@@ -1,0 +1,2476 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#4f7df3">
+<meta name="referrer" content="no-referrer">
+<title>Telefonín DBT</title>
+<style>
+:root{
+  --primary:#4f7df3; --primary-dark:#3b63d1; --accent:#ffb020;
+  --ok:#22b573; --warn:#f0a020; --danger:#e5484d;
+  --bg:#eef3fa; --surface:#fff; --text:#16223a; --muted:#6b7a90;
+  --line:#e2e9f3; --shadow:0 8px 30px rgba(22,34,58,.10); --r:18px;
+}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{height:100%}
+body{margin:0;font-family:system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;
+  background:var(--bg);color:var(--text);-webkit-font-smoothing:antialiased;overflow:hidden}
+.app{display:flex;flex-direction:column;height:100dvh;max-width:820px;margin:0 auto;position:relative}
+.topbar{display:flex;align-items:center;gap:8px;
+  padding:calc(env(safe-area-inset-top) + 10px) 12px 10px;
+  background:rgba(255,255,255,.9);backdrop-filter:blur(14px);
+  border-bottom:1px solid var(--line);z-index:20;flex:none}
+.icon-btn{width:40px;height:40px;display:grid;place-items:center;border:none;
+  border-radius:13px;background:#f1f5fc;color:var(--text);font-size:18px;cursor:pointer;
+  transition:.15s;flex:none}
+.icon-btn:active{transform:scale(.92)}
+.brand{flex:1;display:flex;align-items:center;justify-content:center;gap:8px;
+  font-weight:800;font-size:16px}
+.brand svg{width:26px;height:32px}
+.badge-rol{font-size:10px;font-weight:700;padding:3px 7px;border-radius:99px;
+  background:#e8efff;color:#3b63d1;letter-spacing:.3px;text-transform:uppercase}
+.views{flex:1;overflow-y:auto;position:relative}
+.view{display:none;padding:14px 14px 8px;animation:fade .25s ease}
+.view.active{display:block}
+@keyframes fade{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
+.h1{font-size:20px;margin:4px 0 4px;letter-spacing:-.3px}
+.sub{color:var(--muted);font-size:13.5px;margin:0 0 14px;line-height:1.45}
+.card{background:var(--surface);border-radius:var(--r);padding:16px;
+  box-shadow:var(--shadow);margin-bottom:14px}
+.card h3{margin:0 0 10px;font-size:15px;letter-spacing:-.2px;
+  display:flex;align-items:center;gap:8px;justify-content:space-between}
+.card h3 .h3-actions{display:flex;gap:6px}
+.card h3 .h3-btn{background:#eef3fb;border:none;border-radius:8px;
+  padding:5px 9px;font-size:12px;font-weight:700;color:var(--primary-dark);
+  cursor:pointer;font-family:inherit;transition:.15s}
+.card h3 .h3-btn:active{transform:scale(.95)}
+.card .hint{font-size:12.5px;color:var(--muted);margin:0 0 12px;line-height:1.4}
+.ctx-clima{display:flex;align-items:center;gap:14px;padding:12px 14px;
+  background:linear-gradient(135deg,#e8f0ff,#f4f8ff);border-radius:14px;
+  margin-bottom:12px;border:1px solid #d8e5f5}
+.ctx-clima .ctx-icon{font-size:34px;flex:none;line-height:1}
+.ctx-clima .ctx-info{flex:1;min-width:0}
+.ctx-clima .ctx-info strong{font-size:16px;display:block;margin-bottom:2px;letter-spacing:-.2px}
+.ctx-clima .ctx-info small{font-size:12px;color:var(--muted);line-height:1.4;display:block}
+.ctx-clima .ctx-refresh{background:#fff;border:1px solid #d8e5f5;
+  width:36px;height:36px;border-radius:10px;cursor:pointer;font-size:15px;flex:none;transition:.15s}
+.ctx-clima .ctx-refresh:active{transform:scale(.92)}
+.lugar-chips{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:12px}
+.lugar-chip{padding:8px 12px;border:1px solid var(--line);background:#fff;
+  border-radius:11px;font-family:inherit;font-size:13px;font-weight:600;
+  color:var(--text);cursor:pointer;transition:.15s}
+.lugar-chip:active{transform:scale(.95)}
+.lugar-chip.on{background:var(--primary);color:#fff;border-color:var(--primary)}
+.afecto-chips{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:6px}
+.afecto-chip{padding:7px 11px;border:1px solid var(--line);background:#fff;
+  border-radius:11px;font-family:inherit;font-size:12.5px;font-weight:600;
+  color:var(--muted);cursor:pointer;transition:.15s}
+.afecto-chip:active{transform:scale(.95)}
+.afecto-chip.on{background:var(--primary);color:#fff;border-color:var(--primary)}
+.playlist-row{display:flex;gap:10px;align-items:center;padding:10px 0;border-bottom:1px solid var(--line)}
+.playlist-row:last-child{border-bottom:none}
+.playlist-row .pl-body{flex:1;min-width:0}
+.playlist-row .pl-body strong{font-size:14px;display:block;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.playlist-row .pl-body small{font-size:11.5px;color:var(--muted);display:block;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.playlist-row .pl-btn{border:none;background:#1db954;color:#fff;width:38px;
+  height:38px;border-radius:50%;font-size:16px;cursor:pointer;flex:none;transition:.15s}
+.playlist-row .pl-btn:active{transform:scale(.9)}
+.playlist-row .pl-del{border:none;background:none;color:var(--danger);font-size:15px;cursor:pointer;padding:4px;flex:none}
+.sugerencia{background:#eaf7ee;border:1px solid #bfe5cc;border-radius:14px;
+  padding:13px 15px;margin-bottom:12px;font-size:13.5px;line-height:1.5;color:#14532d}
+.sugerencia strong{display:block;margin-bottom:5px;color:#0f3d22;font-size:14px}
+.sugerencia .sug-actions{display:flex;gap:8px;margin-top:10px;flex-wrap:wrap}
+.sugerencia button{background:#fff;border:1px solid #bfe5cc;color:#14532d;
+  padding:7px 13px;border-radius:10px;font-family:inherit;font-size:12.5px;
+  font-weight:700;cursor:pointer;transition:.15s}
+.sugerencia button:active{transform:scale(.95)}
+.chat{padding:18px 14px 8px;display:flex;flex-direction:column;gap:12px}
+.row{display:flex;gap:9px;align-items:flex-end;animation:pop .28s ease both}
+.row.user{flex-direction:row-reverse}
+@keyframes pop{from{opacity:0;transform:translateY(10px) scale(.97)}to{opacity:1;transform:none}}
+.avatar{width:36px;height:44px;flex:none;display:grid;place-items:center}
+.bubble{max-width:80%;padding:11px 15px;border-radius:var(--r);font-size:14.5px;
+  line-height:1.5;white-space:pre-wrap;word-wrap:break-word}
+.row.bot .bubble{background:#fff;border-bottom-left-radius:6px;box-shadow:var(--shadow)}
+.row.user .bubble{background:linear-gradient(135deg,var(--primary),var(--primary-dark));
+  color:#fff;border-bottom-right-radius:6px;box-shadow:0 8px 22px rgba(79,125,243,.32)}
+.typing{display:flex;gap:4px;padding:4px 2px}
+.typing i{width:7px;height:7px;border-radius:50%;background:#b7c6dc;animation:blink 1.2s infinite}
+.typing i:nth-child(2){animation-delay:.2s}
+.typing i:nth-child(3){animation-delay:.4s}
+@keyframes blink{0%,60%,100%{opacity:.3;transform:translateY(0)}30%{opacity:1;transform:translateY(-3px)}}
+.chips{display:flex;flex-wrap:wrap;gap:8px;margin-top:12px}
+.chip{border:1px solid var(--line);background:#fff;color:var(--text);
+  padding:8px 13px;border-radius:999px;font-size:13px;font-weight:600;
+  cursor:pointer;transition:.15s;font-family:inherit}
+.chip:active{transform:scale(.95)}
+.chip:hover{border-color:var(--primary);color:var(--primary)}
+.composer{display:flex;align-items:flex-end;gap:8px;flex:none;
+  padding:10px 12px calc(env(safe-area-inset-bottom) + 10px);
+  background:rgba(255,255,255,.92);backdrop-filter:blur(14px);border-top:1px solid var(--line)}
+#input{flex:1;min-height:44px;max-height:120px;padding:12px 16px;
+  border:1px solid var(--line);border-radius:22px;background:#f6f9fd;
+  font-family:inherit;font-size:15px;color:var(--text);resize:none;outline:none;
+  line-height:1.35;transition:.15s}
+#input:focus{border-color:var(--primary);background:#fff}
+.round-btn{width:44px;height:44px;flex:none;border:none;border-radius:50%;
+  display:grid;place-items:center;font-size:18px;cursor:pointer;transition:.15s}
+.round-btn:active{transform:scale(.9)}
+#micBtn{background:#eef3fb;color:var(--primary)}
+#micBtn.listening{background:var(--danger);color:#fff;animation:pulse 1.3s infinite}
+@keyframes pulse{0%{box-shadow:0 0 0 0 rgba(229,72,77,.5)}70%{box-shadow:0 0 0 14px rgba(229,72,77,0)}100%{box-shadow:0 0 0 0 rgba(229,72,77,0)}}
+#sendBtn{background:linear-gradient(135deg,var(--primary),var(--primary-dark));color:#fff;box-shadow:0 6px 16px rgba(79,125,243,.35)}
+.overlay{position:fixed;inset:0;background:rgba(16,26,45,.45);opacity:0;pointer-events:none;transition:.25s;z-index:40}
+.overlay.show{opacity:1;pointer-events:auto}
+.drawer{position:fixed;top:0;left:0;bottom:0;width:280px;max-width:82vw;
+  background:#fff;z-index:50;transform:translateX(-102%);
+  transition:transform .3s cubic-bezier(.4,0,.2,1);display:flex;flex-direction:column;
+  padding-top:env(safe-area-inset-top);box-shadow:12px 0 40px rgba(16,26,45,.18)}
+.drawer.show{transform:translateX(0)}
+.drawer-head{display:flex;align-items:center;gap:12px;padding:18px 16px 14px;
+  background:linear-gradient(135deg,#4f7df3,#6f9bff);color:#fff}
+.drawer-head svg{width:40px;height:50px;flex:none}
+.drawer-head strong{display:block;font-size:16px}
+.drawer-head span{font-size:12px;opacity:.85}
+.drawer-nav{padding:10px 8px;overflow-y:auto;flex:1}
+.nav-item{display:flex;align-items:center;gap:12px;width:100%;padding:12px 14px;
+  border:none;background:none;border-radius:13px;font-family:inherit;font-size:14.5px;
+  font-weight:600;color:var(--text);cursor:pointer;text-align:left;transition:.15s}
+.nav-item:hover,.nav-item:active{background:#f1f5fc}
+.nav-item.active{background:#e8efff;color:var(--primary-dark)}
+.nav-item .ico{font-size:18px;width:24px;text-align:center;flex:none}
+.drawer-foot{padding:12px 16px calc(env(safe-area-inset-bottom) + 14px);
+  font-size:11px;color:var(--muted);border-top:1px solid var(--line)}
+.field{margin-bottom:14px}
+.field label{display:block;font-size:12.5px;font-weight:700;color:var(--muted);
+  margin-bottom:6px;text-transform:uppercase;letter-spacing:.3px}
+.field input[type=text],.field input[type=number],.field input[type=date],
+.field input[type=url],.field textarea,.field select{width:100%;padding:11px 13px;
+  border:1px solid var(--line);border-radius:12px;font-family:inherit;font-size:14.5px;
+  background:#f6f9fd;outline:none;transition:.15s}
+.field textarea{resize:vertical;min-height:70px;line-height:1.4}
+.field input:focus,.field textarea:focus,.field select:focus{border-color:var(--primary);background:#fff}
+.scale-row{display:flex;align-items:center;gap:10px;margin-bottom:12px}
+.scale-row .lbl{flex:1;font-size:13.5px;font-weight:600}
+.scale{display:flex;gap:4px}
+.scale button{width:32px;height:32px;border:1px solid var(--line);background:#fff;
+  border-radius:9px;font-family:inherit;font-size:13px;font-weight:700;color:var(--muted);
+  cursor:pointer;transition:.12s;flex:none}
+.scale button:active{transform:scale(.9)}
+.scale button.on{background:var(--primary);color:#fff;border-color:var(--primary)}
+.scale.alert button.on{background:var(--danger);border-color:var(--danger)}
+.scale.joy button.on{background:var(--ok);border-color:var(--ok)}
+.scale.skill button{width:30px;height:30px;font-size:12px}
+.switch-row{display:flex;align-items:center;justify-content:space-between;
+  padding:11px 0;border-bottom:1px solid var(--line);gap:12px}
+.switch-row:last-child{border-bottom:none}
+.switch-row span{font-size:14px;font-weight:600;flex:1;min-width:0}
+.switch-row .sub-txt{font-size:11.5px;color:var(--muted);display:block;margin-top:2px;font-weight:400;line-height:1.4}
+.switch{position:relative;width:48px;height:28px;flex:none}
+.switch input{opacity:0;width:0;height:0}
+.slider{position:absolute;inset:0;background:#cdd8e8;border-radius:99px;cursor:pointer;transition:.2s}
+.slider::before{content:"";position:absolute;width:22px;height:22px;left:3px;top:3px;
+  background:#fff;border-radius:50%;transition:.2s;box-shadow:0 2px 5px rgba(0,0,0,.2)}
+.switch input:checked + .slider{background:var(--primary)}
+.switch input:checked + .slider::before{transform:translateX(20px)}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:6px;
+  padding:12px 18px;border:none;border-radius:14px;font-family:inherit;
+  font-size:14.5px;font-weight:700;cursor:pointer;transition:.15s}
+.btn:active{transform:scale(.97)}
+.btn-primary{background:linear-gradient(135deg,var(--primary),var(--primary-dark));
+  color:#fff;box-shadow:0 8px 20px rgba(79,125,243,.3);width:100%}
+.btn-secondary{background:#f1f5fc;color:var(--text)}
+.btn-danger{background:#fdecec;color:var(--danger)}
+.btn-mini{padding:6px 11px;font-size:12.5px;border-radius:10px;width:auto}
+.pill{display:inline-block;padding:3px 9px;border-radius:99px;font-size:11px;font-weight:700;letter-spacing:.2px}
+.pill.ok{background:#e3f7ed;color:#149a5a}
+.pill.warn{background:#fef3dd;color:#a76a00}
+.pill.danger{background:#fde9e9;color:#c92c32}
+.pill.info{background:#e8efff;color:#3b63d1}
+.entry{padding:12px 14px;border-radius:14px;background:#f8fafd;margin-bottom:9px;border:1px solid var(--line)}
+.entry .hdr{display:flex;justify-content:space-between;align-items:center;margin-bottom:6px}
+.entry .date{font-size:13px;font-weight:700;color:var(--primary-dark)}
+.entry .txt{font-size:14px;line-height:1.4;color:var(--text)}
+.entry .meta{font-size:11.5px;color:var(--muted);margin-top:6px;line-height:1.5}
+.entry button.del{border:none;background:none;color:var(--danger);font-size:15px;cursor:pointer;padding:2px 4px}
+.empty{text-align:center;color:var(--muted);font-size:13.5px;padding:24px 12px;line-height:1.5}
+.item-editor{display:flex;gap:8px;align-items:center;padding:10px 0;border-bottom:1px solid var(--line)}
+.item-editor:last-child{border-bottom:none}
+.item-editor .drag{color:#b8c5da;cursor:grab;font-size:16px;flex:none;user-select:none}
+.item-editor .item-body{flex:1;min-width:0}
+.item-editor .item-body strong{font-size:14px;display:block;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.item-editor .item-body small{font-size:11px;color:var(--muted)}
+.item-editor .item-actions{display:flex;gap:4px;flex:none}
+.item-editor .item-actions button{border:none;background:#f1f5fc;width:32px;height:32px;
+  border-radius:9px;cursor:pointer;font-size:14px;transition:.15s}
+.item-editor .item-actions button:active{transform:scale(.9)}
+.item-editor .item-actions button.danger{background:#fdecec;color:var(--danger)}
+.item-editor.inactivo{opacity:.5}
+.mascot{width:100%;height:100%;display:block;overflow:visible}
+.mascot .body{fill:#4f7df3}
+.mascot .screen{fill:#eaf1ff}
+.mascot .ant{stroke:#3b63d1;stroke-width:4;stroke-linecap:round}
+.mascot .ant-ball{fill:var(--accent);animation:antGlow 2.4s infinite}
+.mascot .eye{fill:#16223a;transform-box:fill-box;transform-origin:center;animation:eyeBlink 4.6s infinite}
+.mascot .eye.right{animation-delay:.07s}
+.mascot .mouth{fill:none;stroke:#16223a;stroke-width:3.4;stroke-linecap:round;
+  transform-box:fill-box;transform-origin:center}
+.mascot .cheek{fill:#ff9db1;opacity:.55}
+.mascot .home{fill:#eaf1ff;opacity:.85}
+@keyframes eyeBlink{0%,90%,100%{transform:scaleY(1)}94%{transform:scaleY(.08)}}
+@keyframes antGlow{0%,100%{opacity:1}50%{opacity:.45}}
+.mascot.talking .mouth{animation:talk .26s infinite alternate}
+@keyframes talk{from{transform:scaleY(.35) scaleX(.94)}to{transform:scaleY(1.25) scaleX(1.06)}}
+.mascot.talking{animation:bob .7s infinite alternate}
+@keyframes bob{from{transform:translateY(0)}to{transform:translateY(-4px)}}
+.sheet{position:fixed;left:50%;bottom:0;transform:translate(-50%,105%);
+  width:100%;max-width:520px;max-height:86dvh;background:#fff;
+  border-radius:26px 26px 0 0;z-index:60;transition:transform .32s cubic-bezier(.4,0,.2,1);
+  display:flex;flex-direction:column;padding-bottom:env(safe-area-inset-bottom);
+  box-shadow:0 -10px 40px rgba(16,26,45,.2)}
+.sheet.show{transform:translate(-50%,0)}
+.sheet-head{display:flex;align-items:center;justify-content:space-between;
+  padding:18px 20px 12px;border-bottom:1px solid var(--line);flex:none}
+.sheet-head h2{margin:0;font-size:17px}
+.sheet-body{padding:16px 18px 26px;overflow-y:auto}
+.plan-item{display:flex;gap:10px;align-items:flex-start;padding:10px 0;border-bottom:1px solid var(--line)}
+.plan-item:last-child{border-bottom:none}
+.plan-check{width:24px;height:24px;flex:none;border:2px solid var(--line);
+  border-radius:8px;background:#fff;cursor:pointer;display:grid;place-items:center;
+  font-size:14px;color:#fff;transition:.15s}
+.plan-check.done{background:var(--ok);border-color:var(--ok)}
+.plan-check.done::after{content:"✓"}
+.plan-body{flex:1;min-width:0}
+.plan-body strong{font-size:14px;display:block;margin-bottom:2px}
+.plan-body small{font-size:12px;color:var(--muted);line-height:1.4}
+.progress{height:8px;background:#eef3fa;border-radius:99px;overflow:hidden;margin:8px 0}
+.progress > div{height:100%;background:linear-gradient(90deg,var(--primary),#6f9bff);transition:width .4s}
+.stat-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:12px}
+.stat{background:#f6f9fd;border-radius:12px;padding:10px 8px;text-align:center}
+.stat b{display:block;font-size:20px;color:var(--primary-dark);line-height:1.1}
+.stat small{font-size:11px;color:var(--muted);line-height:1.3;display:block;margin-top:3px}
+.t-overlay{position:fixed;inset:0;background:#0d1425;color:#e6edfa;z-index:200;
+  display:none;overflow-y:auto;
+  padding:calc(env(safe-area-inset-top) + 16px) 16px calc(env(safe-area-inset-bottom) + 32px);
+  font-family:system-ui,-apple-system,sans-serif}
+.t-overlay.show{display:block}
+.t-header{display:flex;justify-content:space-between;align-items:flex-start;
+  gap:12px;margin-bottom:20px;padding-bottom:14px;border-bottom:1px solid rgba(255,255,255,.08)}
+.t-header h1{font-size:18px;margin:0 0 4px;letter-spacing:-.3px}
+.t-header .t-sub{font-size:12.5px;color:#8fa2c4}
+.t-header .t-close{background:rgba(255,255,255,.08);color:#e6edfa;border:none;
+  padding:9px 14px;border-radius:10px;cursor:pointer;font-family:inherit;font-size:13px;font-weight:600;flex:none}
+.t-card{background:#162138;border-radius:16px;padding:16px;margin-bottom:14px;border:1px solid rgba(255,255,255,.06)}
+.t-card h3{margin:0 0 12px;font-size:14px;color:#b8c8e0;font-weight:700;
+  display:flex;align-items:center;gap:8px;justify-content:space-between}
+.t-card h3 .t-h3-btn{background:rgba(79,125,243,.15);color:#8fb4ff;border:none;
+  padding:5px 10px;border-radius:8px;font-size:11.5px;font-weight:700;cursor:pointer;font-family:inherit}
+.t-card .t-hint{font-size:12px;color:#7b8dae;margin:0 0 12px;line-height:1.4}
+.t-alert{border-radius:14px;padding:14px;margin-bottom:14px;border-left:4px solid;display:flex;gap:12px;align-items:flex-start}
+.t-alert.critical{background:rgba(229,72,77,.12);border-color:#e5484d}
+.t-alert.warn{background:rgba(240,160,32,.12);border-color:#f0a020}
+.t-alert.info{background:rgba(79,125,243,.12);border-color:#4f7df3}
+.t-alert .t-icon{font-size:20px;flex:none;line-height:1.3}
+.t-alert .t-txt{font-size:13.5px;line-height:1.5;color:#e6edfa}
+.t-alert .t-txt strong{color:#fff;display:block;margin-bottom:3px;font-size:14px}
+.t-stats{display:grid;grid-template-columns:repeat(2,1fr);gap:10px}
+.t-stat{background:rgba(255,255,255,.04);border-radius:12px;padding:12px}
+.t-stat b{display:block;font-size:22px;font-weight:800;line-height:1.1;color:#fff;margin-bottom:4px}
+.t-stat small{font-size:11.5px;color:#8fa2c4;line-height:1.3;display:block}
+.t-chart{width:100%;height:140px;display:block;overflow:visible}
+.t-chart .bar{fill:#4f7df3;transition:fill .2s}
+.t-chart .bar.warn{fill:#f0a020}
+.t-chart .bar.danger{fill:#e5484d}
+.t-chart .axis{stroke:rgba(255,255,255,.08);stroke-width:1}
+.t-chart .lbl{fill:#7b8dae;font-size:9px;font-family:system-ui}
+.t-skill-row{display:flex;align-items:center;gap:10px;margin-bottom:9px}
+.t-skill-row .t-name{font-size:13px;color:#c6d4e8;width:130px;flex:none;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.t-skill-bar{flex:1;height:8px;background:rgba(255,255,255,.06);border-radius:99px;overflow:hidden}
+.t-skill-bar > div{height:100%;border-radius:99px;transition:width .4s}
+.t-skill-val{font-size:12px;color:#8fa2c4;width:38px;text-align:right;flex:none;font-weight:700}
+.t-rutina-row{display:flex;align-items:center;justify-content:space-between;
+  padding:9px 0;border-bottom:1px solid rgba(255,255,255,.06);font-size:13.5px;gap:10px}
+.t-rutina-row:last-child{border-bottom:none}
+.t-rutina-row .t-rname{color:#c6d4e8;flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.t-rutina-row .t-rpct{font-weight:700;font-size:13px;flex:none}
+.t-rutina-row .t-rpct.ok{color:#22b573}
+.t-rutina-row .t-rpct.warn{color:#f0a020}
+.t-rutina-row .t-rpct.danger{color:#e5484d}
+.t-note{padding:12px 14px;background:rgba(255,255,255,.04);border-radius:12px;
+  margin-bottom:9px;font-size:13.5px;line-height:1.5;color:#dfe7f4;border-left:3px solid #4f7df3}
+.t-note.mine{background:rgba(255,176,32,.08);border-left-color:#ffb020}
+.t-note .t-nmeta{font-size:11px;color:#7b8dae;margin-top:6px;display:flex;justify-content:space-between}
+.t-note .t-nautor{font-weight:700;color:#a8b8d4}
+.t-input{width:100%;padding:12px 14px;background:rgba(255,255,255,.04);
+  border:1px solid rgba(255,255,255,.1);border-radius:12px;color:#e6edfa;
+  font-family:inherit;font-size:14px;resize:vertical;min-height:70px;line-height:1.4;outline:none;transition:.15s}
+.t-input:focus{border-color:#4f7df3;background:rgba(255,255,255,.06)}
+.t-input::placeholder{color:#5f6f8f}
+.t-btn{display:inline-flex;align-items:center;justify-content:center;gap:6px;
+  padding:11px 18px;border:none;border-radius:12px;font-family:inherit;
+  font-size:14px;font-weight:700;cursor:pointer;transition:.15s;width:100%;margin-top:10px}
+.t-btn:active{transform:scale(.97)}
+.t-btn-primary{background:linear-gradient(135deg,#4f7df3,#3b63d1);color:#fff}
+.t-btn-ghost{background:rgba(255,255,255,.06);color:#e6edfa}
+.t-btn-warn{background:rgba(240,160,32,.15);color:#ffb020}
+.perm-row{display:flex;align-items:center;justify-content:space-between;
+  gap:12px;padding:11px 0;border-bottom:1px solid rgba(255,255,255,.06)}
+.perm-row:last-child{border-bottom:none}
+.perm-row .perm-info{flex:1;min-width:0}
+.perm-row .perm-info strong{display:block;font-size:13.5px;color:#e6edfa;margin-bottom:2px}
+.perm-row .perm-info small{font-size:11.5px;color:#7b8dae;line-height:1.35;display:block}
+.t-empty{text-align:center;color:#7b8dae;font-size:13px;padding:20px 10px;line-height:1.5}
+.t-access-log{padding:10px 12px;background:rgba(255,255,255,.03);border-radius:10px;
+  margin-bottom:6px;font-size:12px;color:#a8b8d4;display:flex;justify-content:space-between;align-items:center;gap:10px}
+.t-hash{font-family:ui-monospace,monospace;font-size:10px;color:#4f7df3;background:rgba(79,125,243,.12);padding:2px 6px;border-radius:6px}
+.pin-overlay{position:fixed;inset:0;background:rgba(6,10,20,.9);backdrop-filter:blur(6px);
+  z-index:300;display:none;align-items:center;justify-content:center;padding:20px}
+.pin-overlay.show{display:flex}
+.pin-box{background:#162138;border-radius:20px;padding:28px 22px;max-width:340px;width:100%;
+  border:1px solid rgba(255,255,255,.08);color:#e6edfa;text-align:center;box-shadow:0 20px 60px rgba(0,0,0,.5)}
+.pin-box h2{margin:0 0 8px;font-size:18px}
+.pin-box p{margin:0 0 20px;font-size:13px;color:#8fa2c4;line-height:1.5}
+.pin-box input{width:100%;padding:14px;text-align:center;font-size:22px;
+  font-family:ui-monospace,monospace;letter-spacing:6px;
+  background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.12);
+  border-radius:12px;color:#fff;outline:none;margin-bottom:14px}
+.pin-box input:focus{border-color:#4f7df3}
+.pin-error{color:#e5484d;font-size:12.5px;margin-bottom:10px;min-height:16px}
+.legal-box{background:#f0f7ff;border:1px solid #c5ddf5;border-radius:12px;
+  padding:14px;margin-bottom:12px;font-size:12.5px;line-height:1.55;color:#1a3a5c}
+.legal-box strong{color:#0d2a45}
+.legal-box ul{margin:6px 0 0;padding-left:20px}
+.preview-rutina{background:#f8fafd;border:1px dashed #c5d5ea;border-radius:12px;
+  padding:10px 12px;margin-top:12px;font-size:12.5px;color:var(--muted);line-height:1.5}
+.preview-rutina strong{color:var(--text);display:block;margin-bottom:6px;font-size:13px}
+.preview-rutina ul{margin:0;padding-left:18px}
+.preview-rutina li{margin-bottom:3px}
+@media (max-width:380px){
+  .scale button{width:29px;height:29px;font-size:12px}
+  .h1{font-size:18px}
+  .t-skill-row .t-name{width:100px;font-size:12px}
+}
+</style>
+</head>
+<body>
+
+<template id="tplMascota">
+  <svg class="mascot" viewBox="0 0 100 130" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+    <line class="ant" x1="50" y1="30" x2="50" y2="11"/>
+    <circle class="ant-ball" cx="50" cy="8" r="6"/>
+    <rect class="body" x="16" y="26" width="68" height="98" rx="21"/>
+    <rect class="screen" x="25" y="36" width="50" height="62" rx="12"/>
+    <ellipse class="eye left" cx="39" cy="58" rx="5.2" ry="7"/>
+    <ellipse class="eye right" cx="61" cy="58" rx="5.2" ry="7"/>
+    <circle class="cheek" cx="31" cy="72" r="4.2"/>
+    <circle class="cheek" cx="69" cy="72" r="4.2"/>
+    <path class="mouth" d="M42 71 Q50 80 58 71"/>
+    <circle class="home" cx="50" cy="109" r="6"/>
+  </svg>
+</template>
+
+<div class="app">
+  <header class="topbar">
+    <button class="icon-btn" id="menuBtn">☰</button>
+    <div class="brand">
+      <span data-mascota style="width:26px;height:32px"></span>
+      Telefonín DBT
+      <span class="badge-rol" id="badgeRol">Paciente</span>
+    </div>
+    <button class="icon-btn" id="muteBtn">🔊</button>
+  </header>
+
+  <div class="views" id="views">
+    <section class="view active" id="view-chat"><div class="chat" id="chat"></div></section>
+
+    <section class="view" id="view-registro">
+      <h1 class="h1">📋 Registro diario</h1>
+      <p class="sub">Cómo te fue hoy. Solo tú lo ves. La idea es mirar patrones, no juzgarte.</p>
+
+      <div class="card">
+        <h3>🌤️ Contexto de hoy</h3>
+        <p class="hint">El clima y el lugar afectan cómo nos sentimos. Los guardo para que puedas ver patrones después.</p>
+        <div id="ctxClima"></div>
+        <label style="font-size:12.5px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.3px;display:block;margin:14px 0 6px">¿Dónde estás?</label>
+        <div class="lugar-chips" id="lugaresChips"></div>
+        <label style="font-size:12.5px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.3px;display:block;margin:14px 0 6px">¿Cómo te afectó el clima hoy?</label>
+        <div class="afecto-chips" id="afectoChips"></div>
+        <div class="field" style="margin-top:12px">
+          <label>Nota sobre el clima / lugar (opcional)</label>
+          <input type="text" id="r-ctxNota" placeholder="Ej: me costó levantarme por la lluvia">
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="field"><label>Fecha</label><input type="date" id="r-fecha"></div>
+        <h3>🚨 Impulsos (0-5)</h3>
+        <div class="scale-row"><span class="lbl">Suicidio</span><div class="scale alert" data-scale="impSuicidio"></div></div>
+        <div class="scale-row"><span class="lbl">Autolesiones</span><div class="scale alert" data-scale="impAutolesion"></div></div>
+        <div class="scale-row"><span class="lbl">Uso de drogas / escapar</span><div class="scale alert" data-scale="impDrogas"></div></div>
+        <h3 style="margin-top:16px">📊 Calificaciones más altas (0-5)</h3>
+        <div class="scale-row"><span class="lbl">Malestar emocional</span><div class="scale" data-scale="malEmocional"></div></div>
+        <div class="scale-row"><span class="lbl">Malestar físico</span><div class="scale" data-scale="malFisico"></div></div>
+        <div class="scale-row"><span class="lbl">Alegría</span><div class="scale joy" data-scale="alegria"></div></div>
+      </div>
+
+      <div class="card">
+        <h3>🌱 Mi rutina de cuidado
+          <span class="h3-actions"><button class="h3-btn" id="editRutinaBtn">✏️ Editar</button></span>
+        </h3>
+        <p class="hint">Lo que me propuse sostener. Sin culpa si algún día no se da.</p>
+        <div id="rutinaChecklist"></div>
+        <div class="field" style="margin-top:14px"><label>Minutos de atención plena</label><input type="number" id="r-minutosMind" min="0" max="240" placeholder="Ej: 10"></div>
+      </div>
+
+      <div class="card">
+        <h3>🧠 Habilidades DBT usadas hoy (0-7)</h3>
+        <p class="hint">0 = no pensé · 1 = pensé y no quise · 2 = pensé, quise, no usé · 3 = intenté pero no pude · 4 = usé, no ayudaron · 5 = usé y ayudaron · 6 = automáticas, no ayudaron · 7 = automáticas, ayudaron</p>
+        <div class="scale-row"><span class="lbl">🧘 Mindfulness</span><div class="scale skill" data-scale="habMindfulness" data-max="7"></div></div>
+        <div class="scale-row"><span class="lbl">🌡️ Regulación emocional</span><div class="scale skill" data-scale="habRegulacion" data-max="7"></div></div>
+        <div class="scale-row"><span class="lbl">🌊 Tolerancia al malestar</span><div class="scale skill" data-scale="habTolerancia" data-max="7"></div></div>
+        <div class="scale-row"><span class="lbl">🗣️ Efectividad interpersonal</span><div class="scale skill" data-scale="habInterpersonal" data-max="7"></div></div>
+      </div>
+
+      <div class="card">
+        <h3>📝 Notas del día</h3>
+        <div class="field"><label>¿Qué pasó? ¿Qué sentí? ¿Qué necesito?</label><textarea id="r-notas"></textarea></div>
+        <div class="field"><label>Algo importante para recordar</label><textarea id="r-importante"></textarea></div>
+        <button class="btn btn-primary" id="guardarRegistro">Guardar registro de hoy</button>
+      </div>
+    </section>
+
+    <section class="view" id="view-historial">
+      <h1 class="h1">📈 Historial y patrones</h1>
+      <div class="card">
+        <h3>Últimos 7 días</h3>
+        <div class="stat-grid">
+          <div class="stat"><b id="avgMal">—</b><small>Malestar em.</small></div>
+          <div class="stat"><b id="avgAle">—</b><small>Alegría</small></div>
+          <div class="stat"><b id="avgHab">—</b><small>Habilidades</small></div>
+        </div>
+        <div class="progress"><div id="progRutina" style="width:0%"></div></div>
+        <p class="hint" style="margin:0"><strong id="rutinaPct">0%</strong> de cumplimiento de rutina.</p>
+      </div>
+      <div class="card"><h3>💡 Lo que veo</h3><div id="insights"><div class="empty">Necesito al menos 3 registros.</div></div></div>
+      <div class="card"><h3>Registros guardados</h3><div id="listaRegistros"></div></div>
+    </section>
+
+    <section class="view" id="view-notas">
+      <h1 class="h1">📌 Temas importantes</h1>
+      <div class="card" id="cardMensajesTerapeuta" style="display:none;background:#e8f4ff;border:1px solid #b8d4f0">
+        <h3>💬 De mi terapeuta</h3>
+        <div id="mensajesTerapeuta"></div>
+      </div>
+      <div class="card" id="cardFlagsTerapeuta" style="display:none;background:#fff7e8;border:1px solid #f0d9a8">
+        <h3>🎯 Marcado para la próxima sesión</h3>
+        <div id="flagsPaciente"></div>
+      </div>
+      <div class="card">
+        <div class="field"><label>Nuevo tema</label><textarea id="nota-nueva"></textarea></div>
+        <div class="field"><label>Categoría</label>
+          <select id="nota-cat">
+            <option value="terapia">Para terapia (la terapeuta lo ve)</option>
+            <option value="objetivo">Objetivo</option>
+            <option value="patron">Patrón que noto</option>
+            <option value="logro">Logro</option>
+            <option value="general">General (privado)</option>
+          </select>
+        </div>
+        <button class="btn btn-primary" id="agregarNota">Guardar tema</button>
+      </div>
+      <div class="card"><h3>Mis temas</h3><div id="listaNotas"><div class="empty">Todavía no guardaste temas.</div></div></div>
+    </section>
+
+    <section class="view" id="view-rutina">
+      <h1 class="h1">🎯 Rutina y objetivos</h1>
+      <div class="card">
+        <h3>Objetivo grande</h3>
+        <div class="field"><textarea id="obj-principal"></textarea></div>
+      </div>
+      <div class="card">
+        <h3>Pasos pequeños</h3>
+        <div id="listaPasos"></div>
+        <div class="field" style="margin-top:8px"><input type="text" id="nuevoPaso" placeholder="Nuevo paso..."></div>
+        <button class="btn btn-secondary" id="agregarPaso" style="width:100%">➕ Agregar paso</button>
+      </div>
+      <div class="card">
+        <h3>🎵 Mis playlists</h3>
+        <p class="hint">Guardá playlists de Spotify para distintas situaciones. Telefonín te las ofrece cuando tienen sentido.</p>
+        <div id="listaPlaylists"></div>
+        <div class="field" style="margin-top:10px"><input type="text" id="pl-nombre" placeholder="Nombre... ej: Para calmarme"></div>
+        <div class="field"><input type="url" id="pl-url" placeholder="Link de Spotify... ej: https://open.spotify.com/playlist/..."></div>
+        <button class="btn btn-secondary" id="agregarPlaylist" style="width:100%">➕ Agregar playlist</button>
+      </div>
+      <div class="card">
+        <h3>🔧 Herramientas rápidas</h3>
+        <button class="btn btn-secondary" style="width:100%;margin-bottom:8px;justify-content:flex-start" onclick="Telefonin.abrirSkill('stop')">🛑 STOP</button>
+        <button class="btn btn-secondary" style="width:100%;margin-bottom:8px;justify-content:flex-start" onclick="Telefonin.abrirSkill('tip')">🧊 TIP</button>
+        <button class="btn btn-secondary" style="width:100%;margin-bottom:8px;justify-content:flex-start" onclick="Telefonin.abrirSkill('aceptas')">🌈 ACEPTAS</button>
+        <button class="btn btn-secondary" style="width:100%;margin-bottom:8px;justify-content:flex-start" onclick="Telefonin.abrirSkill('opuesta')">↔️ Acción opuesta</button>
+        <button class="btn btn-secondary" style="width:100%;justify-content:flex-start" onclick="Telefonin.abrirSkill('radical')">🌱 Aceptación radical</button>
+      </div>
+      <div class="card">
+        <h3>📞 Líneas de ayuda (Argentina)</h3>
+        <p class="hint"><strong>135</strong> — Prevención del suicidio (CABA/GBA, 24h)<br>
+        <strong>911</strong> — Emergencias<br>
+        <strong>0800-345-1435</strong> — Salud mental (nacional, 24h)<br>
+        <strong>144</strong> — Violencia de género</p>
+      </div>
+    </section>
+
+    <section class="view" id="view-habilidades">
+      <h1 class="h1">📖 Habilidades DBT</h1>
+      <div class="card"><h3>🧘 Mindfulness</h3><p class="hint"><strong>Observar · Describir · Participar · Sin juzgar · Una cosa a la vez · Siendo efectivo/a.</strong></p></div>
+      <div class="card"><h3>🌡️ Regulación emocional</h3><p class="hint"><strong>Verificar los hechos · Acción opuesta · Resolución de problemas · Anticiparme · Construir competencia.</strong></p></div>
+      <div class="card"><h3>🌊 Tolerancia al malestar</h3><p class="hint"><strong>STOP · TIP · ACEPTAS · SALVARA · Aceptación radical.</strong></p></div>
+      <div class="card"><h3>🗣️ Efectividad interpersonal</h3><p class="hint"><strong>DEAR MAN · AVES · VIDA.</strong></p></div>
+    </section>
+
+    <section class="view" id="view-ajustes">
+      <h1 class="h1">⚙️ Ajustes</h1>
+
+      <div class="card">
+        <div class="field"><label>¿Cómo querés que te llame?</label><input type="text" id="setNombre"></div>
+        <div class="switch-row"><span>🔊 Que Telefonín hable</span><label class="switch"><input type="checkbox" id="setVoz"><span class="slider"></span></label></div>
+        <div class="field" style="margin-top:14px"><label>Velocidad de la voz</label><input type="range" id="setVel" min="0.7" max="1.4" step="0.05"></div>
+        <button class="btn btn-primary" id="guardarAjustes" style="margin-top:8px">Guardar</button>
+      </div>
+
+      <div class="card">
+        <h3>🌤️ Clima y ubicación</h3>
+        <p class="hint">El clima afecta cómo nos sentimos. Es un factor de vulnerabilidad.</p>
+        <div class="switch-row">
+          <div><span>Guardar el clima con el registro</span><small class="sub-txt">Usa Open-Meteo. Sin cuenta. Sin tracking.</small></div>
+          <label class="switch"><input type="checkbox" id="setClimaActivo"><span class="slider"></span></label>
+        </div>
+        <div class="field" style="margin-top:14px"><label>Ciudad por defecto</label><input type="text" id="setCiudad" placeholder="Ej: La Plata, Argentina"></div>
+        <div class="switch-row">
+          <div><span>Usar mi ubicación puntual</span><small class="sub-txt">Solo cuando lo toco. Nunca en background.</small></div>
+          <label class="switch"><input type="checkbox" id="setGeoActivo"><span class="slider"></span></label>
+        </div>
+        <div class="switch-row">
+          <div><span>Compartir clima con mi terapeuta</span><small class="sub-txt">Ella verá el clima de los días que registraste.</small></div>
+          <label class="switch"><input type="checkbox" id="permClima"><span class="slider"></span></label>
+        </div>
+      </div>
+
+      <div class="card">
+        <h3>🩺 Compartir con mi terapeuta</h3>
+        <p class="hint">Vos decidís qué ve. Podés pausar cuando quieras.</p>
+        <div class="switch-row" style="padding-top:6px">
+          <div><strong style="font-size:14px">Compartir activo</strong><div style="font-size:11.5px;color:var(--muted);margin-top:2px">Si lo apagás, no accede a nada</div></div>
+          <label class="switch"><input type="checkbox" id="setCompartir"><span class="slider"></span></label>
+        </div>
+        <div id="bloqueCompartir">
+          <div class="field" style="margin-top:14px">
+            <label>Código de acceso (prototipo)</label>
+            <div style="display:flex;gap:8px">
+              <input type="text" id="codigoAcceso" readonly style="font-family:ui-monospace,monospace;letter-spacing:2px;font-weight:700;text-align:center">
+              <button class="btn btn-secondary" id="regenCodigo" style="flex:none;padding:11px 14px">🔄</button>
+            </div>
+            <div style="font-size:11.5px;color:var(--muted);margin-top:6px">⚠️ En producción: OAuth 2.0 + 2FA.</div>
+          </div>
+          <h3 style="margin-top:20px">Qué puede ver</h3>
+          <div class="perm-row"><div class="perm-info"><strong>Registro diario agregado</strong><small>Números, no texto libre</small></div><label class="switch"><input type="checkbox" id="permRegistro"><span class="slider"></span></label></div>
+          <div class="perm-row"><div class="perm-info"><strong>Rutina de cuidado</strong><small>Ítems y adherencia</small></div><label class="switch"><input type="checkbox" id="permRutina"><span class="slider"></span></label></div>
+          <div class="perm-row"><div class="perm-info"><strong>Habilidades DBT usadas</strong><small>Qué practicaste y cuánto</small></div><label class="switch"><input type="checkbox" id="permHabilidades"><span class="slider"></span></label></div>
+          <div class="perm-row"><div class="perm-info"><strong>Temas "para terapia"</strong><small>Solo los que etiquetás así</small></div><label class="switch"><input type="checkbox" id="permTemas"><span class="slider"></span></label></div>
+          <div class="perm-row"><div class="perm-info"><strong>Alertas de seguridad</strong><small>Riesgo alto. Por defecto activado.</small></div><label class="switch"><input type="checkbox" id="permAlertas"><span class="slider"></span></label></div>
+          <div class="perm-row"><div class="perm-info"><strong>Notas privadas del día</strong><small style="color:var(--warn)">⚠️ Recomendado: NO</small></div><label class="switch"><input type="checkbox" id="permNotasPrivadas"><span class="slider"></span></label></div>
+          <div class="perm-row"><div class="perm-info"><strong>Chat con Telefonín</strong><small style="color:var(--warn)">⚠️ Recomendado: NO</small></div><label class="switch"><input type="checkbox" id="permChat"><span class="slider"></span></label></div>
+          <h3 style="margin-top:22px">📜 Consentimiento informado</h3>
+          <div id="consentInfo"></div>
+          <h3 style="margin-top:22px">📋 Marco legal</h3>
+          <div class="legal-box" id="marcoLegalBox"></div>
+          <h3 style="margin-top:22px">🔐 Integridad de la auditoría</h3>
+          <div id="integridadAudit" style="font-size:12.5px;color:var(--muted);padding:10px;background:#f6f9fd;border-radius:10px;margin-bottom:12px"></div>
+          <h3 style="margin-top:22px">📜 Historial de accesos</h3>
+          <div id="logAccesos"></div>
+          <button class="btn btn-secondary" style="width:100%;margin-top:14px" id="abrirModoTerapeuta">🩺 Entrar en modo terapeuta (demo)</button>
+        </div>
+      </div>
+
+      <div class="card">
+        <h3>📦 Tus datos (Ley 26.529)</h3>
+        <p class="hint">La historia clínica es tuya. Tenés derecho a exportarla, gratis.</p>
+        <button class="btn btn-secondary" style="width:100%;margin-bottom:8px" onclick="Telefonin.exportar()">⬇️ Exportar mis datos</button>
+        <button class="btn btn-danger" style="width:100%" onclick="Telefonin.borrarTodo()">🗑️ Borrar todo</button>
+      </div>
+
+      <div class="card">
+        <h3>ℹ️ Sobre Telefonín</h3>
+        <p class="hint">Compañero, no terapeuta. No reemplaza tratamiento profesional. Si estás en crisis: 135 o 911.</p>
+      </div>
+    </section>
+  </div>
+
+  <div class="composer">
+    <button class="round-btn" id="micBtn">🎤</button>
+    <textarea id="input" rows="1" placeholder="Escribí o hablame..." autocomplete="off"></textarea>
+    <button class="round-btn" id="sendBtn">➤</button>
+  </div>
+</div>
+
+<div class="overlay" id="overlay"></div>
+
+<aside class="drawer" id="drawer">
+  <div class="drawer-head">
+    <span data-mascota style="width:40px;height:50px"></span>
+    <div><strong>Telefonín</strong><span>Tu compañero DBT</span></div>
+  </div>
+  <nav class="drawer-nav" id="nav">
+    <button class="nav-item active" data-view="chat"><span class="ico">💬</span> Conversar</button>
+    <button class="nav-item" data-view="registro"><span class="ico">📋</span> Registro diario</button>
+    <button class="nav-item" data-view="historial"><span class="ico">📈</span> Historial</button>
+    <button class="nav-item" data-view="notas"><span class="ico">📌</span> Temas importantes</button>
+    <button class="nav-item" data-view="rutina"><span class="ico">🎯</span> Rutina y objetivos</button>
+    <button class="nav-item" data-view="habilidades"><span class="ico">📖</span> Habilidades DBT</button>
+    <button class="nav-item" data-view="ajustes"><span class="ico">⚙️</span> Ajustes</button>
+  </nav>
+  <div class="drawer-foot">Telefonín v1 · Datos en tu dispositivo</div>
+</aside>
+
+<section class="sheet" id="sheetSkill">
+  <div class="sheet-head"><h2 id="skillTitle">Habilidad</h2><button class="icon-btn" data-close-sheet>✕</button></div>
+  <div class="sheet-body" id="skillBody"></div>
+</section>
+
+<section class="sheet" id="sheetEditorRutina">
+  <div class="sheet-head"><h2>✏️ Editar mi rutina</h2><button class="icon-btn" data-close-sheet>✕</button></div>
+  <div class="sheet-body">
+    <p class="hint" style="font-size:13px;line-height:1.5;color:var(--muted);margin-bottom:14px">
+      Agregá las cosas que querés registrar cada día. Podés ordenarlas, editar el nombre, desactivarlas o eliminarlas si las creaste vos.
+    </p>
+    <div id="editorLista"></div>
+    <div style="display:flex;gap:8px;margin-top:14px">
+      <input type="text" id="nuevoItemInput" placeholder="Ej: 🚿 Me bañé" style="flex:1;padding:12px 14px;border:1px solid var(--line);border-radius:12px;font-family:inherit;font-size:14.5px;background:#f6f9fd">
+      <button class="btn btn-primary" id="agregarItemBtn" style="flex:none;padding:12px 16px;width:auto">➕</button>
+    </div>
+    <div class="preview-rutina" id="previewRutina"></div>
+  </div>
+</section>
+
+<section class="sheet" id="sheetEditorRutinaT">
+  <div class="sheet-head"><h2>✏️ Sugerir ítems de rutina</h2><button class="icon-btn" data-close-sheet>✕</button></div>
+  <div class="sheet-body">
+    <p class="hint" style="font-size:13px;line-height:1.5;color:#a8b8d4;margin-bottom:14px">
+      Podés agregar ítems que la persona verá como "sugerido por tu terapeuta". No podés eliminar los que creó el paciente.
+    </p>
+    <div id="editorListaT"></div>
+    <div style="display:flex;gap:8px;margin-top:14px">
+      <input type="text" id="nuevoItemInputT" placeholder="Ej: 🍳 Cociné algo" style="flex:1;padding:12px 14px;background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.12);border-radius:12px;color:#e6edfa;font-family:inherit;font-size:14.5px">
+      <button class="t-btn t-btn-primary" id="agregarItemBtnT" style="flex:none;padding:12px 16px;width:auto;margin:0">➕</button>
+    </div>
+  </div>
+</section>
+
+<div class="t-overlay" id="therapistOverlay">
+  <div class="t-header">
+    <div><h1 id="tNombre">Panel clínico</h1><div class="t-sub" id="tRango">—</div></div>
+    <button class="t-close" id="salirTerapeuta">Salir</button>
+  </div>
+  <div id="tAlertas"></div>
+  <div class="t-card"><h3>📊 Métricas clave</h3><div class="t-stats" id="tStats"></div></div>
+  <div class="t-card"><h3>📈 Tendencia emocional (30 días)</h3><div id="tTrend"></div></div>
+  <div class="t-card"><h3>🌤️ Clima y estado de ánimo</h3><div id="tClima"></div></div>
+  <div class="t-card"><h3>🧠 Habilidades DBT</h3><div id="tSkills"></div></div>
+  <div class="t-card"><h3>🌱 Adherencia a rutina <button class="t-h3-btn" id="abrirEditorRutinaT">✏️ Sugerir ítems</button></h3><div id="tRutina"></div></div>
+  <div class="t-card"><h3>📌 Temas "para terapia"</h3><div id="tTemas"></div></div>
+  <div class="t-card"><h3>💬 Notas entre sesiones</h3><div id="tNotas"></div><textarea class="t-input" id="tNuevaNota" placeholder="Observación, consigna..."></textarea><button class="t-btn t-btn-primary" id="tGuardarNota">Enviar nota</button></div>
+  <div class="t-card"><h3>🎯 Marcar para próxima sesión</h3><div id="tFlags"></div><textarea class="t-input" id="tNuevoFlag" placeholder="Ej: revisar análisis de cadena"></textarea><button class="t-btn t-btn-warn" id="tGuardarFlag">Marcar</button></div>
+</div>
+
+<div class="pin-overlay" id="pinOverlay">
+  <div class="pin-box">
+    <h2>🩺 Modo terapeuta</h2>
+    <p>Ingresá el código que te compartió la persona.</p>
+    <input type="text" id="pinInput" inputmode="numeric" maxlength="8" placeholder="— — — —">
+    <div class="pin-error" id="pinError"></div>
+    <button class="t-btn t-btn-primary" id="pinOk">Entrar</button>
+    <button class="t-btn t-btn-ghost" id="pinCancel">Cancelar</button>
+  </div>
+</div>
+
+<script>
+/* =====================================================================
+   TELEFONÍN DBT · CAPAS [C0]..[C14]
+   ===================================================================== */
+
+const ROLES = Object.freeze({
+  PACIENTE: 'paciente', TERAPEUTA: 'terapeuta', ADMIN: 'admin', SOPORTE: 'soporte'
+});
+
+const RECURSOS = Object.freeze({
+  REGISTRO_DIARIO: 'registro_diario', RUTINA: 'rutina', HABILIDADES: 'habilidades',
+  TEMAS_TERAPIA: 'temas_terapia', NOTAS_PRIVADAS: 'notas_privadas',
+  CHAT: 'chat', ALERTAS: 'alertas', CLIMA: 'clima',
+  CUENTAS: 'cuentas', LOGS_TECNICOS: 'logs_tecnicos', METRICAS_SISTEMA: 'metricas_sistema'
+});
+
+const PERMISOS_POR_ROL = Object.freeze({
+  [ROLES.PACIENTE]: [RECURSOS.REGISTRO_DIARIO, RECURSOS.RUTINA, RECURSOS.HABILIDADES,
+    RECURSOS.TEMAS_TERAPIA, RECURSOS.NOTAS_PRIVADAS, RECURSOS.CHAT, RECURSOS.CLIMA],
+  [ROLES.TERAPEUTA]: [RECURSOS.REGISTRO_DIARIO, RECURSOS.RUTINA, RECURSOS.HABILIDADES,
+    RECURSOS.TEMAS_TERAPIA, RECURSOS.ALERTAS, RECURSOS.CLIMA],
+  [ROLES.ADMIN]: [RECURSOS.CUENTAS, RECURSOS.METRICAS_SISTEMA, RECURSOS.LOGS_TECNICOS],
+  [ROLES.SOPORTE]: [RECURSOS.LOGS_TECNICOS]
+});
+
+const MARCO_LEGAL = Object.freeze({
+  LEY_25326: {
+    nombre: 'Ley 25.326 — Protección de Datos Personales',
+    puntos: ['Los datos de salud son DATOS SENSIBLES.',
+      'La ubicación precisa también es dato sensible.',
+      'Requieren consentimiento por escrito, libre, expreso e informado.',
+      'Derecho de acceso, rectificación y supresión por parte del titular.']
+  },
+  LEY_26529: {
+    nombre: 'Ley 26.529 — Derechos del Paciente e Historia Clínica',
+    puntos: ['La historia clínica es PROPIEDAD DEL PACIENTE.',
+      'Derecho a copia autenticada en 48 hs, gratis.',
+      'Consentimiento informado documentado.']
+  }
+});
+
+const SCHEMA_VERSION = 3;
+
+const RUTINA_DEFAULT = [
+  { id: 'pastillas', label: '💊 ¿Tomé las pastillas?', orden: 1, activo: true, creadoPor: 'sistema' },
+  { id: 'facu', label: '📚 Leí / estudié para la facu', orden: 2, activo: true, creadoPor: 'sistema' },
+  { id: 'mindfulness', label: '🧘 Espacio de atención plena', orden: 3, activo: true, creadoPor: 'sistema' },
+  { id: 'cuidadoEmocional', label: '💙 Cuidado emocional', orden: 4, activo: true, creadoPor: 'sistema' },
+  { id: 'movimiento', label: '🏃 Movimiento / cuerpo', orden: 5, activo: true, creadoPor: 'sistema' }
+];
+
+const LUGARES_PREDEFINIDOS = [
+  { id: 'casa', label: '🏠 En casa' },
+  { id: 'afuera', label: '🚶 Afuera' },
+  { id: 'facu', label: '📚 Facu' },
+  { id: 'trabajo', label: '💼 Trabajo' },
+  { id: 'otro', label: '📍 Otro' }
+];
+
+const AFECTOS_CLIMA = [
+  { id: 'animo_bajo', label: '😔 Me bajoneó' },
+  { id: 'animo_bien', label: '😊 Me levantó' },
+  { id: 'energia_baja', label: '😴 Sin energía' },
+  { id: 'energia_alta', label: '⚡ Con energía' },
+  { id: 'ansiedad', label: '😰 Ansiedad' },
+  { id: 'neutral', label: '😐 Neutral' }
+];
+
+const CODIGOS_CLIMA = {
+  0:['Despejado','☀️'], 1:['Mayormente despejado','🌤️'], 2:['Parcialmente nublado','⛅'],
+  3:['Nublado','☁️'], 45:['Niebla','🌫️'], 48:['Niebla helada','🌫️'],
+  51:['Llovizna ligera','🌦️'], 53:['Llovizna','🌦️'], 55:['Llovizna intensa','🌧️'],
+  61:['Lluvia ligera','🌧️'], 63:['Lluvia','🌧️'], 65:['Lluvia fuerte','🌧️'],
+  71:['Nieve ligera','🌨️'], 73:['Nieve','🌨️'], 75:['Nieve fuerte','🌨️'],
+  80:['Chubascos','🌦️'], 81:['Chubascos','🌧️'], 82:['Chubascos fuertes','⛈️'],
+  95:['Tormenta','⛈️'], 96:['Tormenta con granizo','⛈️'], 99:['Tormenta con granizo','⛈️']
+};
+const describirClima = (c) => CODIGOS_CLIMA[c] || ['Clima variable','🌡️'];
+
+const K = {
+  ajustes:'telefonin.v3.ajustes', registros:'telefonin.v3.registros',
+  notas:'telefonin.v3.notas', pasos:'telefonin.v3.pasos',
+  objetivo:'telefonin.v3.objetivo', chat:'telefonin.v3.chat',
+  compartir:'telefonin.v3.compartir', codigo:'telefonin.v3.codigo',
+  audit:'telefonin.v3.audit', notasT:'telefonin.v3.notasT',
+  flagsT:'telefonin.v3.flagsT', consentimiento:'telefonin.v3.consentimiento',
+  usuario:'telefonin.v3.usuario', accesosExcepcionales:'telefonin.v3.accExcep',
+  rutinaItems:'telefonin.v3.rutinaItems', playlists:'telefonin.v3.playlists',
+  climaConfig:'telefonin.v3.climaConfig', climaCache:'telefonin.v3.climaCache',
+  lugarActual:'telefonin.v3.lugarActual'
+};
+
+const Storage = {
+  cargar(k, def){ try { const v = localStorage.getItem(k); return v ? JSON.parse(v) : def; } catch(e){ return def; } },
+  guardar(k, v){ try { localStorage.setItem(k, JSON.stringify(v)); } catch(e){ console.error('[storage]', e); } },
+  borrar(k){ localStorage.removeItem(k); }
+};
+
+const ACTOR_ACTUAL = Storage.cargar(K.usuario, null) || { id: 'paciente-local', rol: ROLES.PACIENTE, creado: Date.now() };
+Storage.guardar(K.usuario, ACTOR_ACTUAL);
+const OWNER_ID = ACTOR_ACTUAL.id;
+
+let ajustes = Object.assign({ nombre:'', voz:true, velocidad:1 }, Storage.cargar(K.ajustes, {}));
+let registros = Storage.cargar(K.registros, []);
+let notas = Storage.cargar(K.notas, []);
+let pasos = Storage.cargar(K.pasos, []);
+let objetivo = Storage.cargar(K.objetivo, '');
+let historialChat = Storage.cargar(K.chat, []);
+let compartir = Object.assign({
+  activo:false, permRegistro:true, permRutina:true, permHabilidades:true,
+  permTemas:true, permAlertas:true, permNotasPrivadas:false, permChat:false, permClima:true
+}, Storage.cargar(K.compartir, {}));
+let codigoAcceso = Storage.cargar(K.codigo, null);
+let auditLog = Storage.cargar(K.audit, []);
+let notasTerapeuta = Storage.cargar(K.notasT, []);
+let flagsTerapeuta = Storage.cargar(K.flagsT, []);
+let accesosExcepcionales = Storage.cargar(K.accesosExcepcionales, []);
+let rutinaItems = Storage.cargar(K.rutinaItems, null);
+if (!rutinaItems){ rutinaItems = RUTINA_DEFAULT.map(x => ({ ...x })); Storage.guardar(K.rutinaItems, rutinaItems); }
+let playlists = Storage.cargar(K.playlists, []);
+let climaConfig = Object.assign({ activo: true, ciudad: '', geoActivo: false }, Storage.cargar(K.climaConfig, {}));
+let climaCache = Storage.cargar(K.climaCache, { datos: null, momento: 0 });
+let lugarActual = Storage.cargar(K.lugarActual, null);
+
+let consentimiento = Storage.cargar(K.consentimiento, null);
+if (!consentimiento){
+  consentimiento = {
+    version: '1.1', fecha: Date.now(),
+    texto: 'Autorizo a mi terapeuta a acceder a los datos clínicos que yo decida compartir, conforme a la Ley 25.326 (datos sensibles, incluida la ubicación) y la Ley 26.529 (historia clínica). Entiendo que puedo revocar este consentimiento en cualquier momento, y que tengo derecho de acceso, rectificación y supresión de mis datos.',
+    revocado: false
+  };
+  Storage.guardar(K.consentimiento, consentimiento);
+}
+
+(function migrar(){
+  let cambios = false;
+  registros = registros.map(r => {
+    if (!r.ownerId){ r.ownerId = OWNER_ID; cambios = true; }
+    if (!r.createdAt){ r.createdAt = r.ts || Date.now(); cambios = true; }
+    if (!r.rutina || typeof r.rutina !== 'object'){
+      const rutinaNueva = {};
+      ['pastillas','facu','mindfulness','cuidadoEmocional','movimiento'].forEach(campo => {
+        if (typeof r[campo] === 'boolean') rutinaNueva[campo] = r[campo];
+      });
+      if (Object.keys(rutinaNueva).length){ r.rutina = rutinaNueva; cambios = true; }
+    }
+    r.schemaVersion = SCHEMA_VERSION;
+    return r;
+  });
+  notas = notas.map(n => { if (!n.ownerId){ n.ownerId = OWNER_ID; cambios = true; } return n; });
+  if (cambios){ Storage.guardar(K.registros, registros); Storage.guardar(K.notas, notas); }
+})();
+
+const esMio = (r) => r && r.ownerId === OWNER_ID;
+
+const MAPA_PERMISOS_TERAPEUTA = {
+  [RECURSOS.REGISTRO_DIARIO]: () => compartir.permRegistro,
+  [RECURSOS.RUTINA]:          () => compartir.permRutina,
+  [RECURSOS.HABILIDADES]:     () => compartir.permHabilidades,
+  [RECURSOS.TEMAS_TERAPIA]:   () => compartir.permTemas,
+  [RECURSOS.ALERTAS]:         () => compartir.permAlertas,
+  [RECURSOS.NOTAS_PRIVADAS]:  () => compartir.permNotasPrivadas,
+  [RECURSOS.CHAT]:            () => compartir.permChat,
+  [RECURSOS.CLIMA]:           () => compartir.permClima
+};
+
+const RECURSOS_CLINICOS = [RECURSOS.REGISTRO_DIARIO, RECURSOS.RUTINA, RECURSOS.HABILIDADES,
+  RECURSOS.TEMAS_TERAPIA, RECURSOS.NOTAS_PRIVADAS, RECURSOS.CHAT, RECURSOS.ALERTAS, RECURSOS.CLIMA];
+
+const SecurityService = {
+  verificar(rol, recurso, ownerDelRecurso){
+    if (!PERMISOS_POR_ROL[rol]) return false;
+    if (!PERMISOS_POR_ROL[rol].includes(recurso)) return false;
+    if (rol === ROLES.PACIENTE) return ownerDelRecurso === OWNER_ID;
+    if (rol === ROLES.TERAPEUTA){
+      if (!compartir.activo) return false;
+      if (consentimiento.revocado) return false;
+      if (ownerDelRecurso !== OWNER_ID) return false;
+      const check = MAPA_PERMISOS_TERAPEUTA[recurso];
+      return check ? check() === true : false;
+    }
+    if (rol === ROLES.ADMIN || rol === ROLES.SOPORTE){
+      if (RECURSOS_CLINICOS.includes(recurso)){
+        return AccesoExcepcional.estaActivoPara(rol, recurso, ownerDelRecurso);
+      }
+    }
+    return true;
+  },
+  autenticarTerapeuta(codigo){ return codigo.trim().toUpperCase() === codigoAcceso.toUpperCase(); },
+  puedeEditarRutina(rol){
+    if (rol === ROLES.PACIENTE) return true;
+    if (rol === ROLES.TERAPEUTA) return compartir.activo && compartir.permRutina && !consentimiento.revocado;
+    return false;
+  },
+  puedeEliminarItem(rol, item){
+    if (rol === ROLES.PACIENTE) return item.creadoPor === 'paciente';
+    if (rol === ROLES.TERAPEUTA) return item.creadoPor === 'terapeuta';
+    return false;
+  }
+};
+
+const puedeVer = (rol, recurso, ownerId) => SecurityService.verificar(rol, recurso, ownerId);
+
+function hashSimple(str){
+  let h = 2166136261;
+  for (let i = 0; i < str.length; i++){ h ^= str.charCodeAt(i); h = Math.imul(h, 16777619); }
+  return (h >>> 0).toString(16).padStart(8, '0');
+}
+
+function auditar(accion, detalle = {}){
+  const anterior = auditLog.length ? auditLog[auditLog.length - 1] : null;
+  const hashAnterior = anterior ? anterior.hashActual : '0'.repeat(8);
+  const entrada = { ts: Date.now(), actor: ACTOR_ACTUAL.id, actorRol: ACTOR_ACTUAL.rol, accion, detalle, hashAnterior };
+  entrada.hashActual = hashSimple(JSON.stringify(entrada));
+  auditLog.push(entrada);
+  if (auditLog.length > 1000) auditLog = auditLog.slice(-1000);
+  Storage.guardar(K.audit, auditLog);
+}
+
+function verificarIntegridadAudit(){
+  for (let i = 1; i < auditLog.length; i++){
+    if (auditLog[i].hashAnterior !== auditLog[i-1].hashActual){ return { ok: false, indiceRoto: i }; }
+  }
+  return { ok: true, total: auditLog.length };
+}
+
+const AccesoExcepcional = {
+  solicitar(rol, motivo, recurso, recursoId){
+    const s = { id: `ax_${Date.now()}`, solicitanteRol: rol, motivo, recurso, recursoId, ownerId: OWNER_ID,
+      desde: Date.now(), hasta: Date.now() + 2*60*60*1000, aprobadoPor: null, activo: false };
+    accesosExcepcionales.push(s); Storage.guardar(K.accesosExcepcionales, accesosExcepcionales);
+    auditar('acceso_excepcional_solicitado', { id: s.id, motivo, recurso });
+    return s;
+  },
+  estaActivoPara(rol, recurso, ownerId){
+    const ahora = Date.now();
+    return accesosExcepcionales.some(a => a.solicitanteRol === rol && a.recurso === recurso &&
+      a.ownerId === ownerId && a.activo && a.aprobadoPor && a.desde <= ahora && ahora <= a.hasta);
+  }
+};
+
+const Clima = {
+  async geocodificar(ciudad){
+    const url = `https://geocoding-api.open-meteo.com/v1/search?name=${encodeURIComponent(ciudad)}&count=1&language=es&format=json`;
+    const r = await fetch(url);
+    const d = await r.json();
+    if (!d.results || !d.results.length) throw new Error('ciudad_no_encontrada');
+    const c = d.results[0];
+    return { lat: c.latitude, lon: c.longitude, nombre: c.name };
+  },
+  async reverseNombre(lat, lon){
+    try {
+      const r = await fetch(`https://api.bigdatacloud.net/data/reverse-geocode-client?latitude=${lat}&longitude=${lon}&localityLanguage=es`);
+      const d = await r.json();
+      return d.city || d.locality || 'tu zona';
+    } catch(e){ return 'tu zona'; }
+  },
+  ubicacionPuntual(){
+    return new Promise((resolver, rechazar) => {
+      if (!navigator.geolocation) return rechazar(new Error('sin_geo'));
+      auditar('ubicacion_puntual_solicitada', {});
+      navigator.geolocation.getCurrentPosition(
+        (p) => { auditar('ubicacion_puntual_obtenida', {}); resolver({ lat: p.coords.latitude, lon: p.coords.longitude }); },
+        (err) => { auditar('ubicacion_puntual_denegada', { motivo: err.code }); rechazar(err); },
+        { timeout: 8000, maximumAge: 600000, enableHighAccuracy: false }
+      );
+    });
+  },
+  async obtener(forzarRefresh = false){
+    const TREINTA_MIN = 30 * 60 * 1000;
+    if (!forzarRefresh && climaCache.datos && Date.now() - climaCache.momento < TREINTA_MIN){ return climaCache.datos; }
+    let lat, lon, lugar;
+    if (climaConfig.geoActivo){
+      try {
+        const u = await this.ubicacionPuntual();
+        lat = u.lat; lon = u.lon;
+        lugar = await this.reverseNombre(lat, lon);
+      } catch(e){}
+    }
+    if (!lat && climaConfig.ciudad){
+      const g = await this.geocodificar(climaConfig.ciudad);
+      lat = g.lat; lon = g.lon; lugar = g.nombre;
+    }
+    if (!lat) return null;
+    const url = `https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}` +
+      `&current=temperature_2m,relative_humidity_2m,apparent_temperature,weather_code,wind_speed_10m` +
+      `&daily=temperature_2m_max,temperature_2m_min,precipitation_probability_max&timezone=auto&forecast_days=1`;
+    const r = await fetch(url);
+    const d = await r.json();
+    const datos = {
+      lugar, temp: Math.round(d.current.temperature_2m), sensacion: Math.round(d.current.apparent_temperature),
+      humedad: d.current.relative_humidity_2m, viento: Math.round(d.current.wind_speed_10m),
+      codigo: d.current.weather_code, max: Math.round(d.daily.temperature_2m_max[0]),
+      min: Math.round(d.daily.temperature_2m_min[0]), lluvia: d.daily.precipitation_probability_max[0],
+      timestamp: Date.now()
+    };
+    climaCache = { datos, momento: Date.now() };
+    Storage.guardar(K.climaCache, climaCache);
+    auditar('clima_obtenido', { lugar: datos.lugar, codigo: datos.codigo });
+    return datos;
+  },
+  sugerir(clima, lugar, ultimoRegistro){
+    if (!clima) return null;
+    const [desc, emoji] = describirClima(clima.codigo);
+    const llueve = clima.lluvia >= 60;
+    const frio = clima.temp <= 10;
+    const calor = clima.temp >= 30;
+    if (lugar === 'casa' && ultimoRegistro){
+      const mal = ultimoRegistro.malEmocional;
+      if (typeof mal === 'number' && mal >= 4){
+        if (playlists.length){
+          const pl = playlists.find(p => /calm|ansied|soft|tranquil|relax/i.test(p.nombre)) || playlists[0];
+          return {
+            texto: `Veo malestar alto y estás en casa. ¿Querés poner música o darte un baño?`,
+            acciones: [
+              pl ? { label: `🎵 ${pl.nombre}`, accion: () => abrirSpotify(pl.url) } : null,
+              { label: '🛁 Bañarme', accion: () => burbujaBot('Buena idea. Ducharte con agua tibia activa el sistema parasimpático. Volvé cuando termines y contame cómo te fue.') },
+              { label: '🧘 Respirar', accion: () => abrirSkill('tip') }
+            ].filter(Boolean)
+          };
+        }
+        return {
+          texto: `Malestar alto y estás en casa. ¿Y si probás algo de autocuidado?`,
+          acciones: [
+            { label: '🛁 Bañarme', accion: () => burbujaBot('Ducharte con agua tibia activa el sistema parasimpático. Volvé y contame.') },
+            { label: '🧘 Respirar', accion: () => abrirSkill('tip') }
+          ]
+        };
+      }
+    }
+    if (llueve){
+      const pl = playlists.find(p => /lluv|llover|calm/i.test(p.nombre));
+      return {
+        texto: `Va a llover (${clima.lluvia}% de probabilidad). Si te afecta, es válido. ¿Algo para acompañar?`,
+        acciones: [
+          pl ? { label: `🎵 ${pl.nombre}`, accion: () => abrirSpotify(pl.url) } : null,
+          { label: '📝 Anotarlo', accion: () => irA('registro') }
+        ].filter(Boolean)
+      };
+    }
+    if (frio || calor){
+      return {
+        texto: `${emoji} ${desc}, ${clima.temp}°C. Los extremos de temperatura son factor de vulnerabilidad.`,
+        acciones: [{ label: '📝 Anotarlo', accion: () => irA('registro') }]
+      };
+    }
+    return null;
+  }
+};
+
+const Ubicacion = {
+  getLugarActual(){ return lugarActual; },
+  setLugarActual(id){
+    const prev = lugarActual; lugarActual = id;
+    Storage.guardar(K.lugarActual, lugarActual);
+    auditar('lugar_cambiado', { de: prev, a: id });
+  },
+  limpiar(){ lugarActual = null; Storage.borrar(K.lugarActual); }
+};
+
+function abrirSpotify(url){
+  if (!url) return;
+  let clean = url.trim();
+  if (clean.startsWith('spotify:')){
+    clean = 'https://open.spotify.com/' + clean.replace(/^spotify:/, '').replace(/:/g, '/');
+  }
+  auditar('spotify_abierto', { url: clean });
+  window.open(clean, '_blank', 'noopener,noreferrer');
+}
+
+const Spotify = {
+  listar(){ return playlists.slice(); },
+  agregar(nombre, url){
+    if (!nombre || !url) return null;
+    const pl = { id: `pl_${Date.now()}`, nombre: nombre.trim(), url: url.trim(), creadoEn: Date.now() };
+    playlists.push(pl); Storage.guardar(K.playlists, playlists);
+    auditar('playlist_agregada', { nombre: pl.nombre });
+    return pl;
+  },
+  borrar(id){
+    const p = playlists.find(x => x.id === id);
+    if (!p) return false;
+    playlists = playlists.filter(x => x.id !== id);
+    Storage.guardar(K.playlists, playlists);
+    auditar('playlist_borrada', { id, nombre: p.nombre });
+    return true;
+  }
+};
+
+const hoyISO = () => new Date().toISOString().slice(0,10);
+const fmtFecha = (iso) => new Date(iso + 'T12:00').toLocaleDateString('es-AR', { weekday:'long', day:'numeric', month:'long' });
+const escapeHTML = (s) => String(s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+
+const Dominio = {
+  rutinaDef: {
+    listar(includeInactivos = false){
+      const items = includeInactivos ? rutinaItems : rutinaItems.filter(i => i.activo);
+      return items.slice().sort((a,b) => (a.orden || 0) - (b.orden || 0));
+    },
+    agregar(label, rol){
+      if (!SecurityService.puedeEditarRutina(rol)){ auditar('rutina_item_denegado', { rol, motivo: 'sin_permiso' }); return null; }
+      const item = {
+        id: `item_${Date.now()}_${Math.random().toString(36).slice(2,6)}`,
+        label: label.trim(), orden: rutinaItems.length + 1, activo: true,
+        creadoPor: rol === ROLES.TERAPEUTA ? 'terapeuta' : (rol === ROLES.PACIENTE ? 'paciente' : 'sistema'),
+        creadoPorId: ACTOR_ACTUAL.id, creadoEn: Date.now()
+      };
+      rutinaItems.push(item); Storage.guardar(K.rutinaItems, rutinaItems);
+      auditar('rutina_item_creado', { id: item.id, label: item.label, por: rol });
+      return item;
+    },
+    editar(id, nuevoLabel, rol){
+      if (!SecurityService.puedeEditarRutina(rol)) return null;
+      const item = rutinaItems.find(i => i.id === id);
+      if (!item) return null;
+      const anterior = item.label;
+      item.label = nuevoLabel.trim(); item.editadoPor = rol; item.editadoEn = Date.now();
+      Storage.guardar(K.rutinaItems, rutinaItems);
+      auditar('rutina_item_editado', { id, antes: anterior, ahora: item.label, por: rol });
+      return item;
+    },
+    toggleActivo(id, rol){
+      if (!SecurityService.puedeEditarRutina(rol)) return null;
+      const item = rutinaItems.find(i => i.id === id);
+      if (!item) return null;
+      item.activo = !item.activo; item.editadoPor = rol; item.editadoEn = Date.now();
+      Storage.guardar(K.rutinaItems, rutinaItems);
+      auditar('rutina_item_toggled', { id, activo: item.activo, por: rol });
+      return item;
+    },
+    eliminar(id, rol){
+      if (!SecurityService.puedeEditarRutina(rol)) return false;
+      const item = rutinaItems.find(i => i.id === id);
+      if (!item) return false;
+      if (!SecurityService.puedeEliminarItem(rol, item)){ auditar('rutina_item_eliminar_denegado', { id, rol, motivo: 'no_es_creador' }); return false; }
+      rutinaItems = rutinaItems.filter(i => i.id !== id);
+      Storage.guardar(K.rutinaItems, rutinaItems);
+      auditar('rutina_item_eliminado', { id, label: item.label, por: rol });
+      return true;
+    },
+    reordenar(id, direccion, rol){
+      if (!SecurityService.puedeEditarRutina(rol)) return false;
+      const ordenados = rutinaItems.slice().sort((a,b) => (a.orden||0) - (b.orden||0));
+      const idx = ordenados.findIndex(i => i.id === id);
+      if (idx < 0) return false;
+      const nuevoIdx = direccion === 'subir' ? idx - 1 : idx + 1;
+      if (nuevoIdx < 0 || nuevoIdx >= ordenados.length) return false;
+      [ordenados[idx], ordenados[nuevoIdx]] = [ordenados[nuevoIdx], ordenados[idx]];
+      ordenados.forEach((it, i) => { it.orden = i + 1; });
+      rutinaItems = ordenados; Storage.guardar(K.rutinaItems, rutinaItems);
+      auditar('rutina_item_reordenado', { id, direccion, por: rol });
+      return true;
+    }
+  },
+  registro: {
+    leer(fecha){
+      const r = registros.find(x => x.fecha === fecha);
+      if (r && esMio(r)) auditar('lectura_registro', { fecha, rol: ACTOR_ACTUAL.rol });
+      return r || null;
+    },
+    listar(desde, hasta){
+      const r = registros.filter(x => x.ownerId === OWNER_ID && (!desde || x.fecha >= desde) && (!hasta || x.fecha <= hasta));
+      auditar('lectura_registros_rango', { desde, hasta, cantidad: r.length });
+      return r;
+    },
+    guardar(datos){
+      const fecha = datos.fecha || hoyISO();
+      const anterior = registros.find(r => r.fecha === fecha);
+      const nuevo = { ...datos, fecha, id: anterior?.id || `reg_${Date.now()}`,
+        ownerId: OWNER_ID, schemaVersion: SCHEMA_VERSION,
+        createdAt: anterior?.createdAt || Date.now(), updatedAt: Date.now() };
+      const idx = registros.findIndex(r => r.fecha === fecha);
+      if (idx >= 0) registros[idx] = nuevo; else registros.push(nuevo);
+      registros.sort((a,b) => a.fecha.localeCompare(b.fecha));
+      Storage.guardar(K.registros, registros);
+      auditar(anterior ? 'registro_actualizado' : 'registro_creado', { fecha });
+      return nuevo;
+    },
+    borrar(fecha){
+      const r = registros.find(x => x.fecha === fecha);
+      if (!r || !esMio(r)) return false;
+      registros = registros.filter(x => x.fecha !== fecha);
+      Storage.guardar(K.registros, registros);
+      auditar('registro_borrado', { fecha });
+      return true;
+    }
+  },
+  notas: {
+    leer(filtro){
+      const r = notas.filter(n => n.ownerId === OWNER_ID && (!filtro || n.cat === filtro));
+      auditar('lectura_notas', { filtro, cantidad: r.length });
+      return r;
+    },
+    crear(texto, cat){
+      const n = { id: `nota_${Date.now()}`, ownerId: OWNER_ID, texto, cat,
+        fecha: new Date().toISOString(), schemaVersion: SCHEMA_VERSION };
+      notas.unshift(n); Storage.guardar(K.notas, notas);
+      auditar('nota_creada', { cat });
+      return n;
+    },
+    borrar(id){
+      const n = notas.find(x => x.id === id);
+      if (!n || !esMio(n)) return false;
+      notas = notas.filter(x => x.id !== id); Storage.guardar(K.notas, notas);
+      auditar('nota_borrada', { id });
+      return true;
+    }
+  },
+  rutina: {
+    leerPasos(){ auditar('lectura_pasos', { cantidad: pasos.length }); return pasos.filter(p => p.ownerId === OWNER_ID); },
+    agregarPaso(texto){
+      const p = { id: `paso_${Date.now()}`, ownerId: OWNER_ID, texto, done: false, createdAt: Date.now() };
+      pasos.push(p); Storage.guardar(K.pasos, pasos); auditar('paso_creado', {});
+      return p;
+    },
+    togglePaso(id){
+      const p = pasos.find(x => x.id === id);
+      if (p && esMio(p)){ p.done = !p.done; Storage.guardar(K.pasos, pasos); auditar('paso_toggle', { id, done: p.done }); }
+    },
+    borrarPaso(id){
+      const p = pasos.find(x => x.id === id);
+      if (p && esMio(p)){ pasos = pasos.filter(x => x.id !== id); Storage.guardar(K.pasos, pasos); auditar('paso_borrado', { id }); }
+    },
+    getObjetivo(){ return objetivo; },
+    setObjetivo(txt){ objetivo = txt; Storage.guardar(K.objetivo, objetivo); auditar('objetivo_actualizado', {}); }
+  },
+  consentimiento: {
+    leer(){ return consentimiento; },
+    revocar(){
+      consentimiento.revocado = true;
+      consentimiento.fechaRevocacion = Date.now();
+      Storage.guardar(K.consentimiento, consentimiento);
+      auditar('consentimiento_revocado', {});
+    }
+  },
+  analisis: {
+    calcularRutina(regs, items){
+      const listaItems = items || rutinaItems.filter(i => i.activo);
+      let ok = 0, total = 0;
+      regs.forEach(r => {
+        const rutina = r.rutina || {};
+        listaItems.forEach(it => {
+          const val = rutina[it.id];
+          if (typeof val === 'boolean'){ total++; if (val) ok++; }
+        });
+      });
+      return { ok, total, pct: total ? Math.round(ok/total*100) : 0 };
+    },
+    promedios(regs, campo){
+      const v = regs.map(r => r[campo]).filter(x => typeof x === 'number');
+      return v.length ? v.reduce((a,b) => a+b, 0) / v.length : null;
+    },
+    detectarAlertas(regs){
+      const ult3 = regs.slice(-3), ult5 = regs.slice(-5), ult7 = regs.slice(-7);
+      const alertas = [];
+      const suic = ult3.filter(r => typeof r.impSuicidio === 'number' && r.impSuicidio >= 3).length;
+      if (suic >= 2) alertas.push({ tipo:'critical', icon:'🚨', titulo:'Impulso suicida elevado',
+        txt:`Registrado en ${suic} de los últimos 3 días con intensidad ≥ 3/5.` });
+      const autol = ult3.filter(r => typeof r.impAutolesion === 'number' && r.impAutolesion >= 3).length;
+      if (autol >= 2) alertas.push({ tipo:'warn', icon:'⚠️', titulo:'Impulso de autolesión elevado',
+        txt:`Registrado en ${autol} de los últimos 3 días.` });
+      const malAlto = ult5.filter(r => typeof r.malEmocional === 'number' && r.malEmocional >= 4).length;
+      if (malAlto >= 3) alertas.push({ tipo:'warn', icon:'🌡️', titulo:'Malestar sostenido alto',
+        txt:`${malAlto} de los últimos 5 días con malestar ≥ 4/5.` });
+      const itemPastillas = rutinaItems.find(i => i.id === 'pastillas' && i.activo);
+      if (itemPastillas){
+        const sinPastillas = ult7.filter(r => r.rutina && r.rutina.pastillas === false).length;
+        if (sinPastillas >= 3) alertas.push({ tipo:'warn', icon:'💊', titulo:'Adherencia a medicación baja',
+          txt:`${sinPastillas} de los últimos 7 días sin registro de toma.` });
+      }
+      return alertas;
+    },
+    adherenciaPorItem(regs){
+      const items = rutinaItems.slice().sort((a,b) => (a.orden||0) - (b.orden||0));
+      return items.map(it => {
+        const valores = regs.map(r => r.rutina ? r.rutina[it.id] : undefined).filter(v => typeof v === 'boolean');
+        const ok = valores.filter(v => v).length, total = valores.length;
+        return { id: it.id, label: it.label, activo: it.activo, creadoPor: it.creadoPor,
+                 ok, total, pct: total ? Math.round(ok/total*100) : 0 };
+      });
+    },
+    climaVsAnimo(regs){
+      const conClima = regs.filter(r => r.clima && typeof r.malEmocional === 'number');
+      if (conClima.length < 3) return null;
+      const porLluvia = { si: [], no: [] };
+      const porTemp = { frio: [], templado: [], calor: [] };
+      conClima.forEach(r => {
+        const llueve = r.clima.lluvia >= 60;
+        (llueve ? porLluvia.si : porLluvia.no).push(r.malEmocional);
+        const t = r.clima.temp;
+        if (t <= 10) porTemp.frio.push(r.malEmocional);
+        else if (t >= 28) porTemp.calor.push(r.malEmocional);
+        else porTemp.templado.push(r.malEmocional);
+      });
+      const prom = (arr) => arr.length ? arr.reduce((a,b)=>a+b,0)/arr.length : null;
+      return {
+        lluvia: { si: prom(porLluvia.si), no: prom(porLluvia.no), nSi: porLluvia.si.length, nNo: porLluvia.no.length },
+        temp: { frio: prom(porTemp.frio), templado: prom(porTemp.templado), calor: prom(porTemp.calor) }
+      };
+    }
+  }
+};
+
+const Voz = {
+  reconocedor: null, escuchando: false,
+  iniciar(){
+    const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
+    if (!SR) return null;
+    this.reconocedor = new SR();
+    this.reconocedor.lang = 'es-AR';
+    this.reconocedor.interimResults = true;
+    this.reconocedor.continuous = false;
+    return this.reconocedor;
+  },
+  escuchar(onTexto, onFin){
+    if (!this.reconocedor) return false;
+    this.reconocedor.onresult = (e) => {
+      let txt = '';
+      for (let i = e.resultIndex; i < e.results.length; i++) txt += e.results[i][0].transcript;
+      if (e.results[e.results.length-1].isFinal){ auditar('voz_transcrita', { longitud: txt.length }); onTexto(txt.trim()); }
+    };
+    this.reconocedor.onerror = () => this.detener();
+    this.reconocedor.onend = () => { this.escuchando = false; if (onFin) onFin(); };
+    try { speechSynthesis.cancel(); this.reconocedor.start(); this.escuchando = true; return true; }
+    catch(e){ return false; }
+  },
+  detener(){ if (this.reconocedor && this.escuchando){ this.reconocedor.stop(); this.escuchando = false; } }
+};
+
+const $ = (s, c = document) => c.querySelector(s);
+const $$ = (s, c = document) => [...c.querySelectorAll(s)];
+const dormir = (ms) => new Promise(r => setTimeout(r, ms));
+
+const TPL = $('#tplMascota');
+const crearMascota = () => TPL.content.firstElementChild.cloneNode(true);
+function pintarMascotas(){ $$('[data-mascota]').forEach(c => { c.innerHTML=''; c.appendChild(crearMascota()); }); }
+function hablando(on){ $$('.mascot').forEach(m => m.classList.toggle('talking', on)); }
+
+let voces = [];
+const cargarVoces = () => { if ('speechSynthesis' in window) voces = speechSynthesis.getVoices(); };
+cargarVoces();
+if ('speechSynthesis' in window) speechSynthesis.onvoiceschanged = cargarVoces;
+const sinEmojis = (s) => s.replace(/[\u{1F000}-\u{1FAFF}\u{2600}-\u{27BF}\u{2B00}-\u{2BFF}\u{FE0F}]/gu,'');
+
+function hablar(texto){
+  if (!ajustes.voz || !('speechSynthesis' in window)) return;
+  speechSynthesis.cancel();
+  const limpio = sinEmojis(texto).replace(/[*_`#>•·]/g,'').replace(/\n+/g,'. ').trim();
+  if (!limpio) return;
+  const u = new SpeechSynthesisUtterance(limpio);
+  u.lang = 'es-AR'; u.rate = ajustes.velocidad || 1; u.pitch = 1.05;
+  const v = voces.find(x => /^es/i.test(x.lang));
+  if (v) u.voice = v;
+  u.onstart = () => hablando(true);
+  u.onend = () => hablando(false);
+  u.onerror = () => hablando(false);
+  speechSynthesis.speak(u);
+}
+
+const chat = $('#chat');
+const input = $('#input');
+const sendBtn = $('#sendBtn');
+function scrollAbajo(){ requestAnimationFrame(() => chat.scrollTop = chat.scrollHeight); }
+
+function burbujaBot(texto){
+  const row = document.createElement('div'); row.className='row bot';
+  const av = document.createElement('div'); av.className='avatar'; av.appendChild(crearMascota());
+  const b = document.createElement('div'); b.className='bubble'; b.textContent = texto;
+  row.append(av,b); chat.appendChild(row); scrollAbajo();
+}
+function burbujaUser(texto){
+  const row = document.createElement('div'); row.className='row user';
+  const b = document.createElement('div'); b.className='bubble'; b.textContent = texto;
+  row.appendChild(b); chat.appendChild(row); scrollAbajo();
+}
+function escribiendo(on){
+  if (on){
+    const row = document.createElement('div'); row.className='row bot'; row.id='typing';
+    const av = document.createElement('div'); av.className='avatar'; av.appendChild(crearMascota());
+    const b = document.createElement('div'); b.className='bubble';
+    b.innerHTML = '<div class="typing"><i></i><i></i><i></i></div>';
+    row.append(av,b); chat.appendChild(row); scrollAbajo();
+  } else { const t = $('#typing'); if (t) t.remove(); }
+}
+function autoAjustar(){ input.style.height='auto'; input.style.height=Math.min(input.scrollHeight,120)+'px'; }
+input.addEventListener('input', autoAjustar);
+input.addEventListener('keydown', e => {
+  if (e.key==='Enter' && !e.shiftKey){ e.preventDefault(); const t=input.value.trim(); if(t) enviarMensaje(t); }
+});
+sendBtn.onclick = () => { const t=input.value.trim(); if(t) enviarMensaje(t); };
+
+const micBtn = $('#micBtn');
+Voz.iniciar();
+micBtn.onclick = () => {
+  if (!Voz.reconocedor){ burbujaBot('No puedo usar el micrófono acá 😅. Pero podés escribirme.'); return; }
+  if (Voz.escuchando){ Voz.detener(); return; }
+  micBtn.classList.add('listening'); micBtn.textContent='⏹';
+  Voz.escuchar(
+    (texto) => { input.value = texto; autoAjustar(); enviarMensaje(texto); },
+    () => { micBtn.classList.remove('listening'); micBtn.textContent='🎤'; }
+  );
+};
+
+let ocupado = false;
+async function enviarMensaje(texto){
+  if (ocupado) return;
+  ocupado = true;
+  burbujaUser(texto); input.value=''; autoAjustar(); Voz.detener();
+  historialChat.push({ rol:'user', texto, fecha:Date.now() });
+  escribiendo(true);
+  let respuesta;
+  try {
+    const t0 = Date.now();
+    respuesta = await responder(texto);
+    await dormir(Math.max(0, 380 - (Date.now() - t0)));
+  } catch(e){ respuesta = 'Se me trabó algo 😅. ¿Podés repetirlo?'; }
+  escribiendo(false);
+  burbujaBot(respuesta); hablar(respuesta);
+  historialChat.push({ rol:'bot', texto:respuesta, fecha:Date.now() });
+  Storage.guardar(K.chat, historialChat.slice(-200));
+  ocupado = false;
+}
+
+async function responder(texto){
+  const t = texto.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'').trim();
+
+  if (/(clima|tiempo|temperatura|llueve|va a llover|frio|calor)/.test(t)){
+    try {
+      const c = await Clima.obtener();
+      if (!c) return 'Para decirte el clima necesito saber dónde estás. Configurá una ciudad en Ajustes.';
+      const [desc, emoji] = describirClima(c.codigo);
+      return `${emoji} En ${c.lugar}: ${c.temp}°C, ${desc.toLowerCase()}.\nSensación: ${c.sensacion}°C\nMáx ${c.max}° / Mín ${c.min}°\nLluvia: ${c.lluvia}%`;
+    } catch(e){ return 'No pude consultar el clima. Revisá tu conexión.'; }
+  }
+
+  if (/(poner musica|musica|spotify|playlist)/.test(t)){
+    if (!playlists.length) return 'No tenés playlists guardadas. Agregalas en "Rutina y objetivos" → Mis playlists.';
+    return `Tus playlists:\n${playlists.map((p,i) => `${i+1}. 🎵 ${p.nombre}`).join('\n')}\n\nEscribí "poner [nombre]" y la abro.`;
+  }
+  const mPl = texto.match(/poner\s+(?:la\s+)?(?:playlist\s+)?(.+)/i);
+  if (mPl && playlists.length){
+    const buscado = mPl[1].toLowerCase().trim();
+    const pl = playlists.find(p => p.nombre.toLowerCase().includes(buscado));
+    if (pl){ abrirSpotify(pl.url); return `🎵 Abriendo "${pl.nombre}" en Spotify.`; }
+  }
+
+  if (/^registr(o|ar)|^anota|^apunta/.test(t) && /hoy|dia/.test(t)){ irA('registro'); return 'Te llevo al registro diario 📋.'; }
+  const mNota = texto.match(/^(?:recorda|recuerda|anota|apunta|guarda|tema|importante)\s*[:\-]?\s*(.{3,})/i);
+  if (mNota){
+    const contenido = mNota[1].trim();
+    Dominio.notas.crear(contenido, 'general'); renderNotas();
+    return `📌 Guardado: "${contenido}".`;
+  }
+  const mRutina = texto.match(/^(?:anota|agrega|añade)\s+(?:a la\s+)?rutina\s*[:\-]?\s*(.{3,})/i);
+  if (mRutina){
+    const label = mRutina[1].trim();
+    const item = Dominio.rutinaDef.agregar(label, ROLES.PACIENTE);
+    if (item){ renderRutinaChecklist(); renderEditorRutina(); return `✅ Agregado a tu rutina: "${label}".`; }
+  }
+  if (/(como (estuve|vengo)|mis datos|mis patrones|como me fue)/.test(t)) return resumenPersonal();
+  if (/(recomenda|sugeri|que hago|consejo)/.test(t)) return recomendacion();
+  if (/(rutina|que me toca hoy|mis pasos|objetivos)/.test(t)) return estadoRutina();
+  if (/mindfulness|atencion plena/.test(t)) return habilidadTexto('mindfulness');
+  if (/regulacion emocional|accion opuesta/.test(t)) return habilidadTexto('regulacion');
+  if (/tolerancia|stop|tip|aceptas|malestar/.test(t)) return habilidadTexto('tolerancia');
+  if (/interpersonal|dear man|aves|vida/.test(t)) return habilidadTexto('interpersonal');
+  if (/(no aguanto|no puedo mas|quiero desaparecer|me quiero morir|suicid)/.test(t)){
+    auditar('evento_crisis_detectado', { canal: 'chat' });
+    return `Estoy acá con vos. Esto es importante 💙\n\n• Llamá al 135 (prevención del suicidio) o al 911.\n• Avisale a alguien de confianza ahora.\n• No te quedes solo/a.\n\n¿Respirás conmigo? Inhala 5, exhala 7.`;
+  }
+  if (/(ansios|angustia|panico)/.test(t)){
+    return `Vamos con algo concreto:\n\nAgua fría en la cara 30s, o respiración pausada: inhalá 5, exhala 7, cinco veces.`;
+  }
+  if (/(triste|bajon|sin ganas|vacio)/.test(t)){
+    return `Gracias por decírmelo. La tristeza es válida.\n\nAcción opuesta (activarte aunque no tengas ganas) y cuidar el cuerpo.\n\n¿Qué paso mínimo podés dar hoy?`;
+  }
+  if (/(enojad|ira|bronca|furia)/.test(t)){
+    return `El enojo avisa que algo importante se pisa.\n\nSTOP: parar, tomar distancia, observar, proceder con mindfulness.`;
+  }
+  if (/(impulso|ganas de consumir|me quiero cortar)/.test(t)){
+    auditar('evento_crisis_detectado', { canal: 'chat', tipo: 'impulso' });
+    return `Gracias por confiarme esto 💙\n\n• Surfeá el impulso.\n• ACEPTAS por 15 min.\n• Si es muy fuerte: 135 o alguien de confianza.`;
+  }
+  if (/^(hola|buenas|hey|que tal)/.test(t)){
+    const h = new Date().getHours();
+    const s = h<12?'Buenos días':h<20?'Buenas tardes':'Buenas noches';
+    const n = ajustes.nombre ? `, ${ajustes.nombre}` : '';
+    return `${s}${n} 👋 ¿Cómo estás?`;
+  }
+  if (/(gracias|genial|perfecto)/.test(t)) return `De nada${ajustes.nombre?', '+ajustes.nombre:''} 💙`;
+  if (/(que podes hacer|ayuda|comandos)/.test(t)){
+    return `📋 "quiero registrar hoy"\n🌤️ "¿cómo está el clima?"\n🎵 "poner [playlist]"\n📈 "¿cómo vengo?"\n🎯 "¿qué me toca hoy?"\n💡 "¿qué me recomendás?"\n📌 "anota: ..."\n➕ "anota rutina: bañarme"\n📖 Preguntame por STOP, TIP, ACEPTAS...\n💙 Contame si estás mal.`;
+  }
+  return `Te escucho. Contame más. ¿Querés guardarlo, registrarlo o pensarlo juntos?`;
+}
+
+function resumenPersonal(){
+  const ult = Dominio.registro.listar(new Date(Date.now() - 7*86400000).toISOString().slice(0,10), hoyISO());
+  if (ult.length < 2) return `Todavía tengo pocos datos. Cargá algunos y te voy contando 📈`;
+  const mal = Dominio.analisis.promedios(ult, 'malEmocional');
+  const ale = Dominio.analisis.promedios(ult, 'alegria');
+  const hab = Dominio.analisis.promedios(ult, 'habRegulacion');
+  const rut = Dominio.analisis.calcularRutina(ult);
+  let txt = `📈 Últimos ${ult.length} registros:\n\n`;
+  if (mal!==null) txt += `• Malestar emocional: ${mal.toFixed(1)}/5\n`;
+  if (ale!==null) txt += `• Alegría: ${ale.toFixed(1)}/5\n`;
+  if (hab!==null) txt += `• Uso de habilidades: ${hab.toFixed(1)}/7\n`;
+  if (rut.total) txt += `• Rutina sostenida: ${rut.pct}%\n`;
+  return txt;
+}
+function recomendacion(){
+  const ult = Dominio.registro.listar(new Date(Date.now() - 7*86400000).toISOString().slice(0,10), hoyISO());
+  if (!ult.length) return 'Necesito registros para recomendarte.';
+  const mal = Dominio.analisis.promedios(ult, 'malEmocional');
+  const mindful = ult.filter(r => r.rutina && r.rutina.mindfulness).length;
+  const ideas = [];
+  if (mindful < ult.length/2) ideas.push('🧘 Casi no hubo atención plena. Probá 3 min al día.');
+  if (mal!==null && mal>=3.5) ideas.push('🌡️ Malestar alto. Usá TIP cuando sube.');
+  if (!ideas.length) ideas.push('Venís sosteniendo bien 🌱.');
+  return `💡 Según tus datos:\n\n${ideas.map(i=>'• '+i).join('\n\n')}`;
+}
+function estadoRutina(){
+  const t = Dominio.registro.leer(hoyISO());
+  const pend = Dominio.rutina.leerPasos().filter(p => !p.done);
+  let txt = t ? `Hoy ya cargaste registro ✅\n\n` : 'Hoy todavía no cargaste el registro 📋\n\n';
+  if (pend.length) txt += 'Pasos pendientes:\n' + pend.map(p=>'• '+p.texto).join('\n');
+  else if (pasos.length) txt += '🎉 Todos los pasos marcados.';
+  else txt += 'No tenés pasos cargados.';
+  return txt;
+}
+
+const SKILLS = {
+  mindfulness:{titulo:'🧘 Mindfulness',texto:`**Qué:** Observar · Describir · Participar\n**Cómo:** Sin juzgar · Una cosa a la vez · Siendo efectivo/a`,accion:'Practicá 3 min: inhalá "mente", exhalá "sabia".'},
+  regulacion:{titulo:'🌡️ Regulación emocional',texto:`**Verificar los hechos · Acción opuesta · Resolución de problemas · Anticiparme · Construir competencia.**`,accion:'Elegí una emoción y verificá los hechos.'},
+  tolerancia:{titulo:'🌊 Tolerancia al malestar',texto:`**STOP · TIP · ACEPTAS · SALVARA · Aceptación radical.**`,accion:'Respiración pausada 5 veces: inhalá 5, exhala 7.'},
+  interpersonal:{titulo:'🗣️ Efectividad interpersonal',texto:`**DEAR MAN · AVES · VIDA**`,accion:'Antes de una charla difícil, escribí tu guion.'}
+};
+function habilidadTexto(k){ const s = SKILLS[k]; return `${s.titulo}\n\n${s.texto}\n\n👉 ${s.accion}`; }
+
+let ctxSeleccion = { lugar: null, afectos: [], nota: '', clima: null };
+
+async function renderContexto(){
+  const cont = $('#ctxClima');
+  if (!climaConfig.activo){
+    cont.innerHTML = `<div class="hint" style="margin:0;padding:10px;background:#f8fafd;border-radius:10px">🌤️ Clima desactivado. Podés activarlo en Ajustes.</div>`;
+    return;
+  }
+  cont.innerHTML = `<div class="hint" style="margin:0;padding:10px;text-align:center">Cargando clima…</div>`;
+  try {
+    const c = await Clima.obtener();
+    if (!c){
+      cont.innerHTML = `<div class="hint" style="margin:0;padding:10px;background:#fff7e8;border-radius:10px;color:#8a5d00">Para saber el clima, configurá una ciudad en Ajustes → Clima y ubicación.</div>`;
+      return;
+    }
+    const [desc, emoji] = describirClima(c.codigo);
+    ctxSeleccion.clima = { lugar: c.lugar, temp: c.temp, codigo: c.codigo, lluvia: c.lluvia };
+    cont.innerHTML = `
+      <div class="ctx-clima">
+        <div class="ctx-icon">${emoji}</div>
+        <div class="ctx-info">
+          <strong>${c.temp}°C · ${desc}</strong>
+          <small>${c.lugar} · Máx ${c.max}° / Mín ${c.min}° · Lluvia ${c.lluvia}%</small>
+        </div>
+        <button class="ctx-refresh" id="refreshClima" title="Actualizar">🔄</button>
+      </div>
+    `;
+    $('#refreshClima').onclick = async () => {
+      climaCache = { datos: null, momento: 0 };
+      Storage.guardar(K.climaCache, climaCache);
+      await renderContexto();
+    };
+  } catch(e){
+    cont.innerHTML = `<div class="hint" style="margin:0;padding:10px;background:#fdecec;border-radius:10px;color:#c92c32">No pude cargar el clima. Revisá tu conexión.</div>`;
+  }
+}
+
+function renderLugaresChips(){
+  const cont = $('#lugaresChips');
+  cont.innerHTML = LUGARES_PREDEFINIDOS.map(l => `
+    <button class="lugar-chip ${lugarActual === l.id ? 'on' : ''}" data-lugar="${l.id}">${l.label}</button>
+  `).join('');
+  cont.querySelectorAll('[data-lugar]').forEach(b => {
+    b.onclick = () => {
+      const id = b.dataset.lugar;
+      const actual = Ubicacion.getLugarActual();
+      if (actual === id){ Ubicacion.limpiar(); ctxSeleccion.lugar = null; }
+      else { Ubicacion.setLugarActual(id); ctxSeleccion.lugar = id; }
+      renderLugaresChips();
+    };
+  });
+}
+
+function renderAfectoChips(){
+  const cont = $('#afectoChips');
+  cont.innerHTML = AFECTOS_CLIMA.map(a => `
+    <button class="afecto-chip ${ctxSeleccion.afectos.includes(a.id) ? 'on' : ''}" data-afecto="${a.id}">${a.label}</button>
+  `).join('');
+  cont.querySelectorAll('[data-afecto]').forEach(b => {
+    b.onclick = () => {
+      const id = b.dataset.afecto;
+      const idx = ctxSeleccion.afectos.indexOf(id);
+      if (idx >= 0) ctxSeleccion.afectos.splice(idx, 1);
+      else ctxSeleccion.afectos.push(id);
+      renderAfectoChips();
+    };
+  });
+}
+
+let rutinaSeleccionActual = {};
+
+function renderRutinaChecklist(){
+  const cont = $('#rutinaChecklist');
+  const items = Dominio.rutinaDef.listar();
+  if (!items.length){
+    cont.innerHTML = `<div class="empty" style="padding:16px">Sin ítems. Tocá "✏️ Editar" para agregar cosas.</div>`;
+    return;
+  }
+  const r = registros.find(x => x.fecha === ($('#r-fecha').value || hoyISO()));
+  if (r && r.rutina) rutinaSeleccionActual = { ...r.rutina };
+  cont.innerHTML = items.map(it => {
+    const marcado = rutinaSeleccionActual[it.id] === true;
+    const sugeridoBadge = it.creadoPor === 'terapeuta' ? '<span class="pill warn" style="margin-left:6px;font-size:9.5px">sugerido</span>' : '';
+    return `<div class="switch-row" data-item="${it.id}">
+        <span>${escapeHTML(it.label)}${sugeridoBadge}</span>
+        <label class="switch"><input type="checkbox" data-rutina-item="${it.id}" ${marcado?'checked':''}><span class="slider"></span></label>
+      </div>`;
+  }).join('');
+  cont.querySelectorAll('[data-rutina-item]').forEach(inp => {
+    inp.addEventListener('change', e => { rutinaSeleccionActual[e.target.dataset.rutinaItem] = e.target.checked; });
+  });
+}
+
+function renderEditorRutina(){
+  const cont = $('#editorLista');
+  const items = Dominio.rutinaDef.listar(true);
+  if (!items.length){ cont.innerHTML = '<div class="empty">Sin ítems. Agregá el primero abajo.</div>'; return; }
+  cont.innerHTML = items.map((it, idx) => {
+    const esSistema = it.creadoPor === 'sistema';
+    const esMioItem = it.creadoPor === 'paciente';
+    const esTerapeuta = it.creadoPor === 'terapeuta';
+    const puedeEliminar = SecurityService.puedeEliminarItem(ROLES.PACIENTE, it);
+    const origen = esSistema ? '' : esMioItem ? '<span class="pill info" style="margin-left:4px;font-size:9px">mío</span>' :
+      esTerapeuta ? '<span class="pill warn" style="margin-left:4px;font-size:9px">terapeuta</span>' : '';
+    return `<div class="item-editor ${it.activo ? '' : 'inactivo'}" data-id="${it.id}">
+        <div class="drag">☰</div>
+        <div class="item-body">
+          <strong>${escapeHTML(it.label)} ${origen}</strong>
+          <small>${it.activo ? 'Activo' : 'Desactivado'}${esSistema ? ' · original' : ''}</small>
+        </div>
+        <div class="item-actions">
+          <button title="Subir" data-accion="subir" data-id="${it.id}" ${idx===0?'disabled style="opacity:.3"':''}>↑</button>
+          <button title="Bajar" data-accion="bajar" data-id="${it.id}" ${idx===items.length-1?'disabled style="opacity:.3"':''}>↓</button>
+          <button title="Editar" data-accion="editar" data-id="${it.id}">✏️</button>
+          <button title="${it.activo?'Desactivar':'Activar'}" data-accion="toggle" data-id="${it.id}">${it.activo?'👁️':'🚫'}</button>
+          ${puedeEliminar ? `<button class="danger" title="Eliminar" data-accion="eliminar" data-id="${it.id}">🗑️</button>` : ''}
+        </div>
+      </div>`;
+  }).join('');
+  cont.querySelectorAll('[data-accion]').forEach(btn => {
+    btn.onclick = () => {
+      const id = btn.dataset.id, accion = btn.dataset.accion;
+      if (accion === 'subir' || accion === 'bajar') Dominio.rutinaDef.reordenar(id, accion, ROLES.PACIENTE);
+      else if (accion === 'editar'){
+        const item = rutinaItems.find(i => i.id === id);
+        const nuevo = prompt('Nuevo nombre del ítem:', item.label);
+        if (nuevo && nuevo.trim()) Dominio.rutinaDef.editar(id, nuevo, ROLES.PACIENTE);
+      } else if (accion === 'toggle') Dominio.rutinaDef.toggleActivo(id, ROLES.PACIENTE);
+      else if (accion === 'eliminar'){
+        if (confirm('¿Eliminar este ítem? El histórico se mantiene.')){
+          Dominio.rutinaDef.eliminar(id, ROLES.PACIENTE);
+        }
+      }
+      renderEditorRutina(); renderRutinaChecklist(); renderPreviewRutina();
+    };
+  });
+  renderPreviewRutina();
+}
+
+function renderPreviewRutina(){
+  const items = Dominio.rutinaDef.listar();
+  const cont = $('#previewRutina');
+  if (!items.length){ cont.innerHTML = '<strong>Vista previa</strong><em>Sin ítems activos.</em>'; return; }
+  cont.innerHTML = `<strong>Así se verá en tu registro diario:</strong>
+    <ul>${items.map(it => `<li>${escapeHTML(it.label)}</li>`).join('')}</ul>`;
+}
+
+function renderEditorRutinaT(){
+  const cont = $('#editorListaT');
+  const items = Dominio.rutinaDef.listar(true);
+  if (!items.length){ cont.innerHTML = '<div class="t-empty">Sin ítems.</div>'; return; }
+  cont.innerHTML = items.map(it => {
+    const puedeEliminar = SecurityService.puedeEliminarItem(ROLES.TERAPEUTA, it);
+    const origen = it.creadoPor === 'paciente' ? '👤 del paciente' :
+      it.creadoPor === 'terapeuta' ? '🩺 sugerido por vos' : '⚙️ original';
+    return `<div class="t-rutina-row" style="padding:12px 0">
+        <div style="flex:1;min-width:0">
+          <div style="color:#e6edfa;font-size:14px;margin-bottom:2px">${escapeHTML(it.label)}</div>
+          <div style="font-size:11px;color:#7b8dae">${origen} · ${it.activo ? 'activo' : '<span style="color:#ffb020">desactivado</span>'}</div>
+        </div>
+        <div style="display:flex;gap:4px;flex:none">
+          <button class="t-h3-btn" data-accion="editar" data-id="${it.id}">✏️</button>
+          <button class="t-h3-btn" data-accion="toggle" data-id="${it.id}">${it.activo?'🚫':'👁️'}</button>
+          ${puedeEliminar ? `<button class="t-h3-btn" style="background:rgba(229,72,77,.15);color:#ff8a8e" data-accion="eliminar" data-id="${it.id}">🗑️</button>` : ''}
+        </div>
+      </div>`;
+  }).join('');
+  cont.querySelectorAll('[data-accion]').forEach(btn => {
+    btn.onclick = () => {
+      const id = btn.dataset.id, accion = btn.dataset.accion;
+      if (accion === 'editar'){
+        const item = rutinaItems.find(i => i.id === id);
+        const nuevo = prompt('Nuevo nombre:', item.label);
+        if (nuevo && nuevo.trim()) Dominio.rutinaDef.editar(id, nuevo, ROLES.TERAPEUTA);
+      } else if (accion === 'toggle') Dominio.rutinaDef.toggleActivo(id, ROLES.TERAPEUTA);
+      else if (accion === 'eliminar'){
+        if (confirm('¿Eliminar este ítem?')) Dominio.rutinaDef.eliminar(id, ROLES.TERAPEUTA);
+      }
+      renderEditorRutinaT(); renderRutinaChecklist();
+      renderRutinaT(registros.slice(-30));
+    };
+  });
+}
+
+function renderPlaylists(){
+  const cont = $('#listaPlaylists');
+  if (!playlists.length){ cont.innerHTML = '<div class="empty" style="padding:12px">Sin playlists todavía.</div>'; return; }
+  cont.innerHTML = playlists.map(p => `
+    <div class="playlist-row">
+      <div class="pl-body">
+        <strong>🎵 ${escapeHTML(p.nombre)}</strong>
+        <small>${escapeHTML(p.url.slice(0, 50))}${p.url.length > 50 ? '…' : ''}</small>
+      </div>
+      <button class="pl-btn" data-abrir="${p.id}" title="Abrir en Spotify">▶</button>
+      <button class="pl-del" data-borrar="${p.id}" title="Eliminar">🗑️</button>
+    </div>
+  `).join('');
+  cont.querySelectorAll('[data-abrir]').forEach(b => {
+    b.onclick = () => { const p = playlists.find(x => x.id === b.dataset.abrir); if (p) abrirSpotify(p.url); };
+  });
+  cont.querySelectorAll('[data-borrar]').forEach(b => {
+    b.onclick = () => { if (confirm('¿Eliminar esta playlist?')){ Spotify.borrar(b.dataset.borrar); renderPlaylists(); } };
+  });
+}
+
+function construirEscalas(){
+  $$('[data-scale]').forEach(cont => {
+    const max = parseInt(cont.dataset.max || '5', 10);
+    cont.innerHTML = '';
+    for (let i=0; i<=max; i++){
+      const b = document.createElement('button');
+      b.type='button'; b.textContent=i; b.dataset.val=i;
+      b.onclick = () => { [...cont.children].forEach(x=>x.classList.remove('on')); b.classList.add('on'); cont.dataset.value = i; };
+      cont.appendChild(b);
+    }
+    cont.dataset.value = '';
+  });
+}
+function setEscala(campo, valor){
+  const cont = document.querySelector(`[data-scale="${campo}"]`);
+  if (!cont) return;
+  [...cont.children].forEach(b => b.classList.toggle('on', Number(b.dataset.val)===valor));
+  if (valor!==undefined && valor!==null) cont.dataset.value = valor;
+}
+function getEscala(campo){
+  const cont = document.querySelector(`[data-scale="${campo}"]`);
+  if (!cont || cont.dataset.value==='') return null;
+  return Number(cont.dataset.value);
+}
+function limpiarFormRegistro(){
+  $('#r-fecha').value = hoyISO();
+  $$('[data-scale]').forEach(c => { [...c.children].forEach(b=>b.classList.remove('on')); c.dataset.value=''; });
+  rutinaSeleccionActual = {};
+  ctxSeleccion = { lugar: null, afectos: [], nota: '', clima: null };
+  Ubicacion.limpiar();
+  $('#r-minutosMind').value=''; $('#r-notas').value=''; $('#r-importante').value=''; $('#r-ctxNota').value='';
+  renderRutinaChecklist(); renderLugaresChips(); renderAfectoChips(); renderContexto();
+}
+async function cargarRegistroEnForm(fecha){
+  const r = Dominio.registro.leer(fecha);
+  limpiarFormRegistro();
+  await renderContexto();
+  if (!r) return;
+  $('#r-fecha').value = r.fecha;
+  ['impSuicidio','impAutolesion','impDrogas','malEmocional','malFisico','alegria',
+   'habMindfulness','habRegulacion','habTolerancia','habInterpersonal'].forEach(c => {
+    if (typeof r[c] === 'number') setEscala(c, r[c]);
+  });
+  rutinaSeleccionActual = { ...(r.rutina || {}) };
+  $('#r-minutosMind').value = r.minutosMind ?? '';
+  $('#r-notas').value = r.notas ?? '';
+  $('#r-importante').value = r.importante ?? '';
+  if (r.clima){ ctxSeleccion.clima = r.clima; }
+  if (r.lugar){ ctxSeleccion.lugar = r.lugar; Ubicacion.setLugarActual(r.lugar); }
+  if (Array.isArray(r.afectosClima)) ctxSeleccion.afectos = [...r.afectosClima];
+  if (r.ctxNota) $('#r-ctxNota').value = r.ctxNota;
+  renderRutinaChecklist(); renderLugaresChips(); renderAfectoChips();
+}
+
+$('#guardarRegistro').onclick = async () => {
+  const fecha = $('#r-fecha').value || hoyISO();
+  const rutinaData = {};
+  $$('[data-rutina-item]').forEach(inp => { rutinaData[inp.dataset.rutinaItem] = inp.checked; });
+  const nuevo = Dominio.registro.guardar({
+    fecha,
+    impSuicidio:getEscala('impSuicidio'), impAutolesion:getEscala('impAutolesion'), impDrogas:getEscala('impDrogas'),
+    malEmocional:getEscala('malEmocional'), malFisico:getEscala('malFisico'), alegria:getEscala('alegria'),
+    habMindfulness:getEscala('habMindfulness'), habRegulacion:getEscala('habRegulacion'),
+    habTolerancia:getEscala('habTolerancia'), habInterpersonal:getEscala('habInterpersonal'),
+    rutina: rutinaData, minutosMind:Number($('#r-minutosMind').value)||0,
+    notas:$('#r-notas').value.trim(), importante:$('#r-importante').value.trim(),
+    clima: ctxSeleccion.clima || null, lugar: ctxSeleccion.lugar || null,
+    afectosClima: ctxSeleccion.afectos, ctxNota: $('#r-ctxNota').value.trim()
+  });
+  if (nuevo.importante){ Dominio.notas.crear(nuevo.importante, 'general'); renderNotas(); }
+  renderHistorial();
+  irA('chat');
+  const msg = generarMensajePostRegistro(nuevo);
+  burbujaBot(msg); hablar(msg);
+  ofrecerSugerenciaContextual(nuevo);
+};
+
+function generarMensajePostRegistro(r){
+  const partes = [`📋 Registro de ${fmtFecha(r.fecha)} guardado.`];
+  if (typeof r.malEmocional==='number' && r.malEmocional>=4) partes.push('Veo malestar alto. ¿Estás bien?');
+  else if (typeof r.alegria==='number' && r.alegria>=3) partes.push('Me alegra que haya habido alegría hoy 🌱');
+  if (typeof r.impSuicidio==='number' && r.impSuicidio>=3) partes.push('⚠️ Impulso suicida alto. Hablá con alguien hoy, o llamá al 135.');
+  if (r.rutina && r.rutina.pastillas === false) partes.push('💊 No marcaste la medicación.');
+  if (r.rutina && r.rutina.mindfulness === false) partes.push('🧘 Hoy sin atención plena. 3 min alcanzan.');
+  if (partes.length===1) partes.push('Gracias por registrarlo 💙');
+  return partes.join('\n\n');
+}
+
+async function ofrecerSugerenciaContextual(registroGuardado){
+  const clima = registroGuardado.clima;
+  const lugar = registroGuardado.lugar;
+  if (!clima) return;
+  const sug = Clima.sugerir(clima, lugar, registroGuardado);
+  if (!sug) return;
+  await dormir(800);
+  const div = document.createElement('div');
+  div.className = 'sugerencia';
+  div.innerHTML = `<strong>💡 Sugerencia</strong>${escapeHTML(sug.texto)}`;
+  const acts = document.createElement('div');
+  acts.className = 'sug-actions';
+  sug.acciones.forEach(a => {
+    const b = document.createElement('button');
+    b.textContent = a.label; b.onclick = a.accion;
+    acts.appendChild(b);
+  });
+  div.appendChild(acts);
+  chat.appendChild(div);
+  scrollAbajo();
+}
+
+function renderHistorial(){
+  const ult = Dominio.registro.listar(new Date(Date.now() - 7*86400000).toISOString().slice(0,10), hoyISO());
+  $('#avgMal').textContent = Dominio.analisis.promedios(ult, 'malEmocional')?.toFixed(1) ?? '—';
+  $('#avgAle').textContent = Dominio.analisis.promedios(ult, 'alegria')?.toFixed(1) ?? '—';
+  $('#avgHab').textContent = Dominio.analisis.promedios(ult, 'habRegulacion')?.toFixed(1) ?? '—';
+  const rut = Dominio.analisis.calcularRutina(ult);
+  $('#progRutina').style.width = rut.pct + '%';
+  $('#rutinaPct').textContent = rut.pct + '%';
+  const cont = $('#insights');
+  if (ult.length < 3) cont.innerHTML = '<div class="empty">Necesito al menos 3 registros.</div>';
+  else {
+    const mal = Dominio.analisis.promedios(ult, 'malEmocional');
+    const ins = [];
+    if (mal!==null && mal>=3.5) ins.push('🌡️ Malestar alto sostenido. Priorizá autocuidado.');
+    if (rut.pct>=70) ins.push('🌱 Rutina sostenida. Aunque no lo sientas, es un logro.');
+    if (rut.pct<=30) ins.push('🎯 Rutina floja. Revisá si los ítems son demasiados.');
+    const cv = Dominio.analisis.climaVsAnimo(ult);
+    if (cv && cv.lluvia.si !== null && cv.lluvia.no !== null){
+      const diff = cv.lluvia.si - cv.lluvia.no;
+      if (diff >= 0.7) ins.push(`🌧️ En los días de lluvia tu malestar es ${diff.toFixed(1)} puntos más alto en promedio.`);
+      else if (diff <= -0.7) ins.push(`☀️ Los días de lluvia parecés estar mejor. Curioso.`);
+    }
+    if (!ins.length) ins.push('Sin patrones fuertes. Seguí registrando.');
+    cont.innerHTML = ins.map(i => `<div class="entry"><div class="txt">${i}</div></div>`).join('');
+  }
+  const lr = $('#listaRegistros');
+  if (!registros.length) lr.innerHTML = '<div class="empty">Todavía no cargaste registros.</div>';
+  else lr.innerHTML = registros.slice().reverse().slice(0,30).map(r => {
+    const partes = [];
+    if (typeof r.malEmocional==='number') partes.push(`malestar ${r.malEmocional}/5`);
+    if (typeof r.alegria==='number') partes.push(`alegría ${r.alegria}/5`);
+    const rutina = r.rutina || {};
+    const itemsActivos = Dominio.rutinaDef.listar();
+    const hechos = itemsActivos.filter(it => rutina[it.id] === true).length;
+    if (itemsActivos.length) partes.push(`${hechos}/${itemsActivos.length} rutina`);
+    const climaTxt = r.clima ? `${r.clima.temp}° · ${describirClima(r.clima.codigo)[1]}` : '';
+    return `<div class="entry">
+      <div class="hdr"><span class="date">${fmtFecha(r.fecha)}</span>
+      <button class="del" onclick="Telefonin.borrarRegistro('${r.fecha}')">🗑️</button></div>
+      <div class="meta">${partes.join(' · ')} ${climaTxt ? '· ' + climaTxt : ''}</div>
+    </div>`;
+  }).join('');
+}
+
+function renderNotas(){
+  const deT = notasTerapeuta.filter(n => n.autor === 'terapeuta');
+  const cardM = $('#cardMensajesTerapeuta');
+  if (deT.length){
+    cardM.style.display = 'block';
+    $('#mensajesTerapeuta').innerHTML = deT.slice().reverse().map(n => `
+      <div class="entry" style="background:#fff">
+        <div class="meta">${new Date(n.fecha).toLocaleString('es-AR')}</div>
+        <div class="txt" style="margin-top:4px">${escapeHTML(n.texto)}</div>
+      </div>`).join('');
+  } else cardM.style.display = 'none';
+  const flagsActivos = flagsTerapeuta.filter(f => !f.resuelto);
+  const cardF = $('#cardFlagsTerapeuta');
+  if (flagsActivos.length){
+    cardF.style.display = 'block';
+    $('#flagsPaciente').innerHTML = flagsActivos.map(f => `
+      <div class="entry" style="background:#fff">
+        <div class="txt">🎯 ${escapeHTML(f.texto)}</div>
+        <div class="meta">${new Date(f.fecha).toLocaleDateString('es-AR')}</div>
+      </div>`).join('');
+  } else cardF.style.display = 'none';
+  const cont = $('#listaNotas');
+  if (!notas.length){ cont.innerHTML = '<div class="empty">Todavía no guardaste temas.</div>'; return; }
+  const cats = { terapia:'🧠 Para terapia', objetivo:'🎯 Objetivo', patron:'🔁 Patrón', logro:'🌟 Logro', general:'📌 Privado' };
+  cont.innerHTML = notas.map(n => `
+    <div class="entry">
+      <div class="hdr">
+        <span class="pill ${n.cat==='terapia'?'info':n.cat==='general'?'warn':'ok'}">${cats[n.cat]||'📌'}</span>
+        <button class="del" onclick="Telefonin.borrarNota('${n.id}')">🗑️</button>
+      </div>
+      <div class="txt">${escapeHTML(n.texto)}</div>
+      <div class="meta">${new Date(n.fecha).toLocaleDateString('es-AR')}</div>
+    </div>
+  `).join('');
+}
+$('#agregarNota').onclick = () => {
+  const t = $('#nota-nueva').value.trim();
+  if (!t) return;
+  Dominio.notas.crear(t, $('#nota-cat').value);
+  $('#nota-nueva').value = '';
+  renderNotas();
+};
+
+function renderPasos(){
+  const cont = $('#listaPasos');
+  const lista = Dominio.rutina.leerPasos();
+  if (!lista.length){ cont.innerHTML = '<div class="empty" style="padding:12px">Sin pasos todavía.</div>'; return; }
+  cont.innerHTML = lista.map(p => `
+    <div class="plan-item">
+      <div class="plan-check ${p.done?'done':''}" onclick="Telefonin.togglePaso('${p.id}')"></div>
+      <div class="plan-body">
+        <strong style="${p.done?'text-decoration:line-through;color:var(--muted)':''}">${escapeHTML(p.texto)}</strong>
+      </div>
+      <button class="del" onclick="Telefonin.borrarPaso('${p.id}')" style="border:none;background:none;color:var(--danger);cursor:pointer;font-size:15px">🗑️</button>
+    </div>
+  `).join('');
+}
+$('#agregarPaso').onclick = () => {
+  const t = $('#nuevoPaso').value.trim(); if (!t) return;
+  Dominio.rutina.agregarPaso(t); $('#nuevoPaso').value=''; renderPasos();
+};
+$('#obj-principal').addEventListener('input', e => Dominio.rutina.setObjetivo(e.target.value));
+
+$('#agregarPlaylist').onclick = () => {
+  const nombre = $('#pl-nombre').value.trim();
+  const url = $('#pl-url').value.trim();
+  if (!nombre || !url){ alert('Completá nombre y link.'); return; }
+  if (!/^spotify:|open\.spotify\.com/i.test(url)){ alert('Pegá un link de Spotify o un URI.'); return; }
+  Spotify.agregar(nombre, url);
+  $('#pl-nombre').value = ''; $('#pl-url').value = '';
+  renderPlaylists();
+};
+
+function irA(vista){
+  $$('.view').forEach(v => v.classList.toggle('active', v.id === 'view-'+vista));
+  $$('.nav-item').forEach(n => n.classList.toggle('active', n.dataset.view === vista));
+  $('#views').scrollTop = 0;
+  if (vista==='registro'){ if (Dominio.registro.leer(hoyISO())) cargarRegistroEnForm(hoyISO()); else limpiarFormRegistro(); }
+  if (vista==='historial') renderHistorial();
+  if (vista==='notas') renderNotas();
+  if (vista==='rutina'){ renderPasos(); $('#obj-principal').value = Dominio.rutina.getObjetivo(); renderPlaylists(); }
+  if (vista==='ajustes') cargarFormAjustes();
+  cerrarDrawer();
+}
+$$('.nav-item').forEach(b => b.onclick = () => irA(b.dataset.view));
+
+const drawer = $('#drawer'), overlay = $('#overlay');
+$('#menuBtn').onclick = () => { drawer.classList.add('show'); overlay.classList.add('show'); };
+function cerrarDrawer(){
+  drawer.classList.remove('show');
+  if (!$$('.sheet.show').length) overlay.classList.remove('show');
+}
+overlay.onclick = () => {
+  cerrarDrawer();
+  $$('.sheet.show').forEach(s => s.classList.remove('show'));
+  overlay.classList.remove('show');
+};
+
+$('#editRutinaBtn').onclick = () => {
+  renderEditorRutina();
+  $('#sheetEditorRutina').classList.add('show');
+  overlay.classList.add('show');
+};
+$('#agregarItemBtn').onclick = () => {
+  const inp = $('#nuevoItemInput');
+  const val = inp.value.trim(); if (!val) return;
+  const item = Dominio.rutinaDef.agregar(val, ROLES.PACIENTE);
+  if (item){ inp.value = ''; renderEditorRutina(); renderRutinaChecklist(); }
+};
+$('#nuevoItemInput').addEventListener('keydown', e => { if (e.key === 'Enter'){ e.preventDefault(); $('#agregarItemBtn').click(); } });
+
+$('#abrirEditorRutinaT').onclick = () => {
+  if (!SecurityService.puedeEditarRutina(ROLES.TERAPEUTA)){ alert('No tenés permiso.'); return; }
+  renderEditorRutinaT();
+  $('#sheetEditorRutinaT').classList.add('show');
+  $('#sheetEditorRutinaT').style.zIndex = 250;
+};
+$('#agregarItemBtnT').onclick = () => {
+  const inp = $('#nuevoItemInputT');
+  const val = inp.value.trim(); if (!val) return;
+  const item = Dominio.rutinaDef.agregar(val, ROLES.TERAPEUTA);
+  if (item){ inp.value = ''; renderEditorRutinaT(); renderRutinaChecklist(); }
+};
+$('#nuevoItemInputT').addEventListener('keydown', e => { if (e.key === 'Enter'){ e.preventDefault(); $('#agregarItemBtnT').click(); } });
+
+const skillTextos = {
+  stop:{t:'🛑 Habilidad STOP',b:`<p><strong>Stop.</strong> Parar.</p><p><strong>Toma un paso atrás.</strong> Respirá.</p><p><strong>Observa.</strong> ¿Qué pasa dentro y fuera?</p><p><strong>Procede con mindfulness.</strong></p>`},
+  tip:{t:'🧊 Habilidades TIP',b:`<p><strong>T:</strong> agua fría en la cara 30s.</p><p><strong>I:</strong> ejercicio intenso 2-5 min.</p><p><strong>P:</strong> respiración pausada (inhalá 5, exhala 7).</p><p><strong>P:</strong> relajación muscular.</p>`},
+  aceptas:{t:'🌈 ACEPTAS',b:`<p>Actividades · Contribuir · Emociones opuestas · Pensamientos · Tomar distancia · Analogías · Sensaciones.</p>`},
+  opuesta:{t:'↔️ Acción opuesta',b:`<p>Cuando la emoción no se ajusta a los hechos o actuar según ella no es efectivo.</p>`},
+  radical:{t:'🌱 Aceptación radical',b:`<p>Aceptar de raíz que esto <em>es así</em>. No resignación: dejar de pelear con lo que ya pasó.</p>`}
+};
+function abrirSkill(k){
+  const s = skillTextos[k]; if (!s) return;
+  $('#skillTitle').textContent = s.t;
+  $('#skillBody').innerHTML = s.b;
+  $('#sheetSkill').classList.add('show'); overlay.classList.add('show');
+}
+$$('[data-close-sheet]').forEach(b => b.onclick = () => {
+  $$('.sheet.show').forEach(s => s.classList.remove('show'));
+  overlay.classList.remove('show');
+});
+
+function cargarFormAjustes(){
+  $('#setNombre').value = ajustes.nombre;
+  $('#setVoz').checked = ajustes.voz;
+  $('#setVel').value = ajustes.velocidad;
+  $('#setCompartir').checked = compartir.activo;
+  $('#bloqueCompartir').style.display = compartir.activo ? 'block' : 'none';
+  $('#codigoAcceso').value = codigoAcceso;
+  ['permRegistro','permRutina','permHabilidades','permTemas','permAlertas','permNotasPrivadas','permChat','permClima'].forEach(id => {
+    $('#'+id).checked = compartir[id];
+  });
+  $('#setClimaActivo').checked = climaConfig.activo;
+  $('#setCiudad').value = climaConfig.ciudad;
+  $('#setGeoActivo').checked = climaConfig.geoActivo;
+  const c = Dominio.consentimiento.leer();
+  $('#consentInfo').innerHTML = `
+    <div class="legal-box">
+      📜 <strong>Consentimiento v${c.version}</strong><br>
+      Otorgado: ${new Date(c.fecha).toLocaleDateString('es-AR')}<br>
+      Estado: ${c.revocado ? '<span style="color:#e5484d">REVOCADO</span>' : '<span style="color:#22b573">vigente</span>'}<br><br>
+      <span style="font-size:12px;color:#4a6583">${escapeHTML(c.texto)}</span>
+    </div>
+  `;
+  $('#marcoLegalBox').innerHTML = Object.values(MARCO_LEGAL).map(ley => `
+    <strong>${ley.nombre}</strong>
+    <ul>${ley.puntos.map(p => `<li>${p}</li>`).join('')}</ul>
+  `).join('');
+  const integridad = verificarIntegridadAudit();
+  $('#integridadAudit').innerHTML = integridad.ok
+    ? `✅ Cadena de auditoría íntegra · ${integridad.total} eventos encadenados.`
+    : `⚠️ Cadena rota en evento #${integridad.indiceRoto}.`;
+  renderAudit('#logAccesos');
+}
+
+$('#guardarAjustes').onclick = () => {
+  ajustes.nombre = $('#setNombre').value.trim();
+  ajustes.voz = $('#setVoz').checked;
+  ajustes.velocidad = parseFloat($('#setVel').value);
+  Storage.guardar(K.ajustes, ajustes);
+  climaConfig.activo = $('#setClimaActivo').checked;
+  climaConfig.ciudad = $('#setCiudad').value.trim();
+  climaConfig.geoActivo = $('#setGeoActivo').checked;
+  Storage.guardar(K.climaConfig, climaConfig);
+  actualizarMute();
+  auditar('ajustes_guardados', {});
+  burbujaBot('✅ Ajustes guardados.');
+  hablar('Ajustes guardados.');
+};
+
+$('#setCompartir').addEventListener('change', e => {
+  compartir.activo = e.target.checked;
+  Storage.guardar(K.compartir, compartir);
+  $('#bloqueCompartir').style.display = compartir.activo ? 'block' : 'none';
+  auditar('compartir_' + (compartir.activo ? 'activado' : 'pausado'), {});
+});
+
+['permRegistro','permRutina','permHabilidades','permTemas','permAlertas','permNotasPrivadas','permChat','permClima'].forEach(id => {
+  $('#'+id).addEventListener('change', e => {
+    compartir[id] = e.target.checked;
+    Storage.guardar(K.compartir, compartir);
+    auditar('permiso_cambiado', { permiso:id, valor:e.target.checked });
+  });
+});
+
+$('#regenCodigo').onclick = () => {
+  if (!confirm('¿Generar un código nuevo?')) return;
+  const n = Math.floor(1000 + Math.random() * 9000);
+  const l = String.fromCharCode(65 + Math.floor(Math.random()*26));
+  codigoAcceso = `${l}${n}`;
+  Storage.guardar(K.codigo, codigoAcceso);
+  $('#codigoAcceso').value = codigoAcceso;
+  auditar('codigo_regenerado', {});
+};
+
+function renderAudit(selector){
+  const cont = $(selector);
+  if (!auditLog.length){ cont.innerHTML = '<div class="t-empty" style="color:var(--muted)">Sin eventos.</div>'; return; }
+  cont.innerHTML = auditLog.slice().reverse().slice(0,15).map(a => `
+    <div class="t-access-log">
+      <span>${a.accion.replace(/_/g,' ')} <span class="t-hash">#${a.hashActual.slice(0,6)}</span></span>
+      <span class="t-log-fecha">${new Date(a.ts).toLocaleString('es-AR')}</span>
+    </div>
+  `).join('');
+}
+
+const muteBtn = $('#muteBtn');
+function actualizarMute(){
+  muteBtn.textContent = ajustes.voz ? '🔊' : '🔇';
+  muteBtn.style.opacity = ajustes.voz ? '1' : '.5';
+}
+muteBtn.onclick = () => {
+  ajustes.voz = !ajustes.voz;
+  Storage.guardar(K.ajustes, ajustes);
+  actualizarMute();
+  if (!ajustes.voz) speechSynthesis.cancel();
+  else hablar('Voz activada.');
+};
+
+const tOverlay = $('#therapistOverlay');
+const pinOverlay = $('#pinOverlay');
+const pinInput = $('#pinInput');
+const pinError = $('#pinError');
+
+$('#abrirModoTerapeuta').onclick = () => {
+  if (!compartir.activo){ alert('El compartir está apagado.'); return; }
+  pinInput.value = ''; pinError.textContent = '';
+  pinOverlay.classList.add('show');
+  setTimeout(() => pinInput.focus(), 100);
+};
+$('#pinCancel').onclick = () => pinOverlay.classList.remove('show');
+$('#pinOk').onclick = intentarEntrar;
+pinInput.addEventListener('keydown', e => { if (e.key==='Enter') intentarEntrar(); });
+
+function intentarEntrar(){
+  const val = pinInput.value.trim();
+  if (SecurityService.autenticarTerapeuta(val)){
+    pinOverlay.classList.remove('show');
+    auditar('terapeuta_acceso_permitido', { rol: ROLES.TERAPEUTA });
+    abrirPanelTerapeuta();
+  } else {
+    pinError.textContent = 'Código incorrecto.';
+    auditar('terapeuta_acceso_denegado', {});
+    pinInput.value = '';
+  }
+}
+
+$('#salirTerapeuta').onclick = () => {
+  auditar('terapeuta_salida', {});
+  tOverlay.classList.remove('show');
+  $$('.sheet.show').forEach(s => s.classList.remove('show'));
+};
+
+function abrirPanelTerapeuta(){
+  renderPanelTerapeuta();
+  tOverlay.classList.add('show');
+  tOverlay.scrollTop = 0;
+}
+
+function renderPanelTerapeuta(){
+  const nombre = ajustes.nombre || 'Consultante';
+  $('#tNombre').textContent = `${nombre} — Panel clínico`;
+  const puedeLeerRegistros = puedeVer(ROLES.TERAPEUTA, RECURSOS.REGISTRO_DIARIO, OWNER_ID);
+  const ult = puedeLeerRegistros ? Dominio.registro.listar(new Date(Date.now() - 30*86400000).toISOString().slice(0,10), hoyISO()) : [];
+  if (ult.length){
+    const desde = new Date(ult[0].fecha+'T12:00').toLocaleDateString('es-AR');
+    const hasta = new Date(ult[ult.length-1].fecha+'T12:00').toLocaleDateString('es-AR');
+    $('#tRango').textContent = `${desde} → ${hasta} · ${ult.length} registros`;
+  } else {
+    $('#tRango').textContent = puedeLeerRegistros ? 'Sin registros todavía' : 'Sin autorización';
+  }
+  renderAlertasT(ult); renderStatsT(ult); renderTrendT(ult); renderClimaT(ult);
+  renderSkillsT(ult); renderRutinaT(ult); renderTemasT(); renderNotasT(); renderFlagsT();
+}
+
+function renderAlertasT(ult){
+  const cont = $('#tAlertas');
+  cont.innerHTML = '';
+  if (!puedeVer(ROLES.TERAPEUTA, RECURSOS.ALERTAS, OWNER_ID)){
+    cont.innerHTML = `<div class="t-alert info"><div class="t-icon">🔒</div><div class="t-txt"><strong>Alertas no autorizadas</strong>La persona no habilitó el envío de alertas.</div></div>`;
+    return;
+  }
+  const alertas = Dominio.analisis.detectarAlertas(ult);
+  if (!alertas.length){
+    cont.innerHTML = `<div class="t-alert info" style="background:rgba(34,181,115,.12);border-color:#22b573"><div class="t-icon">✅</div><div class="t-txt"><strong>Sin alertas activas</strong>No hay indicadores de riesgo.</div></div>`;
+    return;
+  }
+  cont.innerHTML = alertas.map(a => `
+    <div class="t-alert ${a.tipo}">
+      <div class="t-icon">${a.icon}</div>
+      <div class="t-txt"><strong>${a.titulo}</strong>${a.txt}</div>
+    </div>
+  `).join('');
+}
+
+function renderStatsT(ult){
+  const cont = $('#tStats');
+  if (!puedeVer(ROLES.TERAPEUTA, RECURSOS.REGISTRO_DIARIO, OWNER_ID)){ cont.innerHTML = '<div class="t-empty">🔒 Registro diario no compartido.</div>'; return; }
+  if (!ult.length){ cont.innerHTML = '<div class="t-empty">Sin datos.</div>'; return; }
+  const mal = Dominio.analisis.promedios(ult, 'malEmocional');
+  const ale = Dominio.analisis.promedios(ult, 'alegria');
+  const hab = Dominio.analisis.promedios(ult, 'habRegulacion');
+  const rut = Dominio.analisis.calcularRutina(ult);
+  cont.innerHTML = `
+    <div class="t-stat"><b>${mal!==null?mal.toFixed(1):'—'}<small style="font-size:13px;color:#8fa2c4"> /5</small></b><small>Malestar emocional prom.</small></div>
+    <div class="t-stat"><b>${ale!==null?ale.toFixed(1):'—'}<small style="font-size:13px;color:#8fa2c4"> /5</small></b><small>Alegría prom.</small></div>
+    <div class="t-stat"><b>${hab!==null?hab.toFixed(1):'—'}<small style="font-size:13px;color:#8fa2c4"> /7</small></b><small>Habilidades (regulación)</small></div>
+    <div class="t-stat"><b>${rut.pct}<small style="font-size:13px;color:#8fa2c4">%</small></b><small>Adherencia rutina</small></div>
+  `;
+}
+
+function renderTrendT(ult){
+  const cont = $('#tTrend');
+  if (!puedeVer(ROLES.TERAPEUTA, RECURSOS.REGISTRO_DIARIO, OWNER_ID)){ cont.innerHTML = '<div class="t-empty">🔒 No autorizado.</div>'; return; }
+  if (!ult.length){ cont.innerHTML = '<div class="t-empty">Sin datos.</div>'; return; }
+  const hoy = new Date();
+  const dias = [];
+  for (let i=29; i>=0; i--){
+    const d = new Date(hoy); d.setDate(hoy.getDate()-i);
+    const iso = d.toISOString().slice(0,10);
+    const reg = registros.find(r => r.fecha === iso);
+    dias.push({ iso, reg });
+  }
+  const W = 320, H = 140, pad = {t:10,r:6,b:20,l:6};
+  const wI = W-pad.l-pad.r, hI = H-pad.t-pad.b, bw = wI/30 - 2;
+  let bars = '', labels = '';
+  dias.forEach((d,i) => {
+    const x = pad.l + (wI/30)*i + 1;
+    const val = d.reg && typeof d.reg.malEmocional === 'number' ? d.reg.malEmocional : null;
+    const h = val !== null ? (val/5)*hI : 3;
+    const y = pad.t + hI - h;
+    const cls = val===null ? 'bar' : (val>=4 ? 'bar danger' : val>=3 ? 'bar warn' : 'bar');
+    bars += `<rect class="${cls}" x="${x}" y="${y}" width="${bw}" height="${h}" rx="2" opacity="${val===null?'0.15':'1'}"><title>${d.iso}: ${val!==null?val+'/5':'sin dato'}</title></rect>`;
+    if (i%7===0){
+      const f = new Date(d.iso+'T12:00');
+      labels += `<text class="lbl" x="${x}" y="${H-6}" text-anchor="middle">${f.getDate()}/${f.getMonth()+1}</text>`;
+    }
+  });
+  const lineas = `
+    <line class="axis" x1="${pad.l}" y1="${pad.t+hI}" x2="${W-pad.r}" y2="${pad.t+hI}"/>
+    <line class="axis" x1="${pad.l}" y1="${pad.t+hI*0.4}" x2="${W-pad.r}" y2="${pad.t+hI*0.4}" stroke-dasharray="2 3"/>
+  `;
+  cont.innerHTML = `<svg class="t-chart" viewBox="0 0 ${W} ${H}" preserveAspectRatio="none">${lineas}${bars}${labels}</svg>`;
+}
+
+function renderClimaT(ult){
+  const cont = $('#tClima');
+  if (!puedeVer(ROLES.TERAPEUTA, RECURSOS.CLIMA, OWNER_ID)){ cont.innerHTML = '<div class="t-empty">🔒 Clima no compartido.</div>'; return; }
+  const conClima = ult.filter(r => r.clima);
+  if (conClima.length < 3){
+    cont.innerHTML = `<div class="t-empty">Datos insuficientes (${conClima.length} registros con clima). Necesito al menos 3.</div>`;
+    return;
+  }
+  const cv = Dominio.analisis.climaVsAnimo(ult);
+  if (!cv){ cont.innerHTML = '<div class="t-empty">Sin datos suficientes.</div>'; return; }
+  let html = `<p class="t-hint">Malestar emocional promedio según condiciones.</p>`;
+  if (cv.lluvia.si !== null && cv.lluvia.no !== null){
+    const diff = cv.lluvia.si - cv.lluvia.no;
+    const diffTxt = diff > 0.5 ? `<span style="color:#ff8a8e">+${diff.toFixed(1)} con lluvia</span>` :
+      diff < -0.5 ? `<span style="color:#5dd49a">${diff.toFixed(1)} con lluvia</span>` :
+      `<span style="color:#8fa2c4">≈ sin diferencia</span>`;
+    html += `<div class="t-rutina-row"><span class="t-rname">🌧️ Días de lluvia (${cv.lluvia.nSi})</span><span style="font-weight:700;color:#e6edfa">${cv.lluvia.si.toFixed(1)}/5</span></div>
+      <div class="t-rutina-row"><span class="t-rname">☀️ Días sin lluvia (${cv.lluvia.nNo})</span><span style="font-weight:700;color:#e6edfa">${cv.lluvia.no.toFixed(1)}/5</span></div>
+      <div class="t-rutina-row"><span class="t-rname">Diferencia</span><span>${diffTxt}</span></div>`;
+  }
+  const t = cv.temp;
+  if (t.frio !== null || t.templado !== null || t.calor !== null){
+    html += `<div style="margin-top:14px;font-size:12px;color:#7b8dae;font-weight:700">POR TEMPERATURA</div>`;
+    if (t.frio !== null) html += `<div class="t-rutina-row"><span class="t-rname">🥶 Frío (≤10°C)</span><span style="font-weight:700;color:#e6edfa">${t.frio.toFixed(1)}/5</span></div>`;
+    if (t.templado !== null) html += `<div class="t-rutina-row"><span class="t-rname">😊 Templado</span><span style="font-weight:700;color:#e6edfa">${t.templado.toFixed(1)}/5</span></div>`;
+    if (t.calor !== null) html += `<div class="t-rutina-row"><span class="t-rname">🥵 Calor (≥28°C)</span><span style="font-weight:700;color:#e6edfa">${t.calor.toFixed(1)}/5</span></div>`;
+  }
+  cont.innerHTML = html;
+}
+
+function renderSkillsT(ult){
+  const cont = $('#tSkills');
+  if (!puedeVer(ROLES.TERAPEUTA, RECURSOS.HABILIDADES, OWNER_ID)){ cont.innerHTML = '<div class="t-empty">🔒 Habilidades no compartidas.</div>'; return; }
+  if (!ult.length){ cont.innerHTML = '<div class="t-empty">Sin datos.</div>'; return; }
+  const campos = [['Mindfulness','habMindfulness'], ['Regulación em.','habRegulacion'],
+    ['Tolerancia mal.','habTolerancia'], ['Efect. interpersonal','habInterpersonal']];
+  cont.innerHTML = campos.map(([n, c]) => {
+    const v = ult.map(r => r[c]).filter(x => typeof x === 'number');
+    const prom = v.length ? v.reduce((a,b)=>a+b,0)/v.length : 0;
+    const pct = (prom/7)*100;
+    const nivel = prom >= 5 ? 'ok' : prom >= 3 ? 'warn' : 'danger';
+    const color = nivel==='ok' ? 'linear-gradient(90deg,#22b573,#5dd49a)' :
+      nivel==='warn' ? 'linear-gradient(90deg,#f0a020,#ffc156)' : 'linear-gradient(90deg,#e5484d,#ff7d82)';
+    return `<div class="t-skill-row"><div class="t-name">${n}</div><div class="t-skill-bar"><div style="width:${pct}%;background:${color}"></div></div><div class="t-skill-val">${prom.toFixed(1)}</div></div>`;
+  }).join('');
+}
+
+function renderRutinaT(ult){
+  const cont = $('#tRutina');
+  if (!puedeVer(ROLES.TERAPEUTA, RECURSOS.RUTINA, OWNER_ID)){ cont.innerHTML = '<div class="t-empty">🔒 Rutina no compartida.</div>'; return; }
+  if (!ult.length){ cont.innerHTML = '<div class="t-empty">Sin datos.</div>'; return; }
+  const adherencia = Dominio.analisis.adherenciaPorItem(ult);
+  if (!adherencia.length){ cont.innerHTML = '<div class="t-empty">Sin ítems de rutina definidos.</div>'; return; }
+  cont.innerHTML = adherencia.map(it => {
+    const nivel = it.pct>=70?'ok':it.pct>=40?'warn':'danger';
+    const badge = it.activo ? '' : ' <span style="color:#7b8dae;font-size:10px">(inactivo)</span>';
+    const origen = it.creadoPor === 'terapeuta' ? ' 🩺' : it.creadoPor === 'paciente' ? ' 👤' : '';
+    return `<div class="t-rutina-row"><span class="t-rname">${escapeHTML(it.label)}${origen}${badge}</span><span class="t-rpct ${nivel}">${it.pct}% <span style="color:#7b8dae;font-weight:400">(${it.ok}/${it.total})</span></span></div>`;
+  }).join('');
+}
+
+function renderTemasT(){
+  const cont = $('#tTemas');
+  if (!puedeVer(ROLES.TERAPEUTA, RECURSOS.TEMAS_TERAPIA, OWNER_ID)){ cont.innerHTML = '<div class="t-empty">🔒 Temas no compartidos.</div>'; return; }
+  const temas = Dominio.notas.leer('terapia');
+  if (!temas.length){ cont.innerHTML = '<div class="t-empty">Sin temas marcados para terapia.</div>'; return; }
+  cont.innerHTML = temas.slice().reverse().slice(0,20).map(n => `
+    <div class="t-note">${escapeHTML(n.texto)}<div class="t-nmeta"><span>${new Date(n.fecha).toLocaleDateString('es-AR')}</span></div></div>
+  `).join('');
+}
+
+function renderNotasT(){
+  const cont = $('#tNotas');
+  if (!notasTerapeuta.length){ cont.innerHTML = '<div class="t-empty">Sin notas aún.</div>'; return; }
+  cont.innerHTML = notasTerapeuta.slice().reverse().slice(0,15).map(n => `
+    <div class="t-note ${n.autor === 'terapeuta' ? 'mine' : ''}">
+      ${escapeHTML(n.texto)}
+      <div class="t-nmeta"><span class="t-nautor">${n.autor === 'terapeuta' ? 'Tú' : 'La persona'}</span><span>${new Date(n.fecha).toLocaleString('es-AR')}</span></div>
+    </div>
+  `).join('');
+}
+
+function renderFlagsT(){
+  const cont = $('#tFlags');
+  const activos = flagsTerapeuta.filter(f => !f.resuelto);
+  if (!activos.length){ cont.innerHTML = '<div class="t-empty">Sin marcas para la próxima sesión.</div>'; return; }
+  cont.innerHTML = activos.map(f => `
+    <div class="t-note" style="border-left-color:#ffb020">
+      🎯 ${escapeHTML(f.texto)}
+      <div class="t-nmeta"><span>${new Date(f.fecha).toLocaleDateString('es-AR')}</span>
+      <button onclick="Telefonin.resolverFlag('${f.id}')" style="background:none;border:none;color:#22b573;cursor:pointer;font-size:12px;font-weight:700">✓ resuelto</button></div>
+    </div>
+  `).join('');
+}
+
+$('#tGuardarNota').onclick = () => {
+  const t = $('#tNuevaNota').value.trim();
+  if (!t) return;
+  if (!puedeVer(ROLES.TERAPEUTA, RECURSOS.TEMAS_TERAPIA, OWNER_ID)){ alert('No tenés permiso.'); return; }
+  notasTerapeuta.push({ id:`notaT_${Date.now()}`, texto:t, autor:'terapeuta', paraOwnerId: OWNER_ID, fecha:Date.now() });
+  Storage.guardar(K.notasT, notasTerapeuta);
+  auditar('nota_terapeuta_creada', {});
+  $('#tNuevaNota').value = '';
+  renderNotasT(); renderNotas();
+};
+
+$('#tGuardarFlag').onclick = () => {
+  const t = $('#tNuevoFlag').value.trim();
+  if (!t) return;
+  if (!puedeVer(ROLES.TERAPEUTA, RECURSOS.TEMAS_TERAPIA, OWNER_ID)){ alert('No tenés permiso.'); return; }
+  flagsTerapeuta.push({ id:`flag_${Date.now()}`, texto:t, paraOwnerId: OWNER_ID, fecha:Date.now(), resuelto:false });
+  Storage.guardar(K.flagsT, flagsTerapeuta);
+  auditar('flag_terapeuta_creado', {});
+  $('#tNuevoFlag').value = '';
+  renderFlagsT();
+};
+
+const AdminPanel = {
+  metricasSistema(){ if (!puedeVer(ROLES.ADMIN, RECURSOS.METRICAS_SISTEMA, null)) return null; return { totalCuentas: 1, uptime: '99.9%' }; },
+  logsTecnicos(){ if (!puedeVer(ROLES.SOPORTE, RECURSOS.LOGS_TECNICOS, null)) return null; return auditLog.map(a => ({ ts: a.ts, accion: a.accion })); }
+};
+
+function pintarBienvenida(){
+  const div = document.createElement('div');
+  div.className = 'welcome'; div.id = 'welcome';
+  div.style.textAlign = 'center'; div.style.padding = '20px 8px 8px';
+  const hero = document.createElement('div');
+  hero.style.cssText = 'width:120px;height:150px;margin:0 auto 8px';
+  hero.appendChild(crearMascota());
+  const h1 = document.createElement('h1');
+  h1.style.cssText = 'margin:6px 0 4px;font-size:20px';
+  h1.textContent = ajustes.nombre ? `Hola, ${ajustes.nombre}` : 'Hola, soy Telefonín';
+  const p = document.createElement('p');
+  p.style.cssText = 'margin:0 0 6px;color:var(--muted);font-size:14px;line-height:1.5';
+  p.innerHTML = 'Tu compañero DBT. No reemplazo a tu terapeuta: te acompaño entre sesiones.';
+  const chips = document.createElement('div');
+  chips.className = 'chips'; chips.style.marginTop = '14px';
+  [
+    ['📋 Registrar hoy', () => irA('registro')],
+    ['🌤️ Clima', () => enviarMensaje('¿Cómo está el clima?')],
+    ['📈 ¿Cómo vengo?', () => enviarMensaje('¿Cómo vengo estos días?')],
+    ['🎯 Mi rutina', () => enviarMensaje('¿Qué me toca hoy?')],
+    ['💙 Estoy mal', () => enviarMensaje('Estoy mal, no aguanto')],
+    ['📖 Habilidades', () => irA('habilidades')]
+  ].forEach(([txt, fn]) => {
+    const b = document.createElement('button');
+    b.className = 'chip'; b.textContent = txt; b.onclick = fn;
+    chips.appendChild(b);
+  });
+  div.append(hero, h1, p, chips);
+  chat.appendChild(div);
+}
+
+function iniciar(){
+  pintarMascotas();
+  construirEscalas();
+  limpiarFormRegistro();
+  actualizarMute();
+  cargarFormAjustes();
+  renderNotas();
+  renderPasos();
+  renderHistorial();
+  renderRutinaChecklist();
+  renderPlaylists();
+  renderLugaresChips();
+  renderAfectoChips();
+  auditar('app_iniciada', { rol: ACTOR_ACTUAL.rol, version: SCHEMA_VERSION });
+  if (historialChat.length){
+    historialChat.slice(-20).forEach(m => m.rol === 'user' ? burbujaUser(m.texto) : burbujaBot(m.texto));
+  } else pintarBienvenida();
+  const flagsActivos = flagsTerapeuta.filter(f => !f.resuelto);
+  if (flagsActivos.length){
+    setTimeout(() => { burbujaBot(`🎯 Tu terapeuta marcó ${flagsActivos.length} cosa${flagsActivos.length>1?'s':''} para la próxima sesión.`); }, 1200);
+  }
+  setTimeout(() => {
+    if (ajustes.voz){
+      const h = new Date().getHours();
+      const s = h<12?'Buenos días':h<20?'Buenas tardes':'Buenas noches';
+      hablar(`${s}${ajustes.nombre?' '+ajustes.nombre:''}. Soy Telefonín. ¿Cómo estás hoy?`);
+    }
+  }, 900);
+}
+
+window.Telefonin = {
+  irA, abrirSkill,
+  borrarRegistro(fecha){ if (Dominio.registro.borrar(fecha)) renderHistorial(); },
+  borrarNota(id){ if (Dominio.notas.borrar(id)) renderNotas(); },
+  togglePaso(id){ Dominio.rutina.togglePaso(id); renderPasos(); },
+  borrarPaso(id){ Dominio.rutina.borrarPaso(id); renderPasos(); },
+  resolverFlag(id){
+    const f = flagsTerapeuta.find(x => x.id === id);
+    if (f){ f.resuelto = true; Storage.guardar(K.flagsT, flagsTerapeuta); renderFlagsT(); }
+  },
+  exportar(){
+    auditar('exportacion_datos_solicitada', {});
+    const data = { schemaVersion: SCHEMA_VERSION, ownerId: OWNER_ID, exportado: new Date().toISOString(),
+      marcoLegal: MARCO_LEGAL, consentimiento, ajustes, registros, notas, pasos, objetivo,
+      rutinaItems, playlists, climaConfig, compartir, notasTerapeuta, flagsTerapeuta, auditLog };
+    const blob = new Blob([JSON.stringify(data, null, 2)], { type:'application/json' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url; a.download = `telefonin-historia-clinica-${hoyISO()}.json`; a.click();
+    URL.revokeObjectURL(url);
+  },
+  borrarTodo(){
+    if (!confirm('¿Borrar todo? No se puede deshacer.')) return;
+    auditar('borrado_total_solicitado', {});
+    Object.values(K).forEach(k => Storage.borrar(k));
+    location.reload();
+  },
+  _debug: { ROLES, RECURSOS, puedeVer, SecurityService, Dominio, Clima, Ubicacion, Spotify, auditar, verificarIntegridadAudit, AdminPanel, rutinaItems, playlists }
+};
+
+iniciar();
+</script>
+</body>
+</html>
