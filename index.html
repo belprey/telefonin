@@ -86,6 +86,14 @@ body{margin:0;font-family:system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;
   padding:7px 13px;border-radius:10px;font-family:inherit;font-size:12.5px;
   font-weight:700;cursor:pointer;transition:.15s}
 .sugerencia button:active{transform:scale(.95)}
+.save-bar{position:fixed;bottom:0;left:0;right:0;
+  padding:12px 16px calc(env(safe-area-inset-bottom) + 12px);
+  z-index:15;background:rgba(255,255,255,.96);backdrop-filter:blur(14px);
+  border-top:1px solid var(--line);pointer-events:auto;
+  max-width:820px;margin:0 auto;box-shadow:0 -8px 30px rgba(22,34,58,.08)}
+.save-bar button{pointer-events:auto;box-shadow:0 8px 20px rgba(79,125,243,.3)}
+body:has(#view-ajustes.active) .composer { display: none; }
+#view-ajustes.active { padding-bottom: 100px; }  
 .chat{padding:18px 14px 8px;display:flex;flex-direction:column;gap:12px}
 .row{display:flex;gap:9px;align-items:flex-end;animation:pop .28s ease both}
 .row.user{flex-direction:row-reverse}
