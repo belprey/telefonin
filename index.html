@@ -1547,7 +1547,7 @@ const SKILLS = {
 };
 function habilidadTexto(k){ const s = SKILLS[k]; return `${s.titulo}\n\n${s.texto}\n\n👉 ${s.accion}`; }
 
-let ctxSeleccion = { lugar: null, afectos: [], nota: '', clima: null };
+let ctxSeleccion = { lugares:[], afectos:[], nota:'', clima:null };
 
 async function renderContexto(){
   const cont = $('#ctxClima');
