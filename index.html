@@ -1817,7 +1817,7 @@ $('#guardarRegistro').onclick = async () => {
     habTolerancia:getEscala('habTolerancia'), habInterpersonal:getEscala('habInterpersonal'),
     rutina: rutinaData, minutosMind:Number($('#r-minutosMind').value)||0,
     notas:$('#r-notas').value.trim(), importante:$('#r-importante').value.trim(),
-    clima: ctxSeleccion.clima || null, lugar: ctxSeleccion.lugar || null,
+    clima: ctxSeleccion.clima || null, lugares: ctxSeleccion.lugares || [],
     afectosClima: ctxSeleccion.afectos, ctxNota: $('#r-ctxNota').value.trim()
   });
   if (nuevo.importante){ Dominio.notas.crear(nuevo.importante, 'general'); renderNotas(); }
