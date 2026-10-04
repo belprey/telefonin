@@ -2079,8 +2079,7 @@ function cargarFormAjustes(){
     : `⚠️ Cadena rota en evento #${integridad.indiceRoto}.`;
   renderAudit('#logAccesos');
 }
-
-$('#guardarAjustes').onclick = () => $('#guardarAjustes').click(){
+$('#guardarAjustes').onclick = () => {
   ajustes.nombre = $('#setNombre').value.trim();
   ajustes.voz = $('#setVoz').checked;
   ajustes.velocidad = parseFloat($('#setVel').value);
@@ -2094,6 +2093,7 @@ $('#guardarAjustes').onclick = () => $('#guardarAjustes').click(){
   burbujaBot('✅ Ajustes guardados.');
   hablar('Ajustes guardados.');
 };
+$('#guardarAjustesFijo').onclick = () => $('#guardarAjustes').click(); 
 
 $('#setCompartir').addEventListener('change', e => {
   compartir.activo = e.target.checked;
