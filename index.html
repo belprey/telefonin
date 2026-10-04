@@ -1779,7 +1779,7 @@ function limpiarFormRegistro(){
   $('#r-fecha').value = hoyISO();
   $$('[data-scale]').forEach(c => { [...c.children].forEach(b=>b.classList.remove('on')); c.dataset.value=''; });
   rutinaSeleccionActual = {};
-  ctxSeleccion = { lugar: null, afectos: [], nota: '', clima: null };
+  ctxSeleccion = { lugares:[], afectos:[], nota:'', clima:null };
   Ubicacion.limpiar();
   $('#r-minutosMind').value=''; $('#r-notas').value=''; $('#r-importante').value=''; $('#r-ctxNota').value='';
   renderRutinaChecklist(); renderLugaresChips(); renderAfectoChips(); renderContexto();
