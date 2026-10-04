@@ -2080,7 +2080,7 @@ function cargarFormAjustes(){
   renderAudit('#logAccesos');
 }
 
-$('#guardarAjustes').onclick = () => {
+$('#guardarAjustes').onclick = () => $('#guardarAjustes').click(){
   ajustes.nombre = $('#setNombre').value.trim();
   ajustes.voz = $('#setVoz').checked;
   ajustes.velocidad = parseFloat($('#setVel').value);
