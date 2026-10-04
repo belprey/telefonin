@@ -2437,9 +2437,18 @@ function iniciar(){
   renderLugaresChips();
   renderAfectoChips();
   auditar('app_iniciada', { rol: ACTOR_ACTUAL.rol, version: SCHEMA_VERSION });
-  if (historialChat.length){
-    historialChat.slice(-20).forEach(m => m.rol === 'user' ? burbujaUser(m.texto) : burbujaBot(m.texto));
-  } else pintarBienvenida();
+
+  // Siempre mostramos la bienvenida con el muñeco grande
+pintarBienvenida();
+// Y si hay historial, mostramos solo los últimos mensajes como contexto
+if (historialChat.length){
+  const ultimos = historialChat.slice(-4);
+  const sep = document.createElement('div');
+  sep.style.cssText = 'text-align:center;font-size:11.5px;color:var(--muted);margin:14px 0 6px;letter-spacing:.3px';
+  sep.textContent = '— últimos mensajes —';
+  chat.appendChild(sep);
+  ultimos.forEach(m => m.rol === 'user' ? burbujaUser(m.texto) : burbujaBot(m.texto));
+}
   const flagsActivos = flagsTerapeuta.filter(f => !f.resuelto);
   if (flagsActivos.length){
     setTimeout(() => { burbujaBot(`🎯 Tu terapeuta marcó ${flagsActivos.length} cosa${flagsActivos.length>1?'s':''} para la próxima sesión.`); }, 1200);
