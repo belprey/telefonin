@@ -426,6 +426,38 @@ body:has(#view-ajustes.active) .composer { display: none; }
       </div>
 
       <div class="card">
+        <h3>🌡️ Emociones del día</h3>
+        <p class="hint">Las emociones que te acompañaron hoy. La primera es la más intensa. La segunda es opcional.</p>
+
+        <div class="field">
+          <label>Emoción más intensa</label>
+          <select id="emo1-id">
+            <option value="">Elegir...</option>
+          </select>
+        </div>
+        <div class="scale-row">
+          <span class="lbl">Intensidad</span>
+          <div class="scale" data-scale="emo1-int"></div>
+        </div>
+
+        <div class="field" style="margin-top:14px">
+          <label>Segunda emoción (opcional)</label>
+          <select id="emo2-id">
+            <option value="">Elegir...</option>
+          </select>
+        </div>
+        <div class="scale-row">
+          <span class="lbl">Intensidad</span>
+          <div class="scale" data-scale="emo2-int"></div>
+        </div>
+
+        <div class="field" style="margin-top:14px">
+          <label>Observaciones (opcional)</label>
+          <textarea id="emo-obs" placeholder="¿Qué pasó? ¿Con quién? ¿Qué pensaste?"></textarea>
+        </div>
+      </div>
+
+      <div class="card">
         <h3>🌱 Mi rutina de cuidado
           <span class="h3-actions"><button class="h3-btn" id="editRutinaBtn">✏️ Editar</button></span>
         </h3>
@@ -690,6 +722,7 @@ body:has(#view-ajustes.active) .composer { display: none; }
   <div class="t-card"><h3>📈 Tendencia emocional (30 días)</h3><div id="tTrend"></div></div>
   <div class="t-card"><h3>🌤️ Clima y estado de ánimo</h3><div id="tClima"></div></div>
   <div class="t-card"><h3>🧠 Habilidades DBT</h3><div id="tSkills"></div></div>
+  <div class="t-card"><h3>🌡️ Emociones registradas</h3><div id="tEmociones"></div></div>
   <div class="t-card"><h3>🌱 Adherencia a rutina <button class="t-h3-btn" id="abrirEditorRutinaT">✏️ Sugerir ítems</button></h3><div id="tRutina"></div></div>
   <div class="t-card"><h3>📌 Temas "para terapia"</h3><div id="tTemas"></div></div>
   <div class="t-card"><h3>💬 Notas entre sesiones</h3><div id="tNotas"></div><textarea class="t-input" id="tNuevaNota" placeholder="Observación, consigna..."></textarea><button class="t-btn t-btn-primary" id="tGuardarNota">Enviar nota</button></div>
@@ -773,6 +806,21 @@ const AFECTOS_CLIMA = [
   { id: 'energia_alta', label: '⚡ Con energía' },
   { id: 'ansiedad', label: '😰 Ansiedad' },
   { id: 'neutral', label: '😐 Neutral' }
+];
+
+  const EMOCIONES = [
+  { id: 'enojo', label: 'Enojo' },
+  { id: 'miedo', label: 'Miedo' },
+  { id: 'tristeza', label: 'Tristeza' },
+  { id: 'felicidad', label: 'Felicidad / Alegría' },
+  { id: 'verguenza', label: 'Vergüenza' },
+  { id: 'culpa', label: 'Culpa' },
+  { id: 'asco', label: 'Asco / Rechazo' },
+  { id: 'envidia', label: 'Envidia' },
+  { id: 'celos', label: 'Celos' },
+  { id: 'amor', label: 'Amor' },
+  { id: 'ansiedad', label: 'Ansiedad' },
+  { id: 'neutral', label: 'Neutral' }
 ];
 
 const CODIGOS_CLIMA = {
@@ -1549,7 +1597,11 @@ const SKILLS = {
 function habilidadTexto(k){ const s = SKILLS[k]; return `${s.titulo}\n\n${s.texto}\n\n👉 ${s.accion}`; }
 
 let ctxSeleccion = { lugares:[], afectos:[], nota:'', clima:null };
-
+let emocionesSeleccion = {
+  principal: { id: '', intensidad: null },
+  secundaria: { id: '', intensidad: null },
+  observaciones: ''
+};
 async function renderContexto(){
   const cont = $('#ctxClima');
   if (!climaConfig.activo){
@@ -1776,10 +1828,65 @@ function getEscala(campo){
   if (!cont || cont.dataset.value==='') return null;
   return Number(cont.dataset.value);
 }
+function construirSelectsEmociones(){
+  const opciones = '<option value="">Elegir...</option>' +
+    EMOCIONES.map(e => '<option value="' + e.id + '">' + e.label + '</option>').join('');
+  const s1 = document.getElementById('emo1-id');
+  const s2 = document.getElementById('emo2-id');
+  if (s1) s1.innerHTML = opciones;
+  if (s2) s2.innerHTML = opciones;
+}
+
+function resetEmociones(){
+  const s1 = document.getElementById('emo1-id');
+  const s2 = document.getElementById('emo2-id');
+  if (s1) s1.value = '';
+  if (s2) s2.value = '';
+  const c1 = document.querySelector('[data-scale="emo1-int"]');
+  const c2 = document.querySelector('[data-scale="emo2-int"]');
+  if (c1){ [...c1.children].forEach(b => b.classList.remove('on')); c1.dataset.value = ''; }
+  if (c2){ [...c2.children].forEach(b => b.classList.remove('on')); c2.dataset.value = ''; }
+  const obs = document.getElementById('emo-obs');
+  if (obs) obs.value = '';
+}
+
+function cargarEmocionesEnForm(emociones){
+  resetEmociones();
+  if (!emociones) return;
+  const s1 = document.getElementById('emo1-id');
+  const s2 = document.getElementById('emo2-id');
+  const obs = document.getElementById('emo-obs');
+  if (emociones.principal && emociones.principal.id){
+    if (s1) s1.value = emociones.principal.id;
+    if (typeof emociones.principal.intensidad === 'number') setEscala('emo1-int', emociones.principal.intensidad);
+  }
+  if (emociones.secundaria && emociones.secundaria.id){
+    if (s2) s2.value = emociones.secundaria.id;
+    if (typeof emociones.secundaria.intensidad === 'number') setEscala('emo2-int', emociones.secundaria.intensidad);
+  }
+  if (obs) obs.value = emociones.observaciones || '';
+}
+
+function leerEmocionesDelForm(){
+  const s1 = document.getElementById('emo1-id');
+  const s2 = document.getElementById('emo2-id');
+  const obs = document.getElementById('emo-obs');
+  const principalId = s1 ? s1.value : '';
+  const secundariaId = s2 ? s2.value : '';
+  const observaciones = obs ? obs.value.trim() : '';
+  if (!principalId && !secundariaId && !observaciones) return null;
+  return {
+    principal: principalId ? { id: principalId, intensidad: getEscala('emo1-int') } : null,
+    secundaria: secundariaId ? { id: secundariaId, intensidad: getEscala('emo2-int') } : null,
+    observaciones: observaciones
+  };
+}
+  
 function limpiarFormRegistro(){
   $('#r-fecha').value = hoyISO();
   $$('[data-scale]').forEach(c => { [...c.children].forEach(b=>b.classList.remove('on')); c.dataset.value=''; });
   rutinaSeleccionActual = {};
+  resetEmociones();
   ctxSeleccion = { lugares:[], afectos:[], nota:'', clima:null };
   Ubicacion.limpiar();
   $('#r-minutosMind').value=''; $('#r-notas').value=''; $('#r-importante').value=''; $('#r-ctxNota').value='';
@@ -1796,6 +1903,7 @@ async function cargarRegistroEnForm(fecha){
     if (typeof r[c] === 'number') setEscala(c, r[c]);
   });
   rutinaSeleccionActual = { ...(r.rutina || {}) };
+  cargarEmocionesEnForm(r.emociones || null);
   $('#r-minutosMind').value = r.minutosMind ?? '';
   $('#r-notas').value = r.notas ?? '';
   $('#r-importante').value = r.importante ?? '';
@@ -1824,7 +1932,8 @@ async function cargarRegistroEnForm(fecha){
     rutina: rutinaData, minutosMind:Number($('#r-minutosMind').value)||0,
     notas:$('#r-notas').value.trim(), importante:$('#r-importante').value.trim(),
     clima: ctxSeleccion.clima || null, lugares: ctxSeleccion.lugares || [],
-    afectosClima: ctxSeleccion.afectos, ctxNota: $('#r-ctxNota').value.trim()
+        afectosClima: ctxSeleccion.afectos, ctxNota: $('#r-ctxNota').value.trim(),
+    emociones: leerEmocionesDelForm()
   });
   if (nuevo.importante){ Dominio.notas.crear(nuevo.importante, 'general'); renderNotas(); }
   renderHistorial();
@@ -2204,7 +2313,7 @@ function renderPanelTerapeuta(){
     $('#tRango').textContent = puedeLeerRegistros ? 'Sin registros todavía' : 'Sin autorización';
   }
   renderAlertasT(ult); renderStatsT(ult); renderTrendT(ult); renderClimaT(ult);
-  renderSkillsT(ult); renderRutinaT(ult); renderTemasT(); renderNotasT(); renderFlagsT();
+  renderSkillsT(ult); renderEmocionesT(ult); renderRutinaT(ult); renderTemasT(); renderNotasT(); renderFlagsT();
 }
 
 function renderAlertasT(ult){
@@ -2324,6 +2433,42 @@ function renderSkillsT(ult){
   }).join('');
 }
 
+function renderEmocionesT(ult){
+  const cont = document.getElementById('tEmociones');
+  if (!cont) return;
+  if (!puedeVer(ROLES.TERAPEUTA, RECURSOS.REGISTRO_DIARIO, OWNER_ID)){
+    cont.innerHTML = '<div class="t-empty">🔒 No autorizado.</div>';
+    return;
+  }
+  const conEmociones = ult.filter(r => r.emociones && r.emociones.principal && r.emociones.principal.id);
+  if (!conEmociones.length){
+    cont.innerHTML = '<div class="t-empty">Sin emociones registradas todavía.</div>';
+    return;
+  }
+  const conteo = {};
+  conEmociones.forEach(r => {
+    const id = r.emociones.principal.id;
+    if (!conteo[id]) conteo[id] = { count: 0, sumInt: 0 };
+    conteo[id].count++;
+    if (typeof r.emociones.principal.intensidad === 'number'){
+      conteo[id].sumInt += r.emociones.principal.intensidad;
+    }
+  });
+  const filas = Object.entries(conteo)
+    .sort((a, b) => b[1].count - a[1].count)
+    .map(par => {
+      const id = par[0], data = par[1];
+      const emo = EMOCIONES.find(e => e.id === id);
+      const nombre = emo ? emo.label : id;
+      const promInt = data.count > 0 ? (data.sumInt / data.count).toFixed(1) : '—';
+      return '<div class="t-rutina-row">' +
+        '<span class="t-rname">' + nombre + '</span>' +
+        '<span style="font-weight:700;color:#e6edfa">' + data.count + '× · int ' + promInt + '</span>' +
+        '</div>';
+    }).join('');
+  cont.innerHTML = '<p class="t-hint">Emociones más frecuentes como principal (últimos ' + ult.length + ' días).</p>' + filas;
+}
+
 function renderRutinaT(ult){
   const cont = $('#tRutina');
   if (!puedeVer(ROLES.TERAPEUTA, RECURSOS.RUTINA, OWNER_ID)){ cont.innerHTML = '<div class="t-empty">🔒 Rutina no compartida.</div>'; return; }
@@ -2439,6 +2584,7 @@ function iniciar(){
   renderNotas();
   renderPasos();
   renderHistorial();
+  construirSelectsEmociones();
   renderRutinaChecklist();
   renderPlaylists();
   renderLugaresChips();
