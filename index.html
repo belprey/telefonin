@@ -1799,7 +1799,7 @@ async function cargarRegistroEnForm(fecha){
   $('#r-notas').value = r.notas ?? '';
   $('#r-importante').value = r.importante ?? '';
   if (r.clima){ ctxSeleccion.clima = r.clima; }
-  if (r.lugar){ ctxSeleccion.lugar = r.lugar; Ubicacion.setLugarActual(r.lugar); }
+  if (r.lugares){ ctxSeleccion.lugares = [...r.lugares]; } else if (r.lugar){ ctxSeleccion.lugares = [r.lugar]; }
   if (Array.isArray(r.afectosClima)) ctxSeleccion.afectos = [...r.afectosClima];
   if (r.ctxNota) $('#r-ctxNota').value = r.ctxNota;
   renderRutinaChecklist(); renderLugaresChips(); renderAfectoChips();
