@@ -1806,7 +1806,12 @@ async function cargarRegistroEnForm(fecha){
   renderRutinaChecklist(); renderLugaresChips(); renderAfectoChips();
 }
 
-$('#guardarRegistro').onclick = async () => {
+  $('#r-fecha').addEventListener('change', async () => {
+  const fecha = $('#r-fecha').value;
+  if (!fecha) return;
+  await cargarRegistroEnForm(fecha);
+});
+  $('#guardarRegistro').onclick = async () => {
   const fecha = $('#r-fecha').value || hoyISO();
   const rutinaData = {};
   $$('[data-rutina-item]').forEach(inp => { rutinaData[inp.dataset.rutinaItem] = inp.checked; });
