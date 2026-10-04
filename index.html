@@ -1058,13 +1058,14 @@ const Clima = {
 };
 
 const Ubicacion = {
-  getLugarActual(){ return lugarActual; },
-  setLugarActual(id){
-    const prev = lugarActual; lugarActual = id;
-    Storage.guardar(K.lugarActual, lugarActual);
-    auditar('lugar_cambiado', { de: prev, a: id });
+  getLugaresActuales(){ return lugaresActuales; },
+  setLugares(ids){
+    const prev = [...lugaresActuales];
+    lugaresActuales = Array.isArray(ids) ? [...ids] : [];
+    Storage.guardar(K.lugarActual, lugaresActuales);
+    auditar('lugares_cambiados', { de:prev, a:[...lugaresActuales] });
   },
-  limpiar(){ lugarActual = null; Storage.borrar(K.lugarActual); }
+  limpiar(){ lugaresActuales = []; Storage.borrar(K.lugarActual); }
 };
 
 function abrirSpotify(url){
