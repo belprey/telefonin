@@ -69,6 +69,16 @@ body{margin:0;font-family:system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;
   color:var(--muted);cursor:pointer;transition:.15s}
 .afecto-chip:active{transform:scale(.95)}
 .afecto-chip.on{background:var(--primary);color:#fff;border-color:var(--primary)}
+.emocion-chips{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:6px}
+.emocion-chip{padding:8px 12px;border:1px solid var(--line);background:#fff;
+  border-radius:11px;font-family:inherit;font-size:12.5px;font-weight:600;
+  color:var(--muted);cursor:pointer;transition:.15s}
+.emocion-chip:active{transform:scale(.95)}
+.emocion-chip.principal{background:var(--primary);color:#fff;border-color:var(--primary)}
+.emocion-chip.secundaria{background:#e8efff;color:var(--primary-dark);border-color:#b8d4f0}
+.emo-int-bloque{display:none;margin-top:14px;padding-top:12px;border-top:1px solid var(--line)}
+.emo-int-bloque.visible{display:block}
+.emo-int-titulo{font-size:13px;font-weight:700;color:var(--primary-dark);margin-bottom:8px}
 .playlist-row{display:flex;gap:10px;align-items:center;padding:10px 0;border-bottom:1px solid var(--line)}
 .playlist-row:last-child{border-bottom:none}
 .playlist-row .pl-body{flex:1;min-width:0}
@@ -425,38 +435,34 @@ body:has(#view-ajustes.active) .composer { display: none; }
         <div class="scale-row"><span class="lbl">Alegría</span><div class="scale joy" data-scale="alegria"></div></div>
       </div>
 
-      <div class="card">
+    <div class="card">
         <h3>🌡️ Emociones del día</h3>
-        <p class="hint">Las emociones que te acompañaron hoy. La primera es la más intensa. La segunda es opcional.</p>
+        <p class="hint">Las emociones que te acompañaron hoy. La primera que toques es la más intensa. La segunda es opcional.</p>
 
-        <div class="field">
-          <label>Emoción más intensa</label>
-          <select id="emo1-id">
-            <option value="">Elegir...</option>
-          </select>
-        </div>
-        <div class="scale-row">
-          <span class="lbl">Intensidad</span>
-          <div class="scale" data-scale="emo1-int"></div>
+        <div class="emocion-chips" id="emocionChips"></div>
+
+        <div class="emo-int-bloque" id="emoInt1Bloque">
+          <div class="emo-int-titulo" id="emoInt1Titulo">Emoción principal</div>
+          <div class="scale-row" style="margin-bottom:0">
+            <span class="lbl">Intensidad</span>
+            <div class="scale" data-scale="emo1-int"></div>
+          </div>
         </div>
 
-        <div class="field" style="margin-top:14px">
-          <label>Segunda emoción (opcional)</label>
-          <select id="emo2-id">
-            <option value="">Elegir...</option>
-          </select>
-        </div>
-        <div class="scale-row">
-          <span class="lbl">Intensidad</span>
-          <div class="scale" data-scale="emo2-int"></div>
+        <div class="emo-int-bloque" id="emoInt2Bloque">
+          <div class="emo-int-titulo" id="emoInt2Titulo">Segunda emoción</div>
+          <div class="scale-row" style="margin-bottom:0">
+            <span class="lbl">Intensidad</span>
+            <div class="scale" data-scale="emo2-int"></div>
+          </div>
         </div>
 
         <div class="field" style="margin-top:14px">
           <label>Observaciones (opcional)</label>
           <textarea id="emo-obs" placeholder="¿Qué pasó? ¿Con quién? ¿Qué pensaste?"></textarea>
         </div>
-      </div>
-
+      </div>  
+       
       <div class="card">
         <h3>🌱 Mi rutina de cuidado
           <span class="h3-actions"><button class="h3-btn" id="editRutinaBtn">✏️ Editar</button></span>
@@ -1783,6 +1789,102 @@ function renderEditorRutinaT(){
   });
 }
 
+let emocionesActivas = [];
+
+function construirEmocionesChips(){
+  const cont = document.getElementById('emocionChips');
+  if (!cont) return;
+  cont.innerHTML = EMOCIONES.map(e =>
+    '<button type="button" class="emocion-chip" data-emo="' + e.id + '">' + e.label + '</button>'
+  ).join('');
+  cont.querySelectorAll('[data-emo]').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const id = btn.dataset.emo;
+      const idx = emocionesActivas.indexOf(id);
+      if (idx >= 0){
+        emocionesActivas.splice(idx, 1);
+      } else {
+        if (emocionesActivas.length >= 2) return;
+        emocionesActivas.push(id);
+      }
+      renderEmocionesChips();
+    });
+  });
+}
+
+function renderEmocionesChips(){
+  const cont = document.getElementById('emocionChips');
+  if (!cont) return;
+  cont.querySelectorAll('[data-emo]').forEach(btn => {
+    btn.classList.remove('principal', 'secundaria');
+    const idx = emocionesActivas.indexOf(btn.dataset.emo);
+    if (idx === 0) btn.classList.add('principal');
+    else if (idx === 1) btn.classList.add('secundaria');
+  });
+
+  const b1 = document.getElementById('emoInt1Bloque');
+  const b2 = document.getElementById('emoInt2Bloque');
+  const t1 = document.getElementById('emoInt1Titulo');
+  const t2 = document.getElementById('emoInt2Titulo');
+
+  if (emocionesActivas.length >= 1){
+    const e1 = EMOCIONES.find(x => x.id === emocionesActivas[0]);
+    if (t1) t1.textContent = 'Emoción principal: ' + (e1 ? e1.label : '');
+    if (b1) b1.classList.add('visible');
+  } else {
+    if (b1) b1.classList.remove('visible');
+  }
+
+  if (emocionesActivas.length >= 2){
+    const e2 = EMOCIONES.find(x => x.id === emocionesActivas[1]);
+    if (t2) t2.textContent = 'Segunda emoción: ' + (e2 ? e2.label : '');
+    if (b2) b2.classList.add('visible');
+  } else {
+    if (b2) b2.classList.remove('visible');
+  }
+}
+
+function resetEmociones(){
+  emocionesActivas = [];
+  const c1 = document.querySelector('[data-scale="emo1-int"]');
+  const c2 = document.querySelector('[data-scale="emo2-int"]');
+  if (c1){ [...c1.children].forEach(b => b.classList.remove('on')); c1.dataset.value = ''; }
+  if (c2){ [...c2.children].forEach(b => b.classList.remove('on')); c2.dataset.value = ''; }
+  const obs = document.getElementById('emo-obs');
+  if (obs) obs.value = '';
+  renderEmocionesChips();
+}
+
+function cargarEmocionesEnForm(emociones){
+  resetEmociones();
+  if (!emociones) return;
+  const obs = document.getElementById('emo-obs');
+  if (emociones.principal && emociones.principal.id){
+    emocionesActivas.push(emociones.principal.id);
+  }
+  if (emociones.secundaria && emociones.secundaria.id){
+    emocionesActivas.push(emociones.secundaria.id);
+  }
+  renderEmocionesChips();
+  if (emociones.principal && typeof emociones.principal.intensidad === 'number'){
+    setEscala('emo1-int', emociones.principal.intensidad);
+  }
+  if (emociones.secundaria && typeof emociones.secundaria.intensidad === 'number'){
+    setEscala('emo2-int', emociones.secundaria.intensidad);
+  }
+  if (obs) obs.value = emociones.observaciones || '';
+}
+
+function leerEmocionesDelForm(){
+  const obs = document.getElementById('emo-obs');
+  const observaciones = obs ? obs.value.trim() : '';
+  if (!emocionesActivas.length && !observaciones) return null;
+  return {
+    principal: emocionesActivas[0] ? { id: emocionesActivas[0], intensidad: getEscala('emo1-int') } : null,
+    secundaria: emocionesActivas[1] ? { id: emocionesActivas[1], intensidad: getEscala('emo2-int') } : null,
+    observaciones: observaciones
+  };
+}  
 function renderPlaylists(){
   const cont = $('#listaPlaylists');
   if (!playlists.length){ cont.innerHTML = '<div class="empty" style="padding:12px">Sin playlists todavía.</div>'; return; }
@@ -1828,59 +1930,7 @@ function getEscala(campo){
   if (!cont || cont.dataset.value==='') return null;
   return Number(cont.dataset.value);
 }
-function construirSelectsEmociones(){
-  const opciones = '<option value="">Elegir...</option>' +
-    EMOCIONES.map(e => '<option value="' + e.id + '">' + e.label + '</option>').join('');
-  const s1 = document.getElementById('emo1-id');
-  const s2 = document.getElementById('emo2-id');
-  if (s1) s1.innerHTML = opciones;
-  if (s2) s2.innerHTML = opciones;
-}
 
-function resetEmociones(){
-  const s1 = document.getElementById('emo1-id');
-  const s2 = document.getElementById('emo2-id');
-  if (s1) s1.value = '';
-  if (s2) s2.value = '';
-  const c1 = document.querySelector('[data-scale="emo1-int"]');
-  const c2 = document.querySelector('[data-scale="emo2-int"]');
-  if (c1){ [...c1.children].forEach(b => b.classList.remove('on')); c1.dataset.value = ''; }
-  if (c2){ [...c2.children].forEach(b => b.classList.remove('on')); c2.dataset.value = ''; }
-  const obs = document.getElementById('emo-obs');
-  if (obs) obs.value = '';
-}
-
-function cargarEmocionesEnForm(emociones){
-  resetEmociones();
-  if (!emociones) return;
-  const s1 = document.getElementById('emo1-id');
-  const s2 = document.getElementById('emo2-id');
-  const obs = document.getElementById('emo-obs');
-  if (emociones.principal && emociones.principal.id){
-    if (s1) s1.value = emociones.principal.id;
-    if (typeof emociones.principal.intensidad === 'number') setEscala('emo1-int', emociones.principal.intensidad);
-  }
-  if (emociones.secundaria && emociones.secundaria.id){
-    if (s2) s2.value = emociones.secundaria.id;
-    if (typeof emociones.secundaria.intensidad === 'number') setEscala('emo2-int', emociones.secundaria.intensidad);
-  }
-  if (obs) obs.value = emociones.observaciones || '';
-}
-
-function leerEmocionesDelForm(){
-  const s1 = document.getElementById('emo1-id');
-  const s2 = document.getElementById('emo2-id');
-  const obs = document.getElementById('emo-obs');
-  const principalId = s1 ? s1.value : '';
-  const secundariaId = s2 ? s2.value : '';
-  const observaciones = obs ? obs.value.trim() : '';
-  if (!principalId && !secundariaId && !observaciones) return null;
-  return {
-    principal: principalId ? { id: principalId, intensidad: getEscala('emo1-int') } : null,
-    secundaria: secundariaId ? { id: secundariaId, intensidad: getEscala('emo2-int') } : null,
-    observaciones: observaciones
-  };
-}
   
 function limpiarFormRegistro(){
   $('#r-fecha').value = hoyISO();
@@ -2584,7 +2634,7 @@ function iniciar(){
   renderNotas();
   renderPasos();
   renderHistorial();
-  construirSelectsEmociones();
+  construirEmocionesChips();
   renderRutinaChecklist();
   renderPlaylists();
   renderLugaresChips();
