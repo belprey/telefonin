@@ -828,7 +828,8 @@ if (!rutinaItems){ rutinaItems = RUTINA_DEFAULT.map(x => ({ ...x })); Storage.gu
 let playlists = Storage.cargar(K.playlists, []);
 let climaConfig = Object.assign({ activo: true, ciudad: '', geoActivo: false }, Storage.cargar(K.climaConfig, {}));
 let climaCache = Storage.cargar(K.climaCache, { datos: null, momento: 0 });
-let lugarActual = Storage.cargar(K.lugarActual, null);
+let lugaresActuales = Storage.cargar(K.lugarActual, []);
+if (!Array.isArray(lugaresActuales)) lugaresActuales = lugaresActuales ? [lugaresActuales] : [];
 
 let consentimiento = Storage.cargar(K.consentimiento, null);
 if (!consentimiento){
