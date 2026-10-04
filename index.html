@@ -1586,20 +1586,19 @@ async function renderContexto(){
 
 function renderLugaresChips(){
   const cont = $('#lugaresChips');
-  cont.innerHTML = LUGARES_PREDEFINIDOS.map(l => `
-    <button class="lugar-chip ${lugarActual === l.id ? 'on' : ''}" data-lugar="${l.id}">${l.label}</button>
-  `).join('');
+  cont.innerHTML = LUGARES_PREDEFINIDOS.map(l => `<button class="lugar-chip ${ctxSeleccion.lugares.includes(l.id) ? 'on' : ''}" data-lugar="${l.id}">${l.label}</button>`).join('');
   cont.querySelectorAll('[data-lugar]').forEach(b => {
     b.onclick = () => {
       const id = b.dataset.lugar;
-      const actual = Ubicacion.getLugarActual();
-      if (actual === id){ Ubicacion.limpiar(); ctxSeleccion.lugar = null; }
-      else { Ubicacion.setLugarActual(id); ctxSeleccion.lugar = id; }
+      const idx = ctxSeleccion.lugares.indexOf(id);
+      if (idx >= 0) ctxSeleccion.lugares.splice(idx, 1);
+      else ctxSeleccion.lugares.push(id);
+      Ubicacion.setLugares(ctxSeleccion.lugares);
       renderLugaresChips();
     };
   });
 }
-
+ 
 function renderAfectoChips(){
   const cont = $('#afectoChips');
   cont.innerHTML = AFECTOS_CLIMA.map(a => `
