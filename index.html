@@ -1152,7 +1152,13 @@ const Spotify = {
   }
 };
 
-const hoyISO = () => new Date().toISOString().slice(0,10);
+ const hoyISO = () => {
+  const d = new Date();
+  const y = d.getFullYear();
+  const m = String(d.getMonth() + 1).padStart(2, '0');
+  const day = String(d.getDate()).padStart(2, '0');
+  return y + '-' + m + '-' + day;
+};
 const fmtFecha = (iso) => new Date(iso + 'T12:00').toLocaleDateString('es-AR', { weekday:'long', day:'numeric', month:'long' });
 const escapeHTML = (s) => String(s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 
