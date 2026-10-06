@@ -1951,7 +1951,8 @@ function limpiarFormRegistro(){
 async function cargarRegistroEnForm(fecha){
   const r = Dominio.registro.leer(fecha);
   limpiarFormRegistro();
-  await renderContexto();
+  $('#r-fecha').value = fecha;
+  await renderContexto(); 
   if (!r) return;
   $('#r-fecha').value = r.fecha;
   ['impSuicidio','impAutolesion','impDrogas','malEmocional','malFisico','alegria',
