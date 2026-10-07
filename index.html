@@ -464,12 +464,8 @@ body:has(#view-ajustes.active) .composer { display: none; }
       </div>  
        
       <div class="card">
-        <h3>🌱 Mi rutina de cuidado
-          <span class="h3-actions"><button class="h3-btn" id="editRutinaBtn">✏️ Editar</button></span>
-        </h3>
-        <p class="hint">Lo que me propuse sostener. Sin culpa si algún día no se da.</p>
-        <div id="rutinaChecklist"></div>
-        <div class="field" style="margin-top:14px"><label>Minutos de atención plena</label><input type="number" id="r-minutosMind" min="0" max="240" placeholder="Ej: 10"></div>
+        <h3>🧘 Atención plena</h3>
+        <div class="field" style="margin-bottom:0"><label>Minutos de atención plena</label><input type="number" id="r-minutosMind" min="0" max="240" placeholder="Ej: 10"></div>
       </div>
 
       <div class="card">
@@ -565,6 +561,21 @@ body:has(#view-ajustes.active) .composer { display: none; }
         <strong>911</strong> — Emergencias<br>
         <strong>0800-345-1435</strong> — Salud mental (nacional, 24h)<br>
         <strong>144</strong> — Violencia de género</p>
+      </div>
+    </section>
+    <section class="view" id="view-cuidado">
+      <h1 class="h1">🌱 Mi rutina de cuidado</h1>
+      <p class="sub">Lo que me propuse sostener. Sin culpa si algún día no se da.</p>
+
+      <div class="card">
+        <div class="field" style="margin-bottom:0"><label>Fecha</label><input type="date" id="c-fecha"></div>
+      </div>
+
+      <div class="card">
+        <h3>Mi rutina
+          <span class="h3-actions"><button class="h3-btn" id="editRutinaBtn">✏️ Editar</button></span>
+        </h3>
+        <div id="cuidadoChecklist"></div>
       </div>
     </section>
 
@@ -675,6 +686,7 @@ body:has(#view-ajustes.active) .composer { display: none; }
   <nav class="drawer-nav" id="nav">
     <button class="nav-item active" data-view="chat"><span class="ico">💬</span> Conversar</button>
     <button class="nav-item" data-view="registro"><span class="ico">📋</span> Registro diario</button>
+   <button class="nav-item" data-view="cuidado"><span class="ico">🌱</span> Rutina de cuidado</button> 
     <button class="nav-item" data-view="historial"><span class="ico">📈</span> Historial</button>
     <button class="nav-item" data-view="notas"><span class="ico">📌</span> Temas importantes</button>
     <button class="nav-item" data-view="rutina"><span class="ico">🎯</span> Rutina y objetivos</button>
@@ -1704,6 +1716,54 @@ function renderRutinaChecklist(){
   });
 }
 
+let cuidadoFechaActual = null;
+
+function renderCuidadoChecklist(){
+  const cont = document.getElementById('cuidadoChecklist');
+  if (!cont) return;
+  const items = Dominio.rutinaDef.listar();
+  const fechaEl = document.getElementById('c-fecha');
+  if (!fechaEl.value) fechaEl.value = hoyISO();
+  const fecha = fechaEl.value;
+  cuidadoFechaActual = fecha;
+
+  if (!items.length){
+    cont.innerHTML = '<div class="empty" style="padding:16px">Sin ítems. Tocá "✏️ Editar" para agregar cosas.</div>';
+    return;
+  }
+
+  const r = registros.find(x => x.fecha === fecha);
+  const rutinaDelDia = (r && r.rutina) ? r.rutina : {};
+
+  cont.innerHTML = items.map(it => {
+    const marcado = rutinaDelDia[it.id] === true;
+    const sugeridoBadge = it.creadoPor === 'terapeuta' ? '<span class="pill warn" style="margin-left:6px;font-size:9.5px">sugerido</span>' : '';
+    return '<div class="switch-row"><span>' + escapeHTML(it.label) + sugeridoBadge + '</span>' +
+      '<label class="switch"><input type="checkbox" data-cuidado-item="' + it.id + '" ' + (marcado ? 'checked' : '') + '>' +
+      '<span class="slider"></span></label></div>';
+  }).join('');
+
+  cont.querySelectorAll('[data-cuidado-item]').forEach(inp => {
+    inp.addEventListener('change', () => {
+      toggleCuidadoItem(inp.dataset.cuidadoItem, inp.checked);
+    });
+  });
+}
+
+function toggleCuidadoItem(itemId, checked){
+  const fecha = cuidadoFechaActual || hoyISO();
+  let r = registros.find(x => x.fecha === fecha);
+  if (!r){
+    r = Dominio.registro.guardar({ fecha, rutina: {} });
+    r = registros.find(x => x.fecha === fecha);
+  }
+  if (!r.rutina) r.rutina = {};
+  r.rutina[itemId] = checked;
+  r.updatedAt = Date.now();
+  Storage.guardar(K.registros, registros);
+  auditar('cuidado_item_toggle', { fecha: fecha, item: itemId, checked: checked });
+}
+  
 function renderEditorRutina(){
   const cont = $('#editorLista');
   const items = Dominio.rutinaDef.listar(true);
@@ -1976,10 +2036,16 @@ async function cargarRegistroEnForm(fecha){
   if (!fecha) return;
   await cargarRegistroEnForm(fecha);
 });
+  
+const cFechaEl = document.getElementById('c-fecha');
+if (cFechaEl){
+  cFechaEl.addEventListener('change', renderCuidadoChecklist);
+}
+
   $('#guardarRegistro').onclick = async () => {
   const fecha = $('#r-fecha').value || hoyISO();
-  const rutinaData = {};
-  $$('[data-rutina-item]').forEach(inp => { rutinaData[inp.dataset.rutinaItem] = inp.checked; });
+  const registroExistente = registros.find(x => x.fecha === fecha);
+  const rutinaData = (registroExistente && registroExistente.rutina) ? { ...registroExistente.rutina } : {};
   const nuevo = Dominio.registro.guardar({
     fecha,
     impSuicidio:getEscala('impSuicidio'), impAutolesion:getEscala('impAutolesion'), impDrogas:getEscala('impDrogas'),
@@ -2155,6 +2221,7 @@ function irA(vista){
   $$('.nav-item').forEach(n => n.classList.toggle('active', n.dataset.view === vista));
   $('#views').scrollTop = 0;
   if (vista==='registro'){ if (Dominio.registro.leer(hoyISO())) cargarRegistroEnForm(hoyISO()); else limpiarFormRegistro(); }
+  if (vista==='cuidado') renderCuidadoChecklist();
   if (vista==='historial') renderHistorial();
   if (vista==='notas') renderNotas();
   if (vista==='rutina'){ renderPasos(); $('#obj-principal').value = Dominio.rutina.getObjetivo(); renderPlaylists(); }
@@ -2642,7 +2709,7 @@ function iniciar(){
   renderPasos();
   renderHistorial();
   construirEmocionesChips();
-  renderRutinaChecklist();
+  renderCuidadoChecklist();
   renderPlaylists();
   renderLugaresChips();
   renderAfectoChips();
