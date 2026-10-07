@@ -1694,8 +1694,9 @@ function renderAfectoChips(){
 
 let rutinaSeleccionActual = {};
 
-function renderRutinaChecklist(){
+  function renderRutinaChecklist(){
   const cont = $('#rutinaChecklist');
+  if (!cont) return;
   const items = Dominio.rutinaDef.listar();
   if (!items.length){
     cont.innerHTML = `<div class="empty" style="padding:16px">Sin ítems. Tocá "✏️ Editar" para agregar cosas.</div>`;
