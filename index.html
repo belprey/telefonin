@@ -2297,7 +2297,7 @@ if (cFechaEl){
     notas:$('#r-notas').value.trim(), importante:$('#r-importante').value.trim(),
     clima: ctxSeleccion.clima || null, lugares: ctxSeleccion.lugares || [],
         afectosClima: ctxSeleccion.afectos, ctxNota: $('#r-ctxNota').value.trim(),
-    emociones: leerEmocionesDelForm();
+    emociones: leerEmocionesDelForm(),
     marihuana: leerMarihuanaDelForm()
   });
   if (nuevo.importante){ Dominio.notas.crear(nuevo.importante, 'general'); renderNotas(); }
