@@ -69,6 +69,29 @@ body{margin:0;font-family:system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;
   color:var(--muted);cursor:pointer;transition:.15s}
 .afecto-chip:active{transform:scale(.95)}
 .afecto-chip.on{background:var(--primary);color:#fff;border-color:var(--primary)}
+.marihuana-botones{display:flex;gap:8px;margin-bottom:6px;flex-wrap:wrap}
+.marihuana-btn{flex:1;min-width:90px;padding:12px 10px;border:2px solid var(--line);background:#fff;
+  border-radius:14px;font-family:inherit;font-size:13px;font-weight:600;color:var(--text);
+  cursor:pointer;transition:.15s}
+.marihuana-btn:active{transform:scale(.97)}
+.marihuana-btn.on{background:#e8efff;border-color:var(--primary);color:var(--primary-dark)}
+.marihuana-btn.on.verde{background:#e3f7ed;border-color:#22b573;color:#149a5a}
+.marihuana-btn.on.amarillo{background:#fef3dd;border-color:#f0a020;color:#a76a00}
+.marihuana-btn.on.naranja{background:#fde9e9;border-color:#e5484d;color:#c92c32}
+.marihuana-cantidad{display:none;margin-top:12px;padding-top:12px;border-top:1px solid var(--line)}
+.marihuana-cantidad.visible{display:block}
+
+.semana-marihuana{display:flex;justify-content:space-between;gap:4px;margin-bottom:14px}
+.semana-dia{flex:1;text-align:center}
+.semana-dia .dia-nombre{font-size:10px;font-weight:700;color:var(--muted);letter-spacing:.5px;margin-bottom:6px}
+.semana-dia .dia-icono{font-size:20px;line-height:1;margin-bottom:4px}
+.semana-dia .dia-fecha{font-size:10px;color:var(--muted)}
+.semana-resumen{display:flex;gap:14px;flex-wrap:wrap;margin-bottom:6px;font-size:13px}
+.semana-resumen-item{display:flex;align-items:center;gap:6px}
+.semana-resumen-item strong{font-weight:700}
+.meta-marihuana textarea{width:100%;padding:11px 13px;border:1px solid var(--line);border-radius:12px;
+  font-family:inherit;font-size:14px;background:#f6f9fd;outline:none;resize:vertical;min-height:60px;line-height:1.4}
+.meta-marihuana textarea:focus{border-color:var(--primary);background:#fff}
 .emocion-chips{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:6px}
 .emocion-chip{padding:8px 12px;border:1px solid var(--line);background:#fff;
   border-radius:11px;font-family:inherit;font-size:12.5px;font-weight:600;
@@ -477,6 +500,49 @@ body:has(#view-ajustes.active) .composer { display: none; }
         <div class="scale-row"><span class="lbl">🗣️ Efectividad interpersonal</span><div class="scale skill" data-scale="habInterpersonal" data-max="7"></div></div>
       </div>
 
+      <div class="card">
+        <h3>Marihuana</h3>
+        <p class="hint">Cómo fue hoy. Sin juicio, solo el dato.</p>
+
+        <div class="marihuana-botones">
+          <button type="button" class="marihuana-btn" data-mar="no">🟢 No fumé</button>
+          <button type="button" class="marihuana-btn" data-mar="dentro">🟡 Dentro de mi meta</button>
+          <button type="button" class="marihuana-btn" data-mar="fuera">🟠 Fuera de mi meta</button>
+        </div>
+
+        <div class="marihuana-cantidad" id="marCantidad">
+          <label style="font-size:12.5px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.3px;display:block;margin-bottom:8px">Cantidad</label>
+          <div class="marihuana-botones">
+            <button type="button" class="marihuana-btn" data-cant="1">1 seca</button>
+            <button type="button" class="marihuana-btn" data-cant="2">2 secas</button>
+            <button type="button" class="marihuana-btn" data-cant="3+">3 o más</button>
+          </div>
+        </div>
+
+        <div class="field" style="margin-top:14px;margin-bottom:0">
+          <label>Observaciones (opcional)</label>
+          <textarea id="mar-obs" placeholder="¿Qué pasó? ¿Cómo te sentiste?"></textarea>
+        </div>
+      </div>
+
+      <div class="card">
+        <h3>Mi semana
+          <span style="display:flex;gap:6px">
+            <button class="h3-btn" id="semanaPrev" title="Semana anterior">◀</button>
+            <button class="h3-btn" id="semanaHoy" title="Volver a esta semana" style="font-size:11px">hoy</button>
+            <button class="h3-btn" id="semanaNext" title="Semana siguiente">▶</button>
+          </span>
+        </h3>
+        <div id="semanaTitulo" style="font-size:12.5px;color:var(--muted);margin-bottom:10px;font-weight:600"></div>
+        <div id="semanaMarihuana"></div>
+
+        <div class="meta-marihuana" style="margin-top:14px;padding-top:14px;border-top:1px solid var(--line)">
+          <label style="font-size:12.5px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.3px;display:block;margin-bottom:8px">Mi meta ahora</label>
+          <textarea id="mar-meta" placeholder="Ej: no fumar por 21 días"></textarea>
+          <button type="button" class="btn btn-secondary" id="guardarMetaMar" style="margin-top:8px;width:100%">💾 Guardar meta</button>
+        </div>
+      </div>
+     
       <div class="card">
         <h3>📝 Notas del día</h3>
         <div class="field"><label>¿Qué pasó? ¿Qué sentí? ¿Qué necesito?</label><textarea id="r-notas"></textarea></div>
@@ -1858,6 +1924,175 @@ function renderEditorRutinaT(){
 
 let emocionesActivas = [];
 
+let semanaFechaBase = new Date();
+let marihuanaEstado = null;
+let marihuanaCantidad = null;
+let metaMarihuana = Storage.cargar('telefonin.v3.metaMarihuana', { texto: '' });
+
+function construirBotonesMarihuana(){
+  document.querySelectorAll('.marihuana-btn[data-mar]').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const val = btn.dataset.mar;
+      marihuanaEstado = (marihuanaEstado === val) ? null : val;
+      renderMarihuanaBotones();
+    });
+  });
+  document.querySelectorAll('.marihuana-btn[data-cant]').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const val = btn.dataset.cant;
+      marihuanaCantidad = (marihuanaCantidad === val) ? null : val;
+      renderMarihuanaBotones();
+    });
+  });
+  const btnMeta = document.getElementById('guardarMetaMar');
+  if (btnMeta) btnMeta.addEventListener('click', guardarMetaMarihuana);
+
+  const btnPrev = document.getElementById('semanaPrev');
+  const btnNext = document.getElementById('semanaNext');
+  const btnHoy = document.getElementById('semanaHoy');
+  if (btnPrev) btnPrev.addEventListener('click', () => {
+    semanaFechaBase.setDate(semanaFechaBase.getDate() - 7);
+    renderSemanaMarihuana();
+  });
+  if (btnNext) btnNext.addEventListener('click', () => {
+    semanaFechaBase.setDate(semanaFechaBase.getDate() + 7);
+    renderSemanaMarihuana();
+  });
+  if (btnHoy) btnHoy.addEventListener('click', () => {
+    semanaFechaBase = new Date();
+    renderSemanaMarihuana();
+  });
+}
+
+function renderMarihuanaBotones(){
+  document.querySelectorAll('.marihuana-btn[data-mar]').forEach(btn => {
+    btn.classList.remove('on', 'verde', 'amarillo', 'naranja');
+    if (btn.dataset.mar === marihuanaEstado){
+      btn.classList.add('on');
+      if (btn.dataset.mar === 'no') btn.classList.add('verde');
+      if (btn.dataset.mar === 'dentro') btn.classList.add('amarillo');
+      if (btn.dataset.mar === 'fuera') btn.classList.add('naranja');
+    }
+  });
+  document.querySelectorAll('.marihuana-btn[data-cant]').forEach(btn => {
+    btn.classList.toggle('on', btn.dataset.cant === marihuanaCantidad);
+  });
+  const cont = document.getElementById('marCantidad');
+  if (cont){
+    if (marihuanaEstado === 'dentro' || marihuanaEstado === 'fuera'){
+      cont.classList.add('visible');
+    } else {
+      cont.classList.remove('visible');
+      marihuanaCantidad = null;
+    }
+  }
+}
+
+function resetMarihuana(){
+  marihuanaEstado = null;
+  marihuanaCantidad = null;
+  const obs = document.getElementById('mar-obs');
+  if (obs) obs.value = '';
+  renderMarihuanaBotones();
+}
+
+function cargarMarihuanaEnForm(mar){
+  resetMarihuana();
+  if (!mar) return;
+  if (mar.estado) marihuanaEstado = mar.estado;
+  if (mar.cantidad) marihuanaCantidad = mar.cantidad;
+  const obs = document.getElementById('mar-obs');
+  if (obs) obs.value = mar.obs || '';
+  renderMarihuanaBotones();
+}
+
+function leerMarihuanaDelForm(){
+  const obs = document.getElementById('mar-obs');
+  const observaciones = obs ? obs.value.trim() : '';
+  if (!marihuanaEstado && !observaciones) return null;
+  return {
+    estado: marihuanaEstado,
+    cantidad: marihuanaCantidad,
+    obs: observaciones
+  };
+}
+
+function cargarMetaEnForm(){
+  const el = document.getElementById('mar-meta');
+  if (el) el.value = metaMarihuana.texto || '';
+}
+
+function guardarMetaMarihuana(){
+  const el = document.getElementById('mar-meta');
+  if (!el) return;
+  metaMarihuana.texto = el.value.trim();
+  metaMarihuana.actualizada = Date.now();
+  Storage.guardar('telefonin.v3.metaMarihuana', metaMarihuana);
+  auditar('meta_marihuana_guardada', {});
+  burbujaBot('✅ Meta guardada.');
+}
+
+function renderSemanaMarihuana(){
+  const cont = document.getElementById('semanaMarihuana');
+  const tituloEl = document.getElementById('semanaTitulo');
+  if (!cont) return;
+
+  const diaSemana = semanaFechaBase.getDay();
+  const lunes = new Date(semanaFechaBase);
+  const diff = (diaSemana === 0 ? -6 : 1 - diaSemana);
+  lunes.setDate(semanaFechaBase.getDate() + diff);
+
+  const domingo = new Date(lunes);
+  domingo.setDate(lunes.getDate() + 6);
+
+  if (tituloEl){
+    const meses = ['ene','feb','mar','abr','may','jun','jul','ago','sep','oct','nov','dic'];
+    const hoy = new Date();
+    const esHoy = (lunes.getTime() <= hoy.getTime() && hoy.getTime() <= domingo.getTime());
+    const mismoMes = lunes.getMonth() === domingo.getMonth();
+    let rango;
+    if (mismoMes){
+      rango = lunes.getDate() + ' al ' + domingo.getDate() + ' de ' + meses[domingo.getMonth()];
+    } else {
+      rango = lunes.getDate() + ' ' + meses[lunes.getMonth()] + ' al ' + domingo.getDate() + ' ' + meses[domingo.getMonth()];
+    }
+    tituloEl.textContent = rango + (esHoy ? ' · esta semana' : '');
+  }
+
+  const nombres = ['LUN','MAR','MIÉ','JUE','VIE','SÁB','DOM'];
+  let html = '<div class="semana-marihuana">';
+  let sinFumar = 0, dentro = 0, fuera = 0;
+
+  for (let i = 0; i < 7; i++){
+    const d = new Date(lunes);
+    d.setDate(lunes.getDate() + i);
+    const iso = d.getFullYear() + '-' + String(d.getMonth()+1).padStart(2,'0') + '-' + String(d.getDate()).padStart(2,'0');
+    const r = registros.find(x => x.fecha === iso);
+    const mar = (r && r.marihuana) ? r.marihuana : null;
+
+    let icono = '○';
+    if (mar && mar.estado === 'no'){ icono = '🟢'; sinFumar++; }
+    else if (mar && mar.estado === 'dentro'){ icono = '🟡'; dentro++; }
+    else if (mar && mar.estado === 'fuera'){ icono = '🟠'; fuera++; }
+
+    html += '<div class="semana-dia">' +
+      '<div class="dia-nombre">' + nombres[i] + '</div>' +
+      '<div class="dia-icono">' + icono + '</div>' +
+      '<div class="dia-fecha">' + d.getDate() + '</div>' +
+      '</div>';
+  }
+  html += '</div>';
+
+  html += '<div class="semana-resumen">';
+  if (sinFumar) html += '<div class="semana-resumen-item">🟢 <strong>' + sinFumar + '</strong> sin fumar</div>';
+  if (dentro) html += '<div class="semana-resumen-item">🟡 <strong>' + dentro + '</strong> dentro</div>';
+  if (fuera) html += '<div class="semana-resumen-item">🟠 <strong>' + fuera + '</strong> fuera</div>';
+  if (!sinFumar && !dentro && !fuera) html += '<div class="semana-resumen-item" style="color:var(--muted)">Sin datos esta semana</div>';
+  html += '</div>';
+
+  cont.innerHTML = html;
+}
+
 function construirEmocionesChips(){
   const cont = document.getElementById('emocionChips');
   if (!cont) return;
@@ -1924,6 +2159,7 @@ function resetEmociones(){
 
 function cargarEmocionesEnForm(emociones){
   resetEmociones();
+  resetMarihuana();
   if (!emociones) return;
   const obs = document.getElementById('emo-obs');
   if (emociones.principal && emociones.principal.id){
@@ -2022,6 +2258,7 @@ async function cargarRegistroEnForm(fecha){
   });
   rutinaSeleccionActual = { ...(r.rutina || {}) };
   cargarEmocionesEnForm(r.emociones || null);
+  cargarMarihuanaEnForm(r.marihuana || null);
   $('#r-minutosMind').value = r.minutosMind ?? '';
   $('#r-notas').value = r.notas ?? '';
   $('#r-importante').value = r.importante ?? '';
@@ -2032,10 +2269,13 @@ async function cargarRegistroEnForm(fecha){
   renderRutinaChecklist(); renderLugaresChips(); renderAfectoChips();
 }
 
-  $('#r-fecha').addEventListener('change', async () => {
+ $('#r-fecha').addEventListener('change', async () => {
   const fecha = $('#r-fecha').value;
   if (!fecha) return;
+  const partes = fecha.split('-');
+  semanaFechaBase = new Date(parseInt(partes[0]), parseInt(partes[1]) - 1, parseInt(partes[2]));
   await cargarRegistroEnForm(fecha);
+  renderSemanaMarihuana();
 });
   
 const cFechaEl = document.getElementById('c-fecha');
@@ -2057,7 +2297,8 @@ if (cFechaEl){
     notas:$('#r-notas').value.trim(), importante:$('#r-importante').value.trim(),
     clima: ctxSeleccion.clima || null, lugares: ctxSeleccion.lugares || [],
         afectosClima: ctxSeleccion.afectos, ctxNota: $('#r-ctxNota').value.trim(),
-    emociones: leerEmocionesDelForm()
+    emociones: leerEmocionesDelForm();
+    marihuana: leerMarihuanaDelForm()
   });
   if (nuevo.importante){ Dominio.notas.crear(nuevo.importante, 'general'); renderNotas(); }
   renderHistorial();
@@ -2223,6 +2464,7 @@ function irA(vista){
   $('#views').scrollTop = 0;
   if (vista==='registro'){ if (Dominio.registro.leer(hoyISO())) cargarRegistroEnForm(hoyISO()); else limpiarFormRegistro(); }
   if (vista==='cuidado') renderCuidadoChecklist();
+  if (vista==='registro'){ renderSemanaMarihuana(); cargarMetaEnForm(); }
   if (vista==='historial') renderHistorial();
   if (vista==='notas') renderNotas();
   if (vista==='rutina'){ renderPasos(); $('#obj-principal').value = Dominio.rutina.getObjetivo(); renderPlaylists(); }
@@ -2710,6 +2952,7 @@ function iniciar(){
   renderPasos();
   renderHistorial();
   construirEmocionesChips();
+  construirBotonesMarihuana(); 
   renderCuidadoChecklist();
   renderPlaylists();
   renderLugaresChips();
