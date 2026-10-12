@@ -523,19 +523,6 @@ body:has(#view-ajustes.active) .composer { display: none; }
           <label>Observaciones (opcional)</label>
           <textarea id="mar-obs" placeholder="¿Qué pasó? ¿Cómo te sentiste?"></textarea>
         </div>
-      </div>
-
-      <div class="card">
-        <h3>Mi semana
-          <span style="display:flex;gap:6px">
-            <button class="h3-btn" id="semanaPrev" title="Semana anterior">◀</button>
-            <button class="h3-btn" id="semanaHoy" title="Volver a esta semana" style="font-size:11px">hoy</button>
-            <button class="h3-btn" id="semanaNext" title="Semana siguiente">▶</button>
-          </span>
-        </h3>
-        <div id="semanaTitulo" style="font-size:12.5px;color:var(--muted);margin-bottom:10px;font-weight:600"></div>
-        <div id="semanaMarihuana"></div>
-
         <div class="meta-marihuana" style="margin-top:14px;padding-top:14px;border-top:1px solid var(--line)">
           <label style="font-size:12.5px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.3px;display:block;margin-bottom:8px">Mi meta ahora</label>
           <textarea id="mar-meta" placeholder="Ej: no fumar por 21 días"></textarea>
@@ -807,6 +794,7 @@ body:has(#view-ajustes.active) .composer { display: none; }
   <div class="t-card"><h3>🌤️ Clima y estado de ánimo</h3><div id="tClima"></div></div>
   <div class="t-card"><h3>🧠 Habilidades DBT</h3><div id="tSkills"></div></div>
   <div class="t-card"><h3>🌡️ Emociones registradas</h3><div id="tEmociones"></div></div>
+  <div class="t-card"><h3>Consumo de drogas</h3><div id="tMarihuana"></div></div>
   <div class="t-card"><h3>🌱 Adherencia a rutina <button class="t-h3-btn" id="abrirEditorRutinaT">✏️ Sugerir ítems</button></h3><div id="tRutina"></div></div>
   <div class="t-card"><h3>📌 Temas "para terapia"</h3><div id="tTemas"></div></div>
   <div class="t-card"><h3>💬 Notas entre sesiones</h3><div id="tNotas"></div><textarea class="t-input" id="tNuevaNota" placeholder="Observación, consigna..."></textarea><button class="t-btn t-btn-primary" id="tGuardarNota">Enviar nota</button></div>
@@ -2680,7 +2668,7 @@ function renderPanelTerapeuta(){
     $('#tRango').textContent = puedeLeerRegistros ? 'Sin registros todavía' : 'Sin autorización';
   }
   renderAlertasT(ult); renderStatsT(ult); renderTrendT(ult); renderClimaT(ult);
-  renderSkillsT(ult); renderEmocionesT(ult); renderRutinaT(ult); renderTemasT(); renderNotasT(); renderFlagsT();
+  renderSkillsT(ult); renderEmocionesT(ult); renderMarihuanaT(ult); renderRutinaT(ult); renderTemasT(); renderNotasT(); renderFlagsT();
 }
 
 function renderAlertasT(ult){
@@ -2800,6 +2788,79 @@ function renderSkillsT(ult){
   }).join('');
 }
 
+function renderMarihuanaT(ult){
+  const cont = document.getElementById('tMarihuana');
+  if (!cont) return;
+  if (!puedeVer(ROLES.TERAPEUTA, RECURSOS.REGISTRO_DIARIO, OWNER_ID)){
+    cont.innerHTML = '<div class="t-empty">🔒 No autorizado.</div>';
+    return;
+  }
+
+  const metaTexto = (metaMarihuana && metaMarihuana.texto) ? metaMarihuana.texto : 'Sin meta definida';
+
+  const hoy = new Date();
+  const diaSemana = hoy.getDay();
+  const lunesActual = new Date(hoy);
+  const diff = (diaSemana === 0 ? -6 : 1 - diaSemana);
+  lunesActual.setDate(hoy.getDate() + diff);
+
+  const meses = ['ene','feb','mar','abr','may','jun','jul','ago','sep','oct','nov','dic'];
+  const nombres = ['L','M','M','J','V','S','D'];
+
+  let html = '<p class="t-hint">Meta actual: ' + escapeHTML(metaTexto) + '</p>';
+
+  let totalSinFumar = 0, totalDentro = 0, totalFuera = 0;
+
+  for (let sem = 0; sem < 4; sem++){
+    const lunes = new Date(lunesActual);
+    lunes.setDate(lunesActual.getDate() - 7 * sem);
+    const domingo = new Date(lunes);
+    domingo.setDate(lunes.getDate() + 6);
+
+    let rango;
+    const mismoMes = lunes.getMonth() === domingo.getMonth();
+    if (mismoMes){
+      rango = lunes.getDate() + '-' + domingo.getDate() + ' ' + meses[domingo.getMonth()];
+    } else {
+      rango = lunes.getDate() + ' ' + meses[lunes.getMonth()] + '-' + domingo.getDate() + ' ' + meses[domingo.getMonth()];
+    }
+
+    let fila = '<div style="border-bottom:1px solid rgba(255,255,255,.06);padding:10px 0">';
+    fila += '<div style="font-size:11.5px;color:#7b8dae;font-weight:600;margin-bottom:6px">' + (sem === 0 ? 'Esta semana' : rango) + '</div>';
+    fila += '<div style="display:flex;justify-content:space-between;gap:4px">';
+
+    for (let i = 0; i < 7; i++){
+      const d = new Date(lunes);
+      d.setDate(lunes.getDate() + i);
+      const iso = d.getFullYear() + '-' + String(d.getMonth()+1).padStart(2,'0') + '-' + String(d.getDate()).padStart(2,'0');
+      const r = registros.find(x => x.fecha === iso);
+      const mar = (r && r.marihuana) ? r.marihuana : null;
+
+      let icono = '○';
+      let color = '#3a4761';
+      if (mar && mar.estado === 'no'){ icono = '●'; color = '#22b573'; totalSinFumar++; }
+      else if (mar && mar.estado === 'dentro'){ icono = '●'; color = '#f0a020'; totalDentro++; }
+      else if (mar && mar.estado === 'fuera'){ icono = '●'; color = '#e5484d'; totalFuera++; }
+
+      fila += '<div style="flex:1;text-align:center">';
+      fila += '<div style="color:#7b8dae;font-size:9px;margin-bottom:2px">' + nombres[i] + '</div>';
+      fila += '<div style="color:' + color + ';font-size:18px;line-height:1">' + icono + '</div>';
+      fila += '<div style="color:#7b8dae;font-size:9px;margin-top:2px">' + d.getDate() + '</div>';
+      fila += '</div>';
+    }
+    fila += '</div></div>';
+    html += fila;
+  }
+
+  html += '<div style="margin-top:14px;padding-top:12px;font-size:12.5px;color:#c6d4e8">';
+  html += '<div style="display:flex;justify-content:space-between;padding:4px 0"><span>🟢 Sin fumar (28 días)</span><span style="font-weight:700;color:#22b573">' + totalSinFumar + '</span></div>';
+  html += '<div style="display:flex;justify-content:space-between;padding:4px 0"><span>🟡 Dentro de la meta</span><span style="font-weight:700;color:#f0a020">' + totalDentro + '</span></div>';
+  html += '<div style="display:flex;justify-content:space-between;padding:4px 0"><span>🟠 Fuera de la meta</span><span style="font-weight:700;color:#e5484d">' + totalFuera + '</span></div>';
+  html += '</div>';
+
+  cont.innerHTML = html;
+}
+  
 function renderEmocionesT(ult){
   const cont = document.getElementById('tEmociones');
   if (!cont) return;
