@@ -1935,21 +1935,6 @@ function construirBotonesMarihuana(){
   const btnMeta = document.getElementById('guardarMetaMar');
   if (btnMeta) btnMeta.addEventListener('click', guardarMetaMarihuana);
 
-  const btnPrev = document.getElementById('semanaPrev');
-  const btnNext = document.getElementById('semanaNext');
-  const btnHoy = document.getElementById('semanaHoy');
-  if (btnPrev) btnPrev.addEventListener('click', () => {
-    semanaFechaBase.setDate(semanaFechaBase.getDate() - 7);
-    renderSemanaMarihuana();
-  });
-  if (btnNext) btnNext.addEventListener('click', () => {
-    semanaFechaBase.setDate(semanaFechaBase.getDate() + 7);
-    renderSemanaMarihuana();
-  });
-  if (btnHoy) btnHoy.addEventListener('click', () => {
-    semanaFechaBase = new Date();
-    renderSemanaMarihuana();
-  });
 }
 
 function renderMarihuanaBotones(){
@@ -2018,67 +2003,6 @@ function guardarMetaMarihuana(){
   Storage.guardar('telefonin.v3.metaMarihuana', metaMarihuana);
   auditar('meta_marihuana_guardada', {});
   burbujaBot('✅ Meta guardada.');
-}
-
-function renderSemanaMarihuana(){
-  const cont = document.getElementById('semanaMarihuana');
-  const tituloEl = document.getElementById('semanaTitulo');
-  if (!cont) return;
-
-  const diaSemana = semanaFechaBase.getDay();
-  const lunes = new Date(semanaFechaBase);
-  const diff = (diaSemana === 0 ? -6 : 1 - diaSemana);
-  lunes.setDate(semanaFechaBase.getDate() + diff);
-
-  const domingo = new Date(lunes);
-  domingo.setDate(lunes.getDate() + 6);
-
-  if (tituloEl){
-    const meses = ['ene','feb','mar','abr','may','jun','jul','ago','sep','oct','nov','dic'];
-    const hoy = new Date();
-    const esHoy = (lunes.getTime() <= hoy.getTime() && hoy.getTime() <= domingo.getTime());
-    const mismoMes = lunes.getMonth() === domingo.getMonth();
-    let rango;
-    if (mismoMes){
-      rango = lunes.getDate() + ' al ' + domingo.getDate() + ' de ' + meses[domingo.getMonth()];
-    } else {
-      rango = lunes.getDate() + ' ' + meses[lunes.getMonth()] + ' al ' + domingo.getDate() + ' ' + meses[domingo.getMonth()];
-    }
-    tituloEl.textContent = rango + (esHoy ? ' · esta semana' : '');
-  }
-
-  const nombres = ['LUN','MAR','MIÉ','JUE','VIE','SÁB','DOM'];
-  let html = '<div class="semana-marihuana">';
-  let sinFumar = 0, dentro = 0, fuera = 0;
-
-  for (let i = 0; i < 7; i++){
-    const d = new Date(lunes);
-    d.setDate(lunes.getDate() + i);
-    const iso = d.getFullYear() + '-' + String(d.getMonth()+1).padStart(2,'0') + '-' + String(d.getDate()).padStart(2,'0');
-    const r = registros.find(x => x.fecha === iso);
-    const mar = (r && r.marihuana) ? r.marihuana : null;
-
-    let icono = '○';
-    if (mar && mar.estado === 'no'){ icono = '🟢'; sinFumar++; }
-    else if (mar && mar.estado === 'dentro'){ icono = '🟡'; dentro++; }
-    else if (mar && mar.estado === 'fuera'){ icono = '🟠'; fuera++; }
-
-    html += '<div class="semana-dia">' +
-      '<div class="dia-nombre">' + nombres[i] + '</div>' +
-      '<div class="dia-icono">' + icono + '</div>' +
-      '<div class="dia-fecha">' + d.getDate() + '</div>' +
-      '</div>';
-  }
-  html += '</div>';
-
-  html += '<div class="semana-resumen">';
-  if (sinFumar) html += '<div class="semana-resumen-item">🟢 <strong>' + sinFumar + '</strong> sin fumar</div>';
-  if (dentro) html += '<div class="semana-resumen-item">🟡 <strong>' + dentro + '</strong> dentro</div>';
-  if (fuera) html += '<div class="semana-resumen-item">🟠 <strong>' + fuera + '</strong> fuera</div>';
-  if (!sinFumar && !dentro && !fuera) html += '<div class="semana-resumen-item" style="color:var(--muted)">Sin datos esta semana</div>';
-  html += '</div>';
-
-  cont.innerHTML = html;
 }
 
 function construirEmocionesChips(){
@@ -2261,9 +2185,7 @@ async function cargarRegistroEnForm(fecha){
   const fecha = $('#r-fecha').value;
   if (!fecha) return;
   const partes = fecha.split('-');
-  semanaFechaBase = new Date(parseInt(partes[0]), parseInt(partes[1]) - 1, parseInt(partes[2]));
   await cargarRegistroEnForm(fecha);
-  renderSemanaMarihuana();
 });
   
 const cFechaEl = document.getElementById('c-fecha');
@@ -2452,7 +2374,7 @@ function irA(vista){
   $('#views').scrollTop = 0;
   if (vista==='registro'){ if (Dominio.registro.leer(hoyISO())) cargarRegistroEnForm(hoyISO()); else limpiarFormRegistro(); }
   if (vista==='cuidado') renderCuidadoChecklist();
-  if (vista==='registro'){ renderSemanaMarihuana(); cargarMetaEnForm(); }
+  if (vista==='registro'){ cargarMetaEnForm(); }
   if (vista==='historial') renderHistorial();
   if (vista==='notas') renderNotas();
   if (vista==='rutina'){ renderPasos(); $('#obj-principal').value = Dominio.rutina.getObjetivo(); renderPlaylists(); }
