@@ -2642,9 +2642,16 @@ function renderHoy(){
     </div>
   `;
 
-  cont.querySelectorAll('[data-hoy-ir]').forEach(b => {
+   cont.querySelectorAll('[data-hoy-ir]').forEach(b => {
     b.onclick = () => irA(b.dataset.hoyIr);
   });
+
+  const hb = cont.querySelector('#hoyHistorialBtn');
+  if (hb) hb.onclick = () => {
+    renderHistorial();
+    $('#sheetHistorial').classList.add('show');
+    overlay.classList.add('show');
+  };
 
   renderClimaHoy();
 }
@@ -3297,11 +3304,6 @@ $$('#sheetTools [data-tool]').forEach(b => {
   };
 });
   
-$('#plTopBtn').onclick = () => {
-  renderPlaylistsSheet();
-  $('#sheetPlaylists').classList.add('show');
-  overlay.classList.add('show');
-};
 $('#hoyHistorialBtn').onclick = () => {
   renderHistorial();
   $('#sheetHistorial').classList.add('show');
