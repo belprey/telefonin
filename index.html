@@ -434,11 +434,70 @@ body:has(#view-ajustes.active) .composer { display: none; }
   .brand{font-size:14px;gap:6px}
   .brand .badge-rol{display:none}
 }
+
+/* ============ VISTA HOY ============ */
+.hoy-greeting{text-align:center;padding:4px 6px 12px}
+.hoy-greeting .hg-mascot{width:80px;height:100px;margin:0 auto 4px}
+.hoy-greeting h1{margin:4px 0 2px;font-size:21px;letter-spacing:-.3px}
+.hoy-greeting .hg-fecha{margin:0;color:var(--muted);font-size:13px;text-transform:capitalize}
+
+/* Card grande de clima */
+.clima-hero{position:relative;background:linear-gradient(135deg,#e8f0ff,#f4f8ff);
+  border:1px solid #d8e5f5;border-radius:22px;padding:22px 20px 18px;
+  margin-bottom:14px;box-shadow:var(--shadow)}
+.clima-hero .ch-emoji{font-size:58px;line-height:1;text-align:center;margin-bottom:4px}
+.clima-hero .ch-temp{font-size:52px;font-weight:800;line-height:1;text-align:center;
+  color:var(--primary-dark);letter-spacing:-2px;font-variant-numeric:tabular-nums}
+.clima-hero .ch-desc{font-size:15px;font-weight:600;text-align:center;
+  color:var(--text);margin-top:6px}
+.clima-hero .ch-lugar{font-size:12.5px;color:var(--muted);text-align:center;margin-top:2px}
+.clima-hero .ch-meta{display:flex;justify-content:space-around;gap:8px;
+  margin-top:14px;padding-top:12px;border-top:1px solid #d8e5f5}
+.clima-hero .ch-meta .ch-item{text-align:center;flex:1}
+.clima-hero .ch-meta .ch-item b{display:block;font-size:14.5px;color:var(--text);
+  font-variant-numeric:tabular-nums}
+.clima-hero .ch-meta .ch-item small{display:block;font-size:10.5px;color:var(--muted);
+  text-transform:uppercase;letter-spacing:.4px;font-weight:700;margin-top:3px}
+.clima-hero .ch-refresh{position:absolute;top:12px;right:12px;background:#fff;
+  border:1px solid #d8e5f5;width:36px;height:36px;border-radius:11px;
+  cursor:pointer;font-size:15px;transition:.15s;display:grid;place-items:center}
+.clima-hero .ch-refresh:active{transform:scale(.92)}
+
+.clima-vacio{background:#f8fafd;border:1px dashed #c5d5ea;border-radius:18px;
+  padding:24px 18px;text-align:center;color:var(--muted);font-size:13.5px;
+  margin-bottom:14px;line-height:1.5}
+.clima-vacio strong{display:block;color:var(--text);margin-bottom:4px;font-size:14.5px}
+
+/* Grid de acciones de Hoy */
+.hoy-acciones{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.hoy-accion{background:#fff;border:none;border-radius:18px;padding:16px;
+  box-shadow:var(--shadow);cursor:pointer;transition:.15s;font-family:inherit;
+  text-align:left;display:flex;flex-direction:column;gap:6px;align-items:flex-start;
+  color:var(--text)}
+.hoy-accion:active{transform:scale(.97);background:#f6f9fd}
+.hoy-accion .ha-ico{font-size:26px;line-height:1}
+.hoy-accion .ha-label{font-size:13.5px;font-weight:700;letter-spacing:-.1px;
+  line-height:1.25}
+.hoy-accion .ha-sub{font-size:11.5px;color:var(--muted);line-height:1.3}
+
+.hoy-accion.ancho{grid-column:1 / -1;flex-direction:row;align-items:center;
+  padding:18px;gap:14px;
+  background:linear-gradient(135deg,var(--primary),var(--primary-dark));
+  color:#fff;box-shadow:0 10px 26px rgba(79,125,243,.32)}
+.hoy-accion.ancho:active{background:linear-gradient(135deg,var(--primary-dark),#2b4dab)}
+.hoy-accion.ancho .ha-ico{font-size:32px;flex:none}
+.hoy-accion.ancho .ha-body{flex:1;min-width:0}
+.hoy-accion.ancho .ha-body .ha-label{color:#fff;font-size:15.5px}
+.hoy-accion.ancho .ha-body .ha-sub{color:rgba(255,255,255,.85);margin-top:2px;font-size:12px}
   
 @media (max-width:380px){
   .scale button{width:29px;height:29px;font-size:12px}
   .h1{font-size:18px}
   .t-skill-row .t-name{width:100px;font-size:12px}
+  .clima-hero .ch-temp{font-size:44px}
+  .clima-hero .ch-emoji{font-size:48px}
+  .hoy-accion{padding:14px}
+  .hoy-greeting .hg-mascot{width:70px;height:88px}
 }
 </style>
 </head>
@@ -473,8 +532,8 @@ body:has(#view-ajustes.active) .composer { display: none; }
 </header>
 
   <div class="views" id="views">
-    <section class="view active" id="view-chat"><div class="chat" id="chat"></div></section>
-
+    <section class="view active" id="view-hoy"><div id="hoyContent"></div></section>
+    <section class="view" id="view-chat"><div class="chat" id="chat"></div></section>
    <section class="view" id="view-registro">
      <h1 class="h1" style="display:flex;align-items:center;justify-content:space-between;gap:8px">
        <span>📋 Registro diario</span>
@@ -754,7 +813,7 @@ body:has(#view-ajustes.active) .composer { display: none; }
     </section>
   </div>
 
-  <div class="composer">
+  <div class="composer" id="composer" style="display:none">
     <button class="round-btn" id="micBtn">🎤</button>
     <textarea id="input" rows="1" placeholder="Escribí o hablame..." autocomplete="off"></textarea>
     <button class="round-btn" id="sendBtn">➤</button>
@@ -773,6 +832,7 @@ body:has(#view-ajustes.active) .composer { display: none; }
     <div><strong>Telefonín</strong><span>Tu compañero DBT</span></div>
   </div>
   <nav class="drawer-nav" id="nav">
+    <button class="nav-item active" data-view="hoy"><span class="ico">🏠</span> Hoy</button>
     <button class="nav-item active" data-view="chat"><span class="ico">💬</span> Conversar</button>
     <button class="nav-item" data-view="registro"><span class="ico">📋</span> Registro diario</button>
     <button class="nav-item" data-view="cuidado"><span class="ico">🌱</span> Rutina de cuidado</button> 
@@ -1571,6 +1631,11 @@ const dormir = (ms) => new Promise(r => setTimeout(r, ms));
 
 const TPL = $('#tplMascota');
 const crearMascota = () => TPL.content.firstElementChild.cloneNode(true);
+function crearMascotaHTML(){
+  const t = document.createElement('div');
+  t.appendChild(crearMascota());
+  return t.innerHTML;
+}  
 function pintarMascotas(){ $$('[data-mascota]').forEach(c => { c.innerHTML=''; c.appendChild(crearMascota()); }); }
 function hablando(on){ $$('.mascot').forEach(m => m.classList.toggle('talking', on)); }
 
@@ -2521,16 +2586,146 @@ $('#agregarPlaylist').onclick = () => {
   renderPlaylists();
 };
 
-function irA(vista){
+/* ============ VISTA HOY ============ */
+function renderHoy(){
+  const cont = document.getElementById('hoyContent');
+  if (!cont) return;
+
+  const h = new Date().getHours();
+  const saludo = h < 12 ? 'Buenos días' : h < 20 ? 'Buenas tardes' : 'Buenas noches';
+  const nombre = ajustes.nombre ? `, ${escapeHTML(ajustes.nombre)}` : '';
+  const fechaTxt = new Date().toLocaleDateString('es-AR',
+    { weekday: 'long', day: 'numeric', month: 'long' });
+  const regHoy = registros.find(r => r.fecha === hoyISO());
+
+  cont.innerHTML = `
+    <div class="hoy-greeting">
+      <div class="hg-mascot">${crearMascotaHTML()}</div>
+      <h1>${saludo}${nombre}</h1>
+      <p class="hg-fecha">${fechaTxt}</p>
+    </div>
+
+    <div id="climaHoy"></div>
+
+    <div class="hoy-acciones">
+      <button class="hoy-accion ancho" data-hoy-ir="registro">
+        <span class="ha-ico">${regHoy ? '✅' : '📋'}</span>
+        <div class="ha-body">
+          <div class="ha-label">${regHoy ? 'Ya registraste hoy' : 'Registrar cómo me siento'}</div>
+          <div class="ha-sub">${regHoy ? 'Tocá para ver o editar el registro del día' : 'El registro diario, sin juicio'}</div>
+        </div>
+      </button>
+
+      <button class="hoy-accion" data-hoy-ir="chat">
+        <span class="ha-ico">💬</span>
+        <span class="ha-label">Hablar con Telefonín</span>
+        <span class="ha-sub">Escribí o hablá</span>
+      </button>
+
+      <button class="hoy-accion" data-hoy-ir="cuidado">
+        <span class="ha-ico">🌱</span>
+        <span class="ha-label">Mi rutina</span>
+        <span class="ha-sub">Qué me propuse hoy</span>
+      </button>
+
+      <button class="hoy-accion" data-hoy-ir="historial">
+        <span class="ha-ico">📈</span>
+        <span class="ha-label">Historial</span>
+        <span class="ha-sub">Ver patrones</span>
+      </button>
+
+      <button class="hoy-accion" data-hoy-ir="rutina">
+        <span class="ha-ico">🧰</span>
+        <span class="ha-label">Herramientas</span>
+        <span class="ha-sub">STOP, TIP, ACEPTAS…</span>
+      </button>
+    </div>
+  `;
+
+  cont.querySelectorAll('[data-hoy-ir]').forEach(b => {
+    b.onclick = () => irA(b.dataset.hoyIr);
+  });
+
+  renderClimaHoy();
+}
+
+async function renderClimaHoy(){
+  const cont = document.getElementById('climaHoy');
+  if (!cont) return;
+
+  if (!climaConfig.activo){
+    cont.innerHTML = `<div class="clima-vacio">
+      <strong>🌤️ Clima desactivado</strong>
+      Podés activarlo en Ajustes para ver patrones con tu estado de ánimo.
+    </div>`;
+    return;
+  }
+
+  cont.innerHTML = `<div class="clima-vacio">Cargando clima…</div>`;
+
+  try {
+    const c = await Clima.obtener();
+    if (!c){
+      cont.innerHTML = `<div class="clima-vacio">
+        <strong>🌤️ Sin ubicación</strong>
+        Configurá una ciudad en Ajustes → Clima y ubicación para ver el clima acá.
+      </div>`;
+      return;
+    }
+    const [desc, emoji] = describirClima(c.codigo);
+    cont.innerHTML = `
+      <div class="clima-hero">
+        <button class="ch-refresh" id="hoyRefreshClima" title="Actualizar">🔄</button>
+        <div class="ch-emoji">${emoji}</div>
+        <div class="ch-temp">${c.temp}°</div>
+        <div class="ch-desc">${desc}</div>
+        <div class="ch-lugar">${escapeHTML(c.lugar)}</div>
+        <div class="ch-meta">
+          <div class="ch-item"><b>${c.sensacion}°</b><small>Sensación</small></div>
+          <div class="ch-item"><b>${c.lluvia}%</b><small>Lluvia</small></div>
+          <div class="ch-item"><b>${c.max}° / ${c.min}°</b><small>Máx / Mín</small></div>
+        </div>
+      </div>
+    `;
+    const btn = document.getElementById('hoyRefreshClima');
+    if (btn) btn.onclick = async () => {
+      climaCache = { datos: null, momento: 0 };
+      Storage.guardar(K.climaCache, climaCache);
+      renderClimaHoy();
+    };
+  } catch (e){
+    cont.innerHTML = `<div class="clima-vacio">
+      <strong>No pude cargar el clima</strong>
+      Revisá tu conexión e intentá de nuevo.
+    </div>`;
+  }
+}
+  
+ function irA(vista){
   $$('.view').forEach(v => v.classList.toggle('active', v.id === 'view-'+vista));
   $$('.nav-item').forEach(n => n.classList.toggle('active', n.dataset.view === vista));
+  $$('.sheet.show').forEach(s => s.classList.remove('show'));
   $('#views').scrollTop = 0;
-  if (vista==='registro'){ if (Dominio.registro.leer(hoyISO())) cargarRegistroEnForm(hoyISO()); else limpiarFormRegistro(); }
-  if (vista==='cuidado') renderCuidadoChecklist();
-  if (vista==='registro'){ cargarMetaEnForm(); }
-  if (vista==='notas') renderNotas();
-  if (vista==='rutina'){ renderPasos(); $('#obj-principal').value = Dominio.rutina.getObjetivo(); renderPlaylists(); }
-  if (vista==='ajustes') cargarFormAjustes();
+
+  const composer = document.getElementById('composer');
+  if (composer) composer.style.display = vista === 'chat' ? 'flex' : 'none';
+
+  if (vista === 'hoy')      renderHoy();
+  if (vista === 'chat')     scrollAbajo();
+  if (vista === 'registro'){
+    if (Dominio.registro.leer(hoyISO())) cargarRegistroEnForm(hoyISO());
+    else limpiarFormRegistro();
+    cargarMetaEnForm();
+  }
+  if (vista === 'cuidado')  renderCuidadoChecklist();
+  if (vista === 'notas')    renderNotas();
+  if (vista === 'rutina'){
+    renderPasos();
+    $('#obj-principal').value = Dominio.rutina.getObjetivo();
+    renderPlaylists();
+  }
+  if (vista === 'ajustes')  cargarFormAjustes();
+
   cerrarDrawer();
 }
 $$('.nav-item').forEach(b => b.onclick = () => irA(b.dataset.view));
@@ -3172,6 +3367,13 @@ if (historialChat.length){
   if (flagsActivos.length){
     setTimeout(() => { burbujaBot(`🎯 Tu terapeuta marcó ${flagsActivos.length} cosa${flagsActivos.length>1?'s':''} para la próxima sesión.`); }, 1200);
   }
+    renderHoy();
+  setTimeout(() => {
+    if (ajustes.voz){
+      ...
+    }
+  }, 900);
+}
   setTimeout(() => {
     if (ajustes.voz){
       const h = new Date().getHours();
