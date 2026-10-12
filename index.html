@@ -523,10 +523,12 @@ body:has(#view-ajustes.active) .composer { display: none; }
           <label>Observaciones (opcional)</label>
           <textarea id="mar-obs" placeholder="¿Qué pasó? ¿Cómo te sentiste?"></textarea>
         </div>
-        <div class="meta-marihuana" style="margin-top:14px;padding-top:14px;border-top:1px solid var(--line)">
-          <label style="font-size:12.5px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.3px;display:block;margin-bottom:8px">Mi meta ahora</label>
+              <div class="meta-marihuana" style="margin-top:14px;padding-top:14px;border-top:1px solid var(--line)">
+          <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">
+            <label style="font-size:12.5px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.3px">Mi meta ahora</label>
+            <span id="metaGuardadoAviso" style="font-size:11px;color:var(--ok);opacity:0;transition:opacity .3s;font-weight:600">✓ Guardado</span>
+          </div>
           <textarea id="mar-meta" placeholder="Ej: no fumar por 21 días"></textarea>
-          <button type="button" class="btn btn-secondary" id="guardarMetaMar" style="margin-top:8px;width:100%">💾 Guardar meta</button>
         </div>
       </div>
      
@@ -1932,8 +1934,8 @@ function construirBotonesMarihuana(){
       renderMarihuanaBotones();
     });
   });
-  const btnMeta = document.getElementById('guardarMetaMar');
-  if (btnMeta) btnMeta.addEventListener('click', guardarMetaMarihuana);
+   const metaEl = document.getElementById('mar-meta');
+  if (metaEl) metaEl.addEventListener('input', programarGuardadoMeta);
 
 }
 
@@ -1995,14 +1997,30 @@ function cargarMetaEnForm(){
   if (el) el.value = metaMarihuana.texto || '';
 }
 
-function guardarMetaMarihuana(){
+let metaDebounceTimer = null;
+
+function guardarMetaMarihuanaSilencioso(){
   const el = document.getElementById('mar-meta');
   if (!el) return;
-  metaMarihuana.texto = el.value.trim();
+  const nuevoTexto = el.value.trim();
+  if (nuevoTexto === metaMarihuana.texto) return;
+  metaMarihuana.texto = nuevoTexto;
   metaMarihuana.actualizada = Date.now();
   Storage.guardar('telefonin.v3.metaMarihuana', metaMarihuana);
   auditar('meta_marihuana_guardada', {});
-  burbujaBot('✅ Meta guardada.');
+  const aviso = document.getElementById('metaGuardadoAviso');
+  if (aviso){
+    aviso.style.opacity = '1';
+    setTimeout(() => { aviso.style.opacity = '0'; }, 1500);
+  }
+}
+
+function programarGuardadoMeta(){
+  if (metaDebounceTimer) clearTimeout(metaDebounceTimer);
+  metaDebounceTimer = setTimeout(() => {
+    guardarMetaMarihuanaSilencioso();
+    metaDebounceTimer = null;
+  }, 800);
 }
 
 function construirEmocionesChips(){
