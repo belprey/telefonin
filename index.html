@@ -833,7 +833,7 @@ body:has(#view-ajustes.active) .composer { display: none; }
   </div>
   <nav class="drawer-nav" id="nav">
     <button class="nav-item active" data-view="hoy"><span class="ico">🏠</span> Hoy</button>
-    <button class="nav-item active" data-view="chat"><span class="ico">💬</span> Conversar</button>
+    <button class="nav-item" data-view="chat"><span class="ico">💬</span> Conversar</button>
     <button class="nav-item" data-view="registro"><span class="ico">📋</span> Registro diario</button>
     <button class="nav-item" data-view="cuidado"><span class="ico">🌱</span> Rutina de cuidado</button> 
     <button class="nav-item" data-view="notas"><span class="ico">📌</span> Temas importantes</button>
@@ -2628,7 +2628,7 @@ function renderHoy(){
         <span class="ha-sub">Qué me propuse hoy</span>
       </button>
 
-      <button class="hoy-accion" data-hoy-ir="historial">
+      <button class="hoy-accion" id="hoyHistorialBtn">
         <span class="ha-ico">📈</span>
         <span class="ha-label">Historial</span>
         <span class="ha-sub">Ver patrones</span>
@@ -3296,13 +3296,18 @@ $$('#sheetTools [data-tool]').forEach(b => {
     abrirSkill(b.dataset.tool);
   };
 });
-
+  
 $('#plTopBtn').onclick = () => {
   renderPlaylistsSheet();
   $('#sheetPlaylists').classList.add('show');
   overlay.classList.add('show');
 };
-
+$('#hoyHistorialBtn').onclick = () => {
+  renderHistorial();
+  $('#sheetHistorial').classList.add('show');
+  overlay.classList.add('show');
+};
+  
 function renderPlaylistsSheet(){
   const cont = $('#sheetPlaylistsBody');
   if (!playlists.length){
@@ -3345,40 +3350,38 @@ function iniciar(){
   renderPasos();
   renderHistorial();
   construirEmocionesChips();
-  construirBotonesMarihuana(); 
+  construirBotonesMarihuana();
   renderCuidadoChecklist();
   renderPlaylists();
   renderLugaresChips();
   renderAfectoChips();
   auditar('app_iniciada', { rol: ACTOR_ACTUAL.rol, version: SCHEMA_VERSION });
 
-  // Siempre mostramos la bienvenida con el muñeco grande
-pintarBienvenida();
-// Y si hay historial, mostramos solo los últimos mensajes como contexto
-if (historialChat.length){
-  const ultimos = historialChat.slice(-4);
-  const sep = document.createElement('div');
-  sep.style.cssText = 'text-align:center;font-size:11.5px;color:var(--muted);margin:14px 0 6px;letter-spacing:.3px';
-  sep.textContent = '— últimos mensajes —';
-  chat.appendChild(sep);
-  ultimos.forEach(m => m.rol === 'user' ? burbujaUser(m.texto) : burbujaBot(m.texto));
-}
+  // Bienvenida del chat (queda lista para cuando entres a la vista)
+  pintarBienvenida();
+  if (historialChat.length){
+    const ultimos = historialChat.slice(-4);
+    const sep = document.createElement('div');
+    sep.style.cssText = 'text-align:center;font-size:11.5px;color:var(--muted);margin:14px 0 6px;letter-spacing:.3px';
+    sep.textContent = '— últimos mensajes —';
+    chat.appendChild(sep);
+    ultimos.forEach(m => m.rol === 'user' ? burbujaUser(m.texto) : burbujaBot(m.texto));
+  }
+
   const flagsActivos = flagsTerapeuta.filter(f => !f.resuelto);
   if (flagsActivos.length){
-    setTimeout(() => { burbujaBot(`🎯 Tu terapeuta marcó ${flagsActivos.length} cosa${flagsActivos.length>1?'s':''} para la próxima sesión.`); }, 1200);
+    setTimeout(() => {
+      burbujaBot(`🎯 Tu terapeuta marcó ${flagsActivos.length} cosa${flagsActivos.length > 1 ? 's' : ''} para la próxima sesión.`);
+    }, 1200);
   }
-    renderHoy();
-  setTimeout(() => {
-    if (ajustes.voz){
-      ...
-    }
-  }, 900);
-}
+
+  renderHoy();
+
   setTimeout(() => {
     if (ajustes.voz){
       const h = new Date().getHours();
-      const s = h<12?'Buenos días':h<20?'Buenas tardes':'Buenas noches';
-      hablar(`${s}${ajustes.nombre?' '+ajustes.nombre:''}. Soy Telefonín. ¿Cómo estás hoy?`);
+      const s = h < 12 ? 'Buenos días' : h < 20 ? 'Buenas tardes' : 'Buenas noches';
+      hablar(`${s}${ajustes.nombre ? ' ' + ajustes.nombre : ''}. Soy Telefonín. ¿Cómo estás hoy?`);
     }
   }, 900);
 }
