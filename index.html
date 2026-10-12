@@ -400,6 +400,41 @@ body:has(#view-ajustes.active) .composer { display: none; }
 .preview-rutina strong{color:var(--text);display:block;margin-bottom:6px;font-size:13px}
 .preview-rutina ul{margin:0;padding-left:18px}
 .preview-rutina li{margin-bottom:3px}
+
+  /* Botón de acción al lado de un h1 */
+.h1-action{background:#eef3fb;color:var(--primary-dark)}
+
+/* Cards dentro del sheet "Herramientas rápidas" */
+.tool-card{display:flex;align-items:center;gap:12px;width:100%;padding:14px 16px;
+  border:1px solid var(--line);background:#fff;border-radius:14px;
+  font-family:inherit;font-size:14.5px;font-weight:600;color:var(--text);
+  cursor:pointer;text-align:left;margin-bottom:10px;transition:.15s}
+.tool-card:active{transform:scale(.98);background:#f6f9fd}
+.tool-card .tool-ico{font-size:22px;flex:none;width:32px;text-align:center}
+.tool-card .tool-body{flex:1;min-width:0}
+.tool-card .tool-body strong{display:block;font-size:14.5px;margin-bottom:2px}
+.tool-card .tool-body small{display:block;font-size:12px;color:var(--muted);font-weight:400;line-height:1.35}
+
+/* Filas de playlist dentro del sheet "Mis playlists" */
+.pl-sheet-row{display:flex;align-items:center;gap:12px;padding:12px 14px;
+  border:1px solid var(--line);background:#fff;border-radius:14px;
+  margin-bottom:8px;cursor:pointer;transition:.15s;font-family:inherit;text-align:left;width:100%}
+.pl-sheet-row:active{transform:scale(.98);background:#f6f9fd}
+.pl-sheet-row .pl-play{width:40px;height:40px;border-radius:50%;
+  background:linear-gradient(135deg,#1db954,#1aa34a);color:#fff;
+  display:grid;place-items:center;font-size:16px;flex:none}
+.pl-sheet-row .pl-info{flex:1;min-width:0}
+.pl-sheet-row .pl-info strong{display:block;font-size:14px;color:var(--text);
+  overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.pl-sheet-row .pl-info small{display:block;font-size:11.5px;color:var(--muted);
+  overflow:hidden;text-overflow:ellipsis;white-space:nowrap;margin-top:2px}
+
+/* Topbar más compacta en celus chicos */
+@media (max-width:420px){
+  .brand{font-size:14px;gap:6px}
+  .brand .badge-rol{display:none}
+}
+  
 @media (max-width:380px){
   .scale button{width:29px;height:29px;font-size:12px}
   .h1{font-size:18px}
@@ -425,21 +460,26 @@ body:has(#view-ajustes.active) .composer { display: none; }
 </template>
 
 <div class="app">
-  <header class="topbar">
-    <button class="icon-btn" id="menuBtn">☰</button>
-    <div class="brand">
-      <span data-mascota style="width:26px;height:32px"></span>
-      Telefonín DBT
-      <span class="badge-rol" id="badgeRol">Paciente</span>
-    </div>
-    <button class="icon-btn" id="muteBtn">🔊</button>
-  </header>
+<header class="topbar">
+  <button class="icon-btn" id="menuBtn">☰</button>
+  <div class="brand">
+    <span data-mascota style="width:26px;height:32px"></span>
+    Telefonín DBT
+    <span class="badge-rol" id="badgeRol">Paciente</span>
+  </div>
+  <button class="icon-btn" id="plTopBtn" title="Poner música" style="display:none">🎵</button>
+  <button class="icon-btn" id="toolsTopBtn" title="Herramientas rápidas">🧰</button>
+  <button class="icon-btn" id="muteBtn">🔊</button>
+</header>
 
   <div class="views" id="views">
     <section class="view active" id="view-chat"><div class="chat" id="chat"></div></section>
 
    <section class="view" id="view-registro">
-      <h1 class="h1">📋 Registro diario</h1>
+     <h1 class="h1" style="display:flex;align-items:center;justify-content:space-between;gap:8px">
+       <span>📋 Registro diario</span>
+       <button class="icon-btn h1-action" id="abrirHistorialBtn" style="width:36px;height:36px;font-size:16px" title="Ver historial">📊</button>
+   </h1> 
       <p class="sub">Cómo te fue hoy. Solo tú lo ves. La idea es mirar patrones, no juzgarte.</p>
       <div class="card">
         <div class="field" style="margin-bottom:0"><label>Fecha</label><input type="date" id="r-fecha"></div>
@@ -551,24 +591,7 @@ body:has(#view-ajustes.active) .composer { display: none; }
       </div>
     </section>
 
-    <section class="view" id="view-historial">
-      <h1 class="h1">📈 Historial y patrones</h1>
-      <div class="card">
-        <h3>Últimos 7 días</h3>
-        <div class="stat-grid">
-          <div class="stat"><b id="avgMal">—</b><small>Malestar em.</small></div>
-          <div class="stat"><b id="avgAle">—</b><small>Alegría</small></div>
-          <div class="stat"><b id="avgHab">—</b><small>Habilidades</small></div>
-        </div>
-        <div class="progress"><div id="progRutina" style="width:0%"></div></div>
-        <p class="hint" style="margin:0"><strong id="rutinaPct">0%</strong> de cumplimiento de rutina.</p>
-      </div>
-      <div class="card"><h3>💡 Lo que veo</h3><div id="insights"><div class="empty">Necesito al menos 3 registros.</div></div></div>
-      <div class="card"><h3>🌤️ Clima y estado de ánimo</h3><div id="climaPaciente"></div></div>
-      <div class="card"><h3>Registros guardados</h3><div id="listaRegistros"></div></div>
-    </section>
-
-    <section class="view" id="view-notas">
+   <section class="view" id="view-notas">
       <h1 class="h1">📌 Temas importantes</h1>
       <div class="card" id="cardMensajesTerapeuta" style="display:none;background:#e8f4ff;border:1px solid #b8d4f0">
         <h3>💬 De mi terapeuta</h3>
@@ -661,7 +684,6 @@ body:has(#view-ajustes.active) .composer { display: none; }
         <div class="field"><label>¿Cómo querés que te llame?</label><input type="text" id="setNombre"></div>
         <div class="switch-row"><span>🔊 Que Telefonín hable</span><label class="switch"><input type="checkbox" id="setVoz"><span class="slider"></span></label></div>
         <div class="field" style="margin-top:14px"><label>Velocidad de la voz</label><input type="range" id="setVel" min="0.7" max="1.4" step="0.05"></div>
-        <button class="btn btn-primary" id="guardarAjustes" style="margin-top:8px">Guardar</button>
       </div>
 
       <div class="card">
@@ -753,8 +775,7 @@ body:has(#view-ajustes.active) .composer { display: none; }
   <nav class="drawer-nav" id="nav">
     <button class="nav-item active" data-view="chat"><span class="ico">💬</span> Conversar</button>
     <button class="nav-item" data-view="registro"><span class="ico">📋</span> Registro diario</button>
-   <button class="nav-item" data-view="cuidado"><span class="ico">🌱</span> Rutina de cuidado</button> 
-    <button class="nav-item" data-view="historial"><span class="ico">📈</span> Historial</button>
+    <button class="nav-item" data-view="cuidado"><span class="ico">🌱</span> Rutina de cuidado</button> 
     <button class="nav-item" data-view="notas"><span class="ico">📌</span> Temas importantes</button>
     <button class="nav-item" data-view="rutina"><span class="ico">🎯</span> Rutina y objetivos</button>
     <button class="nav-item" data-view="habilidades"><span class="ico">📖</span> Habilidades DBT</button>
@@ -797,6 +818,44 @@ body:has(#view-ajustes.active) .composer { display: none; }
   </div>
 </section>
 
+<!-- NUEVA: Historial como sheet -->
+<section class="sheet" id="sheetHistorial">
+  <div class="sheet-head"><h2>📈 Historial y patrones</h2><button class="icon-btn" data-close-sheet>✕</button></div>
+  <div class="sheet-body">
+    <div class="card">
+      <h3>Últimos 7 días</h3>
+      <div class="stat-grid">
+        <div class="stat"><b id="avgMal">—</b><small>Malestar em.</small></div>
+        <div class="stat"><b id="avgAle">—</b><small>Alegría</small></div>
+        <div class="stat"><b id="avgHab">—</b><small>Habilidades</small></div>
+      </div>
+      <div class="progress"><div id="progRutina" style="width:0%"></div></div>
+      <p class="hint" style="margin:0"><strong id="rutinaPct">0%</strong> de cumplimiento de rutina.</p>
+    </div>
+    <div class="card"><h3>💡 Lo que veo</h3><div id="insights"><div class="empty">Necesito al menos 3 registros.</div></div></div>
+    <div class="card"><h3>🌤️ Clima y estado de ánimo</h3><div id="climaPaciente"></div></div>
+    <div class="card"><h3>Registros guardados</h3><div id="listaRegistros"></div></div>
+  </div>
+</section>
+
+<!-- NUEVA: Herramientas rápidas -->
+<section class="sheet" id="sheetTools">
+  <div class="sheet-head"><h2>🧰 Herramientas rápidas</h2><button class="icon-btn" data-close-sheet>✕</button></div>
+  <div class="sheet-body">
+    <button class="tool-card" data-tool="stop"><span class="tool-ico">🛑</span><div class="tool-body"><strong>STOP</strong><small>Parar, tomar distancia, observar, proceder</small></div></button>
+    <button class="tool-card" data-tool="tip"><span class="tool-ico">🧊</span><div class="tool-body"><strong>TIP</strong><small>Temperatura, ejercicio intenso, respiración pausada</small></div></button>
+    <button class="tool-card" data-tool="aceptas"><span class="tool-ico">🌈</span><div class="tool-body"><strong>ACEPTAS</strong><small>Actividades para tolerar el malestar</small></div></button>
+    <button class="tool-card" data-tool="opuesta"><span class="tool-ico">↔️</span><div class="tool-body"><strong>Acción opuesta</strong><small>Actuar distinto a lo que la emoción pide</small></div></button>
+    <button class="tool-card" data-tool="radical"><span class="tool-ico">🌱</span><div class="tool-body"><strong>Aceptación radical</strong><small>Dejar de pelear con lo que ya pasó</small></div></button>
+  </div>
+</section>
+
+<!-- NUEVA: Selector de playlists -->
+<section class="sheet" id="sheetPlaylists">
+  <div class="sheet-head"><h2>🎵 Mis playlists</h2><button class="icon-btn" data-close-sheet>✕</button></div>
+  <div class="sheet-body" id="sheetPlaylistsBody"></div>
+</section>
+  
 <div class="t-overlay" id="therapistOverlay">
    <div class="t-header">
     <div><h1 id="tNombre">Panel clínico</h1><div class="t-sub" id="tRango">—</div></div>
@@ -2160,6 +2219,7 @@ function leerEmocionesDelForm(){
 }  
 function renderPlaylists(){
   const cont = $('#listaPlaylists');
+  actualizarBotonPlaylist();  
   if (!playlists.length){ cont.innerHTML = '<div class="empty" style="padding:12px">Sin playlists todavía.</div>'; return; }
   cont.innerHTML = playlists.map(p => `
     <div class="playlist-row">
@@ -2468,7 +2528,6 @@ function irA(vista){
   if (vista==='registro'){ if (Dominio.registro.leer(hoyISO())) cargarRegistroEnForm(hoyISO()); else limpiarFormRegistro(); }
   if (vista==='cuidado') renderCuidadoChecklist();
   if (vista==='registro'){ cargarMetaEnForm(); }
-  if (vista==='historial') renderHistorial();
   if (vista==='notas') renderNotas();
   if (vista==='rutina'){ renderPasos(); $('#obj-principal').value = Dominio.rutina.getObjetivo(); renderPlaylists(); }
   if (vista==='ajustes') cargarFormAjustes();
@@ -2565,7 +2624,8 @@ function cargarFormAjustes(){
     : `⚠️ Cadena rota en evento #${integridad.indiceRoto}.`;
   renderAudit('#logAccesos');
 }
-$('#guardarAjustes').onclick = () => {
+  
+$('#guardarAjustesFijo').onclick = () => {
   ajustes.nombre = $('#setNombre').value.trim();
   ajustes.voz = $('#setVoz').checked;
   ajustes.velocidad = parseFloat($('#setVel').value);
@@ -2579,7 +2639,6 @@ $('#guardarAjustes').onclick = () => {
   burbujaBot('✅ Ajustes guardados.');
   hablar('Ajustes guardados.');
 };
-$('#guardarAjustesFijo').onclick = () => $('#guardarAjustes').click(); 
 
 $('#setCompartir').addEventListener('change', e => {
   compartir.activo = e.target.checked;
@@ -2998,24 +3057,22 @@ const AdminPanel = {
 function pintarBienvenida(){
   const div = document.createElement('div');
   div.className = 'welcome'; div.id = 'welcome';
-  div.style.textAlign = 'center'; div.style.padding = '20px 8px 8px';
+  div.style.textAlign = 'center'; div.style.padding = '4px 8px 8px';
   const hero = document.createElement('div');
-  hero.style.cssText = 'width:120px;height:150px;margin:0 auto 8px';
+  hero.style.cssText = 'width:96px;height:120px;margin:0 auto 4px';
   hero.appendChild(crearMascota());
   const h1 = document.createElement('h1');
-  h1.style.cssText = 'margin:6px 0 4px;font-size:20px';
+  h1.style.cssText = 'margin:2px 0 4px;font-size:19px';
   h1.textContent = ajustes.nombre ? `Hola, ${ajustes.nombre}` : 'Hola, soy Telefonín';
   const p = document.createElement('p');
-  p.style.cssText = 'margin:0 0 6px;color:var(--muted);font-size:14px;line-height:1.5';
+  p.style.cssText = 'margin:0 0 6px;color:var(--muted);font-size:13.5px;line-height:1.5';
   p.innerHTML = 'Tu compañero DBT. No reemplazo a tu terapeuta: te acompaño entre sesiones.';
   const chips = document.createElement('div');
-  chips.className = 'chips'; chips.style.marginTop = '14px';
+  chips.className = 'chips'; chips.style.marginTop = '12px';
   [
     ['📋 Registrar hoy', () => irA('registro')],
     ['🌤️ Clima', () => enviarMensaje('¿Cómo está el clima?')],
-    ['📈 ¿Cómo vengo?', () => enviarMensaje('¿Cómo vengo estos días?')],
     ['🎯 Mi rutina', () => enviarMensaje('¿Qué me toca hoy?')],
-    ['💙 Estoy mal', () => enviarMensaje('Estoy mal, no aguanto')],
     ['📖 Habilidades', () => irA('habilidades')]
   ].forEach(([txt, fn]) => {
     const b = document.createElement('button');
@@ -3026,6 +3083,63 @@ function pintarBienvenida(){
   chat.appendChild(div);
 }
 
+/* ===== Nuevos handlers: historial en sheet, herramientas, playlists ===== */
+$('#abrirHistorialBtn').onclick = () => {
+  renderHistorial();
+  $('#sheetHistorial').classList.add('show');
+  overlay.classList.add('show');
+};
+
+$('#toolsTopBtn').onclick = () => {
+  $('#sheetTools').classList.add('show');
+  overlay.classList.add('show');
+};
+
+$$('#sheetTools [data-tool]').forEach(b => {
+  b.onclick = () => {
+    $('#sheetTools').classList.remove('show');
+    abrirSkill(b.dataset.tool);
+  };
+});
+
+$('#plTopBtn').onclick = () => {
+  renderPlaylistsSheet();
+  $('#sheetPlaylists').classList.add('show');
+  overlay.classList.add('show');
+};
+
+function renderPlaylistsSheet(){
+  const cont = $('#sheetPlaylistsBody');
+  if (!playlists.length){
+    cont.innerHTML = '<div class="empty">Sin playlists. Agregalas en "Rutina y objetivos" → Mis playlists.</div>';
+    return;
+  }
+  cont.innerHTML = playlists.map(p => `
+    <button class="pl-sheet-row" data-abrir-pl="${p.id}">
+      <div class="pl-play">▶</div>
+      <div class="pl-info">
+        <strong>${escapeHTML(p.nombre)}</strong>
+        <small>${escapeHTML(p.url.slice(0, 60))}${p.url.length > 60 ? '…' : ''}</small>
+      </div>
+    </button>
+  `).join('');
+  cont.querySelectorAll('[data-abrir-pl]').forEach(b => {
+    b.onclick = () => {
+      const p = playlists.find(x => x.id === b.dataset.abrirPl);
+      if (p){
+        abrirSpotify(p.url);
+        $('#sheetPlaylists').classList.remove('show');
+        overlay.classList.remove('show');
+      }
+    };
+  });
+}
+
+function actualizarBotonPlaylist(){
+  const btn = $('#plTopBtn');
+  if (btn) btn.style.display = playlists.length ? 'grid' : 'none';
+}
+  
 function iniciar(){
   pintarMascotas();
   construirEscalas();
