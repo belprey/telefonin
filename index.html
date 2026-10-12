@@ -367,7 +367,18 @@ body:has(#view-ajustes.active) .composer { display: none; }
 .t-access-log{padding:10px 12px;background:rgba(255,255,255,.03);border-radius:10px;
   margin-bottom:6px;font-size:12px;color:#a8b8d4;display:flex;justify-content:space-between;align-items:center;gap:10px}
 .t-hash{font-family:ui-monospace,monospace;font-size:10px;color:#4f7df3;background:rgba(79,125,243,.12);padding:2px 6px;border-radius:6px}
-.pin-overlay{position:fixed;inset:0;background:rgba(6,10,20,.9);backdrop-filter:blur(6px);
+.t-notas-panel{position:fixed;top:0;right:0;bottom:0;width:100%;max-width:440px;
+  background:#0d1425;color:#e6edfa;z-index:250;transform:translateX(105%);
+  transition:transform .3s cubic-bezier(.4,0,.2,1);display:flex;flex-direction:column;
+  padding-top:env(safe-area-inset-top);box-shadow:-12px 0 40px rgba(0,0,0,.4);
+  overflow-y:auto}
+.t-notas-panel.show{transform:translateX(0)}
+.t-notas-header{display:flex;justify-content:space-between;align-items:center;
+  padding:20px 18px 14px;border-bottom:1px solid rgba(255,255,255,.08);
+  position:sticky;top:0;background:#0d1425;z-index:1}
+.t-notas-header h2{margin:0;font-size:16px;color:#fff}
+.t-notas-body{padding:16px 16px 32px}
+ .pin-overlay{position:fixed;inset:0;background:rgba(6,10,20,.9);backdrop-filter:blur(6px);
   z-index:300;display:none;align-items:center;justify-content:center;padding:20px}
 .pin-overlay.show{display:flex}
 .pin-box{background:#162138;border-radius:20px;padding:28px 22px;max-width:340px;width:100%;
@@ -553,6 +564,7 @@ body:has(#view-ajustes.active) .composer { display: none; }
         <p class="hint" style="margin:0"><strong id="rutinaPct">0%</strong> de cumplimiento de rutina.</p>
       </div>
       <div class="card"><h3>💡 Lo que veo</h3><div id="insights"><div class="empty">Necesito al menos 3 registros.</div></div></div>
+      <div class="card"><h3>🌤️ Clima y estado de ánimo</h3><div id="climaPaciente"></div></div>
       <div class="card"><h3>Registros guardados</h3><div id="listaRegistros"></div></div>
     </section>
 
@@ -786,24 +798,46 @@ body:has(#view-ajustes.active) .composer { display: none; }
 </section>
 
 <div class="t-overlay" id="therapistOverlay">
-  <div class="t-header">
+   <div class="t-header">
     <div><h1 id="tNombre">Panel clínico</h1><div class="t-sub" id="tRango">—</div></div>
-    <button class="t-close" id="salirTerapeuta">Salir</button>
+    <div style="display:flex;gap:8px;flex:none">
+      <button class="t-close" id="abrirPanelNotas">📝 Notas</button>
+      <button class="t-close" id="salirTerapeuta">Salir</button>
+    </div>
   </div>
-  <div id="tAlertas"></div>
-  <div class="t-card"><h3>📊 Métricas clave</h3><div class="t-stats" id="tStats"></div></div>
-  <div class="t-card"><h3>📈 Tendencia emocional (30 días)</h3><div id="tTrend"></div></div>
-  <div class="t-card"><h3>🌤️ Clima y estado de ánimo</h3><div id="tClima"></div></div>
-  <div class="t-card"><h3>🧠 Habilidades DBT</h3><div id="tSkills"></div></div>
-  <div class="t-card"><h3>🌡️ Emociones registradas</h3><div id="tEmociones"></div></div>
-  <div class="t-card"><h3>Consumo de drogas</h3><div id="tMarihuana"></div></div>
-  <div class="t-card"><h3>🌱 Adherencia a rutina <button class="t-h3-btn" id="abrirEditorRutinaT">✏️ Sugerir ítems</button></h3><div id="tRutina"></div></div>
-  <div class="t-card"><h3>📌 Temas "para terapia"</h3><div id="tTemas"></div></div>
-  <div class="t-card"><h3>💬 Notas entre sesiones</h3><div id="tNotas"></div><textarea class="t-input" id="tNuevaNota" placeholder="Observación, consigna..."></textarea><button class="t-btn t-btn-primary" id="tGuardarNota">Enviar nota</button></div>
-  <div class="t-card"><h3>🎯 Marcar para próxima sesión</h3><div id="tFlags"></div><textarea class="t-input" id="tNuevoFlag" placeholder="Ej: revisar análisis de cadena"></textarea><button class="t-btn t-btn-warn" id="tGuardarFlag">Marcar</button></div>
+   <div id="tAlertas"></div>
+     <div class="t-card"><h3>📌 Temas para terapia</h3><div id="tTemas"></div></div>
+     <div class="t-card"><h3>🌱 Adherencia a rutina <button class="t-h3-btn" id="abrirEditorRutinaT">✏️ Sugerir ítems</button></h3><div id="tRutina"></div></div>
+     <div class="t-card"><h3>📈 Tendencia emocional (30 días)</h3><div id="tTrend"></div></div>
+     <div class="t-card"><h3>🌡️ Emociones registradas</h3><div id="tEmociones"></div></div>
+     <div class="t-card"><h3>🧠 Habilidades DBT</h3><div id="tSkills"></div></div>
+     <div class="t-card"><h3>Consumo de drogas</h3><div id="tMarihuana"></div></div>
+  
+<div class="t-notas-panel" id="panelNotasT">
+  <div class="t-notas-header">
+    <h2>📝 Notas y marcas</h2>
+    <button class="t-close" id="cerrarPanelNotas">✕</button>
+  </div>
+  <div class="t-notas-body">
+
+    <div class="t-card">
+      <h3>💬 Notas entre sesiones</h3>
+      <div id="tNotas"></div>
+      <textarea class="t-input" id="tNuevaNota" placeholder="Observación, consigna..."></textarea>
+      <button class="t-btn t-btn-primary" id="tGuardarNota">Enviar nota</button>
+    </div>
+
+    <div class="t-card">
+      <h3>🎯 Marcar para próxima sesión</h3>
+      <div id="tFlags"></div>
+      <textarea class="t-input" id="tNuevoFlag" placeholder="Ej: revisar análisis de cadena"></textarea>
+      <button class="t-btn t-btn-warn" id="tGuardarFlag">Marcar</button>
+    </div>
+
+  </div>
 </div>
 
-<div class="pin-overlay" id="pinOverlay">
+  <div class="pin-overlay" id="pinOverlay">
   <div class="pin-box">
     <h2>🩺 Modo terapeuta</h2>
     <p>Ingresá el código que te compartió la persona.</p>
@@ -2269,7 +2303,42 @@ async function ofrecerSugerenciaContextual(registroGuardado){
   scrollAbajo();
 }
 
+function renderClimaPaciente(){
+  const cont = document.getElementById('climaPaciente');
+  if (!cont) return;
+  const ult = Dominio.registro.listar(new Date(Date.now() - 30*86400000).toISOString().slice(0,10), hoyISO());
+  const conClima = ult.filter(r => r.clima);
+  if (conClima.length < 3){
+    cont.innerHTML = '<div class="empty">Necesito al menos 3 registros con clima. Tenés ' + conClima.length + '.</div>';
+    return;
+  }
+  const cv = Dominio.analisis.climaVsAnimo(ult);
+  if (!cv){ cont.innerHTML = '<div class="empty">Sin datos suficientes.</div>'; return; }
+
+  let html = '';
+  if (cv.lluvia.si !== null && cv.lluvia.no !== null){
+    const diff = cv.lluvia.si - cv.lluvia.no;
+    let color, txt;
+    if (diff > 0.5){ color = 'color:var(--danger)'; txt = 'Con lluvia tu malestar sube ' + diff.toFixed(1) + ' puntos'; }
+    else if (diff < -0.5){ color = 'color:#149a5a'; txt = 'Con lluvia tu malestar baja ' + Math.abs(diff).toFixed(1) + ' puntos'; }
+    else { color = 'color:var(--muted)'; txt = 'Sin diferencia clara entre días de lluvia y sin lluvia'; }
+    html += '<div class="entry"><div class="txt">🌧️ Días de lluvia (' + cv.lluvia.nSi + '): malestar ' + cv.lluvia.si.toFixed(1) + '/5<br>' +
+            '☀️ Días sin lluvia (' + cv.lluvia.nNo + '): malestar ' + cv.lluvia.no.toFixed(1) + '/5<br>' +
+            '<span style="' + color + ';font-weight:700">' + txt + '</span></div></div>';
+  }
+  const t = cv.temp;
+  if (t.frio !== null || t.templado !== null || t.calor !== null){
+    html += '<div class="entry"><div class="txt">';
+    if (t.frio !== null) html += '🥶 Frío (≤10°C): ' + t.frio.toFixed(1) + '/5<br>';
+    if (t.templado !== null) html += '😊 Templado: ' + t.templado.toFixed(1) + '/5<br>';
+    if (t.calor !== null) html += '🥵 Calor (≥28°C): ' + t.calor.toFixed(1) + '/5';
+    html += '</div></div>';
+  }
+  cont.innerHTML = html || '<div class="empty">Sin patrones claros todavía.</div>';
+}
+  
 function renderHistorial(){
+  renderClimaPaciente();
   const ult = Dominio.registro.listar(new Date(Date.now() - 7*86400000).toISOString().slice(0,10), hoyISO());
   $('#avgMal').textContent = Dominio.analisis.promedios(ult, 'malEmocional')?.toFixed(1) ?? '—';
   $('#avgAle').textContent = Dominio.analisis.promedios(ult, 'alegria')?.toFixed(1) ?? '—';
@@ -2583,9 +2652,16 @@ function intentarEntrar(){
   }
 }
 
+const panelNotasT = document.getElementById('panelNotasT');
+const abrirPanelNotasBtn = document.getElementById('abrirPanelNotas');
+const cerrarPanelNotasBtn = document.getElementById('cerrarPanelNotas');
+if (abrirPanelNotasBtn) abrirPanelNotasBtn.onclick = () => panelNotasT.classList.add('show');
+if (cerrarPanelNotasBtn) cerrarPanelNotasBtn.onclick = () => panelNotasT.classList.remove('show');
+
 $('#salirTerapeuta').onclick = () => {
   auditar('terapeuta_salida', {});
   tOverlay.classList.remove('show');
+  if (panelNotasT) panelNotasT.classList.remove('show');
   $$('.sheet.show').forEach(s => s.classList.remove('show'));
 };
 
@@ -2607,8 +2683,9 @@ function renderPanelTerapeuta(){
   } else {
     $('#tRango').textContent = puedeLeerRegistros ? 'Sin registros todavía' : 'Sin autorización';
   }
-  renderAlertasT(ult); renderStatsT(ult); renderTrendT(ult); renderClimaT(ult);
-  renderSkillsT(ult); renderEmocionesT(ult); renderMarihuanaT(ult); renderRutinaT(ult); renderTemasT(); renderNotasT(); renderFlagsT();
+    renderAlertasT(ult); renderStatsT(ult); renderTrendT(ult);
+  renderTemasT(); renderRutinaT(ult); renderEmocionesT(ult); renderSkillsT(ult); renderMarihuanaT(ult);
+  renderNotasT(); renderFlagsT();
 }
 
 function renderAlertasT(ult){
