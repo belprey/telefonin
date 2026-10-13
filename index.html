@@ -3298,13 +3298,7 @@ $$('#sheetTools [data-tool]').forEach(b => {
     abrirSkill(b.dataset.tool);
   };
 });
-  
-$('#hoyHistorialBtn').onclick = () => {
-  renderHistorial();
-  $('#sheetHistorial').classList.add('show');
-  overlay.classList.add('show');
-};
-  
+    
 function renderPlaylistsSheet(){
   const cont = $('#sheetPlaylistsBody');
   if (!playlists.length){
