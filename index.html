@@ -2852,7 +2852,6 @@ $$('[data-close-sheet]').forEach(b => b.onclick = () => {
 
 function cargarFormAjustes(){
   $('#setNombre').value = ajustes.nombre;
-  
   $('#setVoz').checked = ajustes.voz;
   $('#setVel').value = ajustes.velocidad;
   $('#setCompartir').checked = compartir.activo;
@@ -2882,10 +2881,6 @@ function cargarFormAjustes(){
     ? `✅ Cadena de auditoría íntegra · ${integridad.total} eventos encadenados.`
     : `⚠️ Cadena rota en evento #${integridad.indiceRoto}.`;
   renderAudit('#logAccesos');
-    const elApp = document.getElementById('setAppVer');
-  if (elApp) elApp.textContent = APP_VERSION;
-  const elOS = document.getElementById('setOsVer');
-  if (elSch) elSch.textContent = 'v' + SCHEMA_VERSION;
 }
   
 $('#guardarAjustesFijo').onclick = () => {
