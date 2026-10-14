@@ -3356,6 +3356,15 @@ $$('#sheetTools [data-tool]').forEach(b => {
     abrirSkill(b.dataset.tool);
   };
 });
+  
+  /* ── Botón 🎵 de la barra superior ─────────────────────────────
+   Abre el sheet con las playlists guardadas. La lista se genera
+   dentro de renderPlaylistsSheet() para que esté siempre fresca. */
+$('#plTopBtn').onclick = () => {
+  renderPlaylistsSheet();
+  $('#sheetPlaylists').classList.add('show');
+  overlay.classList.add('show');
+};
     
 function renderPlaylistsSheet(){
   const cont = $('#sheetPlaylistsBody');
