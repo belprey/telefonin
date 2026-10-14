@@ -174,17 +174,15 @@ body:has(#view-ajustes.active) .composer { display: none; }
 .drawer-head{display:flex;align-items:center;gap:12px;padding:18px 16px 14px;
   background:linear-gradient(135deg,#4f7df3,#6f9bff);color:#fff}
 .drawer-head svg{width:40px;height:50px;flex:none}
-.drawer-head strong{display:block;font-size:16px}
+.drawer-head strong{display:block;font-size:17px}
 .drawer-head span{font-size:12px;opacity:.85}
 .drawer-nav{padding:10px 8px;overflow-y:auto;flex:1}
-.nav-item{display:flex;align-items:center;gap:12px;width:100%;padding:12px 14px;
-  border:none;background:none;border-radius:13px;font-family:inherit;font-size:14.5px;
+.nav-item{display:flex;align-items:center;gap:12px;width:100%;padding:13px 14px;
+  border:none;background:none;border-radius:13px;font-family:inherit;font-size:16px;
   font-weight:600;color:var(--text);cursor:pointer;text-align:left;transition:.15s}
 .nav-item:hover,.nav-item:active{background:#f1f5fc}
 .nav-item.active{background:#e8efff;color:var(--primary-dark)}
-.nav-item .ico{font-size:18px;width:24px;text-align:center;flex:none}
-.drawer-foot{padding:12px 16px calc(env(safe-area-inset-bottom) + 14px);
-  font-size:11px;color:var(--muted);border-top:1px solid var(--line)}
+.nav-item .ico{font-size:20px;width:26px;text-align:center;flex:none}
 .field{margin-bottom:14px}
 .field label{display:block;font-size:12.5px;font-weight:700;color:var(--muted);
   margin-bottom:6px;text-transform:uppercase;letter-spacing:.3px}
@@ -494,17 +492,16 @@ body:has(#view-ajustes.active) .composer { display: none; }
   .hoy-accion{padding:14px}
   .hoy-greeting .hg-mascot{width:70px;height:88px}
 }
-  /* Pie del menú con la marca */
-.drawer-foot .mini-companin{
-  display:block;
-  margin-bottom:6px;
-  opacity:.95;
+
+ /* Pie de barra lateral  */
+  .drawer-foot{
+  padding:14px 16px calc(env(safe-area-inset-bottom) + 14px);
+  font-size:12px;color:var(--muted);border-top:1px solid var(--line);
+  display:flex;align-items:center;justify-content:center;gap:8px;
 }
-.drawer-foot strong{
-  color:var(--text);
-  font-weight:700;
-  font-size:11.5px;
-}
+.drawer-foot .mini-companin{flex:none;opacity:.95}
+.drawer-foot span{font-weight:700;color:var(--text)}
+  
 </style>
 </head>
 <body>
