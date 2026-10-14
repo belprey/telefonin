@@ -494,6 +494,17 @@ body:has(#view-ajustes.active) .composer { display: none; }
   .hoy-accion{padding:14px}
   .hoy-greeting .hg-mascot{width:70px;height:88px}
 }
+  /* Pie del menú con la marca */
+.drawer-foot .mini-companin{
+  display:block;
+  margin-bottom:6px;
+  opacity:.95;
+}
+.drawer-foot strong{
+  color:var(--text);
+  font-weight:700;
+  font-size:11.5px;
+}
 </style>
 </head>
 <body>
@@ -801,10 +812,48 @@ body:has(#view-ajustes.active) .composer { display: none; }
         <button class="btn btn-danger" style="width:100%" onclick="Telefonin.borrarTodo()">🗑️ Borrar todo</button>
       </div>
 
-      <div class="card">
-        <h3>ℹ️ Sobre Telefonín</h3>
-        <p class="hint">Compañero, no terapeuta. No reemplaza tratamiento profesional. Si estás en crisis: 135 o 911.</p>
-      </div>
+    <div class="card">
+  <h3>ℹ️ Sobre Telefonín</h3>
+  <p class="hint">Compañero, no terapeuta. No reemplaza tratamiento profesional. Si estás en crisis: 135 o 911.</p>
+</div>
+
+<div class="card">
+  <h3>🏷️ CompanIn</h3>
+  <div style="display:flex;align-items:center;gap:12px;margin-bottom:12px">
+    <svg width="44" height="30" viewBox="0 0 60 40" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+      <rect x="0" y="0" width="60" height="40" rx="6" fill="#1A2A47"/>
+      <circle cx="14" cy="20" r="7" fill="#22b573"/>
+      <rect x="24" y="13" width="14" height="14" rx="3" fill="#f2703a" transform="rotate(-8 31 20)"/>
+      <polygon points="52,12 44,28 60,28" fill="#ffc93c"/>
+      <circle cx="9" cy="9" r="4" fill="#e5484d"/>
+      <polygon points="52,32 46,40 58,40" fill="#7a4fff"/>
+    </svg>
+    <div style="flex:1;min-width:0">
+      <div style="font-weight:800;font-size:15px;letter-spacing:-.2px">Un producto de CompanIn</div>
+      <div style="font-size:12px;color:var(--muted);margin-top:2px">Compañeros digitales hechos a mano</div>
+    </div>
+  </div>
+  <div class="switch-row" style="padding:8px 0">
+    <span style="font-size:13px">Aplicación</span>
+    <strong style="font-size:13px;color:var(--muted)">Telefonín</strong>
+  </div>
+  <div class="switch-row" style="padding:8px 0">
+    <span style="font-size:13px">Versión</span>
+    <strong style="font-size:13px;color:var(--muted)">1.0.0</strong>
+  </div>
+  <div class="switch-row" style="padding:8px 0">
+    <span style="font-size:13px">Versión de CompanIn OS</span>
+    <strong style="font-size:13px;color:var(--muted)">0.4</strong>
+  </div>
+  <div class="switch-row" style="padding:8px 0">
+    <span style="font-size:13px">Schema de datos</span>
+    <strong style="font-size:13px;color:var(--muted)" id="setSchemaVer">v3</strong>
+  </div>
+  <div class="switch-row" style="padding:8px 0;border-bottom:none">
+    <span style="font-size:13px">Familia</span>
+    <strong style="font-size:13px;color:var(--muted)">Telefonín · Estudín · Deportín</strong>
+  </div>
+</div>
     </section>
   </div>
 
@@ -836,7 +885,18 @@ body:has(#view-ajustes.active) .composer { display: none; }
     <button class="nav-item" data-view="habilidades"><span class="ico">📖</span> Habilidades DBT</button>
     <button class="nav-item" data-view="ajustes"><span class="ico">⚙️</span> Ajustes</button>
   </nav>
-  <div class="drawer-foot">Telefonín v1 · Datos en tu dispositivo</div>
+<div class="drawer-foot">
+  <svg class="mini-companin" width="20" height="14" viewBox="0 0 60 40" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+    <rect x="0" y="0" width="60" height="40" rx="6" fill="#1A2A47"/>
+    <circle cx="14" cy="20" r="7" fill="#22b573"/>
+    <rect x="24" y="13" width="14" height="14" rx="3" fill="#f2703a" transform="rotate(-8 31 20)"/>
+    <polygon points="52,12 44,28 60,28" fill="#ffc93c"/>
+    <circle cx="9" cy="9" r="4" fill="#e5484d"/>
+    <polygon points="52,32 46,40 58,40" fill="#7a4fff"/>
+  </svg>
+  <span>Un producto de CompanIn</span>
+  
+</div>
 </aside>
 
 <section class="sheet" id="sheetSkill">
@@ -1010,6 +1070,7 @@ const MARCO_LEGAL = Object.freeze({
 });
 
 const SCHEMA_VERSION = 3;
+const APP_VERSION = '1.0.0';
 
 const RUTINA_DEFAULT = [
   { id: 'pastillas', label: '💊 ¿Tomé las pastillas?', orden: 1, activo: true, creadoPor: 'sistema' },
@@ -2791,6 +2852,7 @@ $$('[data-close-sheet]').forEach(b => b.onclick = () => {
 
 function cargarFormAjustes(){
   $('#setNombre').value = ajustes.nombre;
+  
   $('#setVoz').checked = ajustes.voz;
   $('#setVel').value = ajustes.velocidad;
   $('#setCompartir').checked = compartir.activo;
@@ -2820,6 +2882,10 @@ function cargarFormAjustes(){
     ? `✅ Cadena de auditoría íntegra · ${integridad.total} eventos encadenados.`
     : `⚠️ Cadena rota en evento #${integridad.indiceRoto}.`;
   renderAudit('#logAccesos');
+    const elApp = document.getElementById('setAppVer');
+  if (elApp) elApp.textContent = APP_VERSION;
+  const elOS = document.getElementById('setOsVer');
+  if (elSch) elSch.textContent = 'v' + SCHEMA_VERSION;
 }
   
 $('#guardarAjustesFijo').onclick = () => {
