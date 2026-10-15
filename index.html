@@ -1083,6 +1083,15 @@ body.feedback-mode .fb-panel{cursor:default !important}
         <button class="btn btn-secondary" style="width:100%;margin-bottom:8px" onclick="Telefonin.exportar()">⬇️ Exportar mis datos</button>
         <button class="btn btn-danger" style="width:100%" onclick="Telefonin.borrarTodo()">🗑️ Borrar todo</button>
       </div>
+      <!-- ── Sobre Telefonín + versión ─────────────────────────────── -->
+<div class="card">
+  <h3>ℹ️ Sobre Telefonín</h3>
+  <p class="hint">Compañero, no terapeuta. No reemplaza tratamiento profesional. Si estás en crisis: 135 o 911.</p>
+  <div style="display:flex;justify-content:space-between;align-items:center;margin-top:12px;padding-top:12px;border-top:1px solid var(--line)">
+    <span style="font-size:13px;color:var(--muted);font-weight:700">Versión</span>
+    <span style="font-size:14px;font-weight:800;color:var(--primary-dark)" id="setAppVer">v1.0</span>
+  </div>
+</div>
     </section>
   </div>
 
@@ -1232,8 +1241,8 @@ body.feedback-mode .fb-panel{cursor:default !important}
         <div class="stat"><b id="avgHab">—</b><small>Habilidades</small></div>
       </div>
       <div class="progress"><div id="progRutina" style="width:0%"></div></div>
-      <p class="hint" style="margin:0"><strong id="rutinaPct">0%</strong> de cumplimiento de rutina.</p>
-    </div>
+     <p class="hint" style="margin:0"><strong id="rutinaPct">0%</strong> de los ítems de rutina cumplidos en los últimos 7 días.</p>
+       </div>
     <div class="card"><h3>💡 Lo que veo</h3><div id="insights"><div class="empty">Necesito al menos 3 registros.</div></div></div>
     <div class="card"><h3>🌤️ Clima y estado de ánimo</h3><div id="climaPaciente"></div></div>
     <div class="card"><h3>Registros guardados</h3><div id="listaRegistros"></div></div>
@@ -1357,7 +1366,7 @@ const MARCO_LEGAL = Object.freeze({
 });
 
 const SCHEMA_VERSION = 3;
-
+const APP_VERSION = '1.0';
 
 const RUTINA_DEFAULT = [
   { id: 'pastillas', label: '💊 ¿Tomé las pastillas?', orden: 1, activo: true, creadoPor: 'sistema' },
@@ -1875,18 +1884,20 @@ const Dominio = {
     }
   },
   analisis: {
-    calcularRutina(regs, items){
-      const listaItems = items || rutinaItems.filter(i => i.activo);
-      let ok = 0, total = 0;
-      regs.forEach(r => {
-        const rutina = r.rutina || {};
-        listaItems.forEach(it => {
-          const val = rutina[it.id];
-          if (typeof val === 'boolean'){ total++; if (val) ok++; }
-        });
-      });
-      return { ok, total, pct: total ? Math.round(ok/total*100) : 0 };
-    },
+  calcularRutina(regs, items){
+  const listaItems = items || rutinaItems.filter(i => i.activo);
+  let ok = 0, total = 0;
+  regs.forEach(r => {
+    const rutina = r.rutina || {};
+    listaItems.forEach(it => {
+      /* Cada ítem de cada día cuenta. Si no está marcado como true,
+         se cuenta como no cumplido. */
+      total++;
+      if (rutina[it.id] === true) ok++;
+    });
+  });
+  return { ok, total, pct: total ? Math.round(ok/total*100) : 0 };
+},
     promedios(regs, campo){
       const v = regs.map(r => r[campo]).filter(x => typeof x === 'number');
       return v.length ? v.reduce((a,b) => a+b, 0) / v.length : null;
@@ -3358,6 +3369,9 @@ function cargarFormAjustes(){
     ? `✅ Cadena de auditoría íntegra · ${integridad.total} eventos encadenados.`
     : `⚠️ Cadena rota en evento #${integridad.indiceRoto}.`;
   renderAudit('#logAccesos');
+    /* Vuelca la versión de la app en la card Sobre Telefonín */
+  const elApp = document.getElementById('setAppVer');
+  if (elApp) elApp.textContent = 'v' + APP_VERSION;
 }
   
 $('#guardarAjustesFijo').onclick = () => {
