@@ -694,13 +694,14 @@ body.feedback-mode .fb-panel{cursor:default !important}
   z-index:500;box-shadow:0 8px 24px rgba(0,0,0,.3);
   animation:fade .3s ease;max-width:88vw;text-align:center;line-height:1.35}
   /* ── Drogas y medicamentos (Etapa 2, alineado a planilla DBT) ── */
-.drogas-no-btn{width:100%;padding:14px;border:2px solid var(--ok);
-  background:#e3f7ed;color:#149a5a;border-radius:14px;
+.drogas-no-btn{width:100%;padding:14px;border:2px dashed var(--line);
+  background:#fff;color:var(--muted);border-radius:14px;
   font-family:inherit;font-size:14px;font-weight:700;
   cursor:pointer;transition:.15s;margin-bottom:14px}
 .drogas-no-btn:active{transform:scale(.98)}
-.drogas-no-btn.on{background:var(--ok);color:#fff;border-color:var(--ok)}
-
+.drogas-no-btn.on{background:#e3f7ed;color:#149a5a;
+  border:2px solid var(--ok)}
+ 
 .droga-bloque{padding:12px 0;border-bottom:1px solid var(--line)}
 .droga-bloque:last-child{border-bottom:none}
 .droga-label{font-size:13px;font-weight:700;color:var(--text);
@@ -717,6 +718,10 @@ body.feedback-mode .fb-panel{cursor:default !important}
 .droga-sn-btn:active{transform:scale(.97)}
 .droga-sn-btn.on.s{background:#e3f7ed;border-color:var(--ok);color:#149a5a}
 .droga-sn-btn.on.n{background:#fde9e9;border-color:var(--danger);color:#c92c32}
+
+/* Botones S/N para sustancias (alcohol, ilegales, venta libre) */
+.droga-sn-btn.on.no-cons{background:#e3f7ed;border-color:var(--ok);color:#149a5a}
+.droga-sn-btn.on.si-cons{background:#fef3dd;border-color:var(--warn);color:#a76a00}  
   
 </style>
 </head>
@@ -840,22 +845,30 @@ body.feedback-mode .fb-panel{cursor:default !important}
   </button>
 
   <!-- Alcohol -->
-  <div class="droga-bloque">
-    <span class="droga-label">🍷 Alcohol</span>
-    <div class="droga-inputs">
-      <input type="number" id="droga-alcohol-cant" min="0" placeholder="#">
-      <input type="text" id="droga-alcohol-que" placeholder="¿Qué? Ej: cerveza">
-    </div>
+ <div class="droga-bloque">
+  <span class="droga-label">🍷 Alcohol</span>
+  <div class="droga-sn">
+    <button type="button" class="droga-sn-btn" data-sub="alcohol" data-estado="N">No consumí</button>
+    <button type="button" class="droga-sn-btn" data-sub="alcohol" data-estado="S">Sí consumí</button>
   </div>
+  <div class="droga-inputs" id="droga-alcohol-inputs" style="display:none;margin-top:8px">
+    <input type="number" id="droga-alcohol-cant" min="0" placeholder="#">
+    <input type="text" id="droga-alcohol-que" placeholder="¿Qué? Ej: cerveza">
+  </div>
+</div>
 
   <!-- Drogas ilegales -->
-  <div class="droga-bloque">
-    <span class="droga-label">💊 Drogas ilegales</span>
-    <div class="droga-inputs">
-      <input type="number" id="droga-ilegales-cant" min="0" placeholder="#">
-      <input type="text" id="droga-ilegales-que" placeholder="¿Qué? Ej: cocaína">
-    </div>
+ <div class="droga-bloque">
+  <span class="droga-label">💊 Drogas ilegales</span>
+  <div class="droga-sn">
+    <button type="button" class="droga-sn-btn" data-sub="ilegales" data-estado="N">No consumí</button>
+    <button type="button" class="droga-sn-btn" data-sub="ilegales" data-estado="S">Sí consumí</button>
   </div>
+  <div class="droga-inputs" id="droga-ilegales-inputs" style="display:none;margin-top:8px">
+    <input type="number" id="droga-ilegales-cant" min="0" placeholder="#">
+    <input type="text" id="droga-ilegales-que" placeholder="¿Qué? Ej: cocaína">
+  </div>
+</div>
 
   <!-- Meds prescriptos: S/N según lo indicado -->
   <div class="droga-bloque">
@@ -871,13 +884,17 @@ body.feedback-mode .fb-panel{cursor:default !important}
   </div>
 
   <!-- Meds de venta libre -->
-  <div class="droga-bloque">
-    <span class="droga-label">🩹 Medicamentos de venta libre</span>
-    <div class="droga-inputs">
-      <input type="number" id="droga-vl-cant" min="0" placeholder="#">
-      <input type="text" id="droga-vl-que" placeholder="¿Qué? Ej: ibuprofeno 400mg">
-    </div>
+<div class="droga-bloque">
+  <span class="droga-label">🩹 Medicamentos de venta libre</span>
+  <div class="droga-sn">
+    <button type="button" class="droga-sn-btn" data-sub="ventaLibre" data-estado="N">No consumí</button>
+    <button type="button" class="droga-sn-btn" data-sub="ventaLibre" data-estado="S">Sí consumí</button>
   </div>
+  <div class="droga-inputs" id="droga-vl-inputs" style="display:none;margin-top:8px">
+    <input type="number" id="droga-vl-cant" min="0" placeholder="#">
+    <input type="text" id="droga-vl-que" placeholder="¿Qué? Ej: ibuprofeno 400mg">
+  </div>
+</div>
 
   <div class="field" style="margin-top:14px;margin-bottom:0">
     <label>Observaciones (opcional)</label>
@@ -1884,14 +1901,16 @@ const Dominio = {
     }
   },
   analisis: {
-  calcularRutina(regs, items){
+ calcularRutina(regs, items){
   const listaItems = items || rutinaItems.filter(i => i.activo);
   let ok = 0, total = 0;
   regs.forEach(r => {
     const rutina = r.rutina || {};
+    /* Solo contamos días donde se tocó al menos un ítem de rutina.
+       Los días sin datos no penalizan. */
+    const tieneAlgunItem = listaItems.some(it => typeof rutina[it.id] === 'boolean');
+    if (!tieneAlgunItem) return;
     listaItems.forEach(it => {
-      /* Cada ítem de cada día cuenta. Si no está marcado como true,
-         se cuenta como no cumplido. */
       total++;
       if (rutina[it.id] === true) ok++;
     });
@@ -2446,10 +2465,10 @@ let metaMarihuana = Storage.cargar('telefonin.v3.metaMarihuana', { texto: '' });
    en el campo `drogas`. Independiente de `marihuana`. */
 
 let drogasEstado = {
-  alcohol: { cant: '', que: '' },
-  ilegales: { cant: '', que: '' },
-  medsPrescriptos: null,   // 'S' | 'N' | null
-  ventaLibre: { cant: '', que: '' },
+  alcohol: { estado: null, cant: '', que: '' },
+  ilegales: { estado: null, cant: '', que: '' },
+  medsPrescriptos: null,
+  ventaLibre: { estado: null, cant: '', que: '' },
   noConsumiNada: false,
   obs: ''
 };
@@ -2462,42 +2481,69 @@ function renderDrogasNoBtn(){
 
 function resetDrogas(){
   drogasEstado = {
-    alcohol: { cant: '', que: '' },
-    ilegales: { cant: '', que: '' },
+    alcohol: { estado: null, cant: '', que: '' },
+    ilegales: { estado: null, cant: '', que: '' },
     medsPrescriptos: null,
-    ventaLibre: { cant: '', que: '' },
+    ventaLibre: { estado: null, cant: '', que: '' },
     noConsumiNada: false,
     obs: ''
   };
-  document.getElementById('droga-alcohol-cant').value = '';
-  document.getElementById('droga-alcohol-que').value = '';
-  document.getElementById('droga-ilegales-cant').value = '';
-  document.getElementById('droga-ilegales-que').value = '';
-  document.getElementById('droga-vl-cant').value = '';
-  document.getElementById('droga-vl-que').value = '';
+  ['alcohol','ilegales','ventaLibre'].forEach(sub => {
+    const cantId = sub === 'ventaLibre' ? 'droga-vl-cant' : `droga-${sub}-cant`;
+    const queId = sub === 'ventaLibre' ? 'droga-vl-que' : `droga-${sub}-que`;
+    const inpId = sub === 'ventaLibre' ? 'droga-vl-inputs' : `droga-${sub}-inputs`;
+    const cant = document.getElementById(cantId);
+    const que = document.getElementById(queId);
+    const inp = document.getElementById(inpId);
+    if (cant) cant.value = '';
+    if (que) que.value = '';
+    if (inp) inp.style.display = 'none';
+  });
   document.getElementById('droga-obs').value = '';
-  document.querySelectorAll('.droga-sn-btn').forEach(b => b.classList.remove('on', 's', 'n'));
+  document.querySelectorAll('.droga-sn-btn').forEach(b => {
+    b.classList.remove('on', 's', 'n', 'no-cons', 'si-cons');
+  });
   renderDrogasNoBtn();
 }
 
+/* Actualiza los botones S/N de una sustancia y muestra u oculta
+   los inputs según el estado. */
+function renderSubEstado(sub){
+  const estado = drogasEstado[sub].estado;
+  document.querySelectorAll(`.droga-sn-btn[data-sub="${sub}"]`).forEach(btn => {
+    btn.classList.remove('on', 'no-cons', 'si-cons');
+    if (btn.dataset.estado === estado){
+      btn.classList.add('on');
+      if (estado === 'N') btn.classList.add('no-cons');
+      if (estado === 'S') btn.classList.add('si-cons');
+    }
+  });
+  const inpId = sub === 'ventaLibre' ? 'droga-vl-inputs' : `droga-${sub}-inputs`;
+  const inp = document.getElementById(inpId);
+  if (inp) inp.style.display = estado === 'S' ? 'grid' : 'none';
+}
+  
 function cargarDrogasEnForm(drogas){
   resetDrogas();
   if (!drogas) return;
-  if (drogas.alcohol){
-    drogasEstado.alcohol = { ...drogas.alcohol };
-    document.getElementById('droga-alcohol-cant').value = drogas.alcohol.cant || '';
-    document.getElementById('droga-alcohol-que').value = drogas.alcohol.que || '';
-  }
-  if (drogas.ilegales){
-    drogasEstado.ilegales = { ...drogas.ilegales };
-    document.getElementById('droga-ilegales-cant').value = drogas.ilegales.cant || '';
-    document.getElementById('droga-ilegales-que').value = drogas.ilegales.que || '';
-  }
-  if (drogas.ventaLibre){
-    drogasEstado.ventaLibre = { ...drogas.ventaLibre };
-    document.getElementById('droga-vl-cant').value = drogas.ventaLibre.cant || '';
-    document.getElementById('droga-vl-que').value = drogas.ventaLibre.que || '';
-  }
+
+  ['alcohol','ilegales','ventaLibre'].forEach(sub => {
+    if (!drogas[sub]) return;
+    const d = drogas[sub];
+    /* Compatibilidad hacia atrás: registros viejos sin `estado`.
+       Si hay cant o que, asumimos 'S'. */
+    let estado = d.estado || null;
+    if (!estado && (d.cant || d.que)) estado = 'S';
+    drogasEstado[sub] = { estado, cant: d.cant || '', que: d.que || '' };
+    const cantId = sub === 'ventaLibre' ? 'droga-vl-cant' : `droga-${sub}-cant`;
+    const queId = sub === 'ventaLibre' ? 'droga-vl-que' : `droga-${sub}-que`;
+    const cant = document.getElementById(cantId);
+    const que = document.getElementById(queId);
+    if (cant) cant.value = drogasEstado[sub].cant;
+    if (que) que.value = drogasEstado[sub].que;
+    renderSubEstado(sub);
+  });
+
   if (drogas.medsPrescriptos){
     drogasEstado.medsPrescriptos = drogas.medsPrescriptos;
     const id = drogas.medsPrescriptos === 'S' ? 'droga-meds-s' : 'droga-meds-n';
@@ -2508,70 +2554,103 @@ function cargarDrogasEnForm(drogas){
   document.getElementById('droga-obs').value = drogas.obs || '';
   renderDrogasNoBtn();
 }
-
+  
 function leerDrogasDelForm(){
   const alcohol = {
+    estado: drogasEstado.alcohol.estado,
     cant: document.getElementById('droga-alcohol-cant').value.trim(),
     que: document.getElementById('droga-alcohol-que').value.trim()
   };
   const ilegales = {
+    estado: drogasEstado.ilegales.estado,
     cant: document.getElementById('droga-ilegales-cant').value.trim(),
     que: document.getElementById('droga-ilegales-que').value.trim()
   };
   const ventaLibre = {
+    estado: drogasEstado.ventaLibre.estado,
     cant: document.getElementById('droga-vl-cant').value.trim(),
     que: document.getElementById('droga-vl-que').value.trim()
   };
   const obs = document.getElementById('droga-obs').value.trim();
 
-  // Si no hay nada cargado, devolvemos null para no ensuciar el registro
-  const todoVacio = !alcohol.cant && !alcohol.que && !ilegales.cant && !ilegales.que &&
-                    !ventaLibre.cant && !ventaLibre.que && !drogasEstado.medsPrescriptos &&
+  const todoVacio = !alcohol.estado && !alcohol.cant && !alcohol.que &&
+                    !ilegales.estado && !ilegales.cant && !ilegales.que &&
+                    !ventaLibre.estado && !ventaLibre.cant && !ventaLibre.que &&
+                    !drogasEstado.medsPrescriptos &&
                     !drogasEstado.noConsumiNada && !obs;
   if (todoVacio) return null;
 
   return {
-    alcohol,
-    ilegales,
+    alcohol, ilegales,
     medsPrescriptos: drogasEstado.medsPrescriptos,
     ventaLibre,
     noConsumiNada: drogasEstado.noConsumiNada === true,
     obs
   };
 }
-
+  
 function construirDrogas(){
-  // Botón "Hoy no consumí nada"
+  /* Botón "Hoy no consumí nada" */
   const btn = document.getElementById('drogasNoBtn');
   if (btn){
     btn.addEventListener('click', () => {
       const encendido = !drogasEstado.noConsumiNada;
       drogasEstado.noConsumiNada = encendido;
       if (encendido){
-        // Limpiar todos los campos
-        document.getElementById('droga-alcohol-cant').value = '';
-        document.getElementById('droga-alcohol-que').value = '';
-        document.getElementById('droga-ilegales-cant').value = '';
-        document.getElementById('droga-ilegales-que').value = '';
-        document.getElementById('droga-vl-cant').value = '';
-        document.getElementById('droga-vl-que').value = '';
-        document.querySelectorAll('.droga-sn-btn').forEach(b => b.classList.remove('on', 's', 'n'));
+        ['alcohol','ilegales','ventaLibre'].forEach(sub => {
+          drogasEstado[sub] = { estado: 'N', cant: '', que: '' };
+          const cantId = sub === 'ventaLibre' ? 'droga-vl-cant' : `droga-${sub}-cant`;
+          const queId = sub === 'ventaLibre' ? 'droga-vl-que' : `droga-${sub}-que`;
+          const cant = document.getElementById(cantId);
+          const que = document.getElementById(queId);
+          if (cant) cant.value = '';
+          if (que) que.value = '';
+          renderSubEstado(sub);
+        });
+        document.querySelectorAll('.droga-sn-btn[data-sub]').forEach(b => {
+          if (b.dataset.estado === 'N') b.classList.add('on', 'no-cons');
+          else b.classList.remove('on', 'no-cons', 'si-cons');
+        });
+        document.querySelectorAll('.droga-sn-btn').forEach(b => {
+          if (!b.dataset.sub) b.classList.remove('on', 's', 'n');
+        });
         drogasEstado.medsPrescriptos = null;
+      } else {
+        ['alcohol','ilegales','ventaLibre'].forEach(sub => {
+          drogasEstado[sub] = { estado: null, cant: '', que: '' };
+          renderSubEstado(sub);
+        });
       }
       renderDrogasNoBtn();
     });
   }
 
-  // Botones S/N de prescriptos
+  /* Botones S/N de cada sustancia */
+  document.querySelectorAll('.droga-sn-btn[data-sub]').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const sub = btn.dataset.sub;
+      const estado = btn.dataset.estado;
+      const yaActivo = drogasEstado[sub].estado === estado;
+      drogasEstado[sub].estado = yaActivo ? null : estado;
+      if (drogasEstado.noConsumiNada){
+        drogasEstado.noConsumiNada = false;
+        renderDrogasNoBtn();
+      }
+      renderSubEstado(sub);
+    });
+  });
+
+  /* Botones S/N de meds prescriptos (sin cambios) */
   const sBtn = document.getElementById('droga-meds-s');
   const nBtn = document.getElementById('droga-meds-n');
-  const bindSN = (btn, val) => {
-    if (!btn) return;
-    btn.addEventListener('click', () => {
-      const yaActivo = btn.classList.contains('on');
-      document.querySelectorAll('.droga-sn-btn').forEach(b => b.classList.remove('on', 's', 'n'));
+  const bindSN = (b, val) => {
+    if (!b) return;
+    b.addEventListener('click', () => {
+      const yaActivo = b.classList.contains('on');
+      document.querySelectorAll('#droga-meds-s, #droga-meds-n')
+        .forEach(x => x.classList.remove('on', 's', 'n'));
       if (!yaActivo){
-        btn.classList.add('on', val.toLowerCase());
+        b.classList.add('on', val.toLowerCase());
         drogasEstado.medsPrescriptos = val;
         drogasEstado.noConsumiNada = false;
       } else {
@@ -2583,7 +2662,7 @@ function construirDrogas(){
   bindSN(sBtn, 'S');
   bindSN(nBtn, 'N');
 
-  // Cualquier cambio en los inputs apaga el "no consumí nada"
+  /* Cambios en inputs apagan "no consumí nada" */
   ['droga-alcohol-cant','droga-alcohol-que','droga-ilegales-cant',
    'droga-ilegales-que','droga-vl-cant','droga-vl-que'].forEach(id => {
     const el = document.getElementById(id);
@@ -2594,7 +2673,7 @@ function construirDrogas(){
       }
     });
   });
-    }
+}
   
   /* ── Marihuana en Rutina de cuidado (tracker personal) ────────
    Reutiliza los estados `marihuanaEstado` y `marihuanaCantidad`.
@@ -2641,27 +2720,39 @@ function renderMarihuanaBotonesCuidado(){
 
 function guardarMarihuanaCuidado(){
   const fecha = cuidadoFechaActual || hoyISO();
-  let r = registros.find(x => x.fecha === fecha);
-  if (!r){
-    r = Dominio.registro.guardar({ fecha, rutina: {} });
-    r = registros.find(x => x.fecha === fecha);
-  }
   const obs = document.getElementById('mar-obs-cuidado');
   const observaciones = obs ? obs.value.trim() : '';
+
+  /* Caso 1: no hay nada para guardar. Si existía marihuana, la
+     borramos del registro, pero no creamos registros vacíos. */
   if (!marihuanaEstado && !observaciones){
-    delete r.marihuana;
-  } else {
-    r.marihuana = {
-      estado: marihuanaEstado,
-      cantidad: marihuanaCantidad,
-      obs: observaciones
-    };
+    const r = registros.find(x => x.fecha === fecha);
+    if (r && r.marihuana){
+      delete r.marihuana;
+      r.updatedAt = Date.now();
+      Storage.guardar(K.registros, registros);
+      auditar('marihuana_cuidado_borrada', { fecha });
+    }
+    return;
   }
+
+  /* Caso 2: hay algo para guardar. Creamos el registro solo si
+     no existe, pero sin array rutina vacío. */
+  let r = registros.find(x => x.fecha === fecha);
+  if (!r){
+    r = Dominio.registro.guardar({ fecha });
+    r = registros.find(x => x.fecha === fecha);
+  }
+  r.marihuana = {
+    estado: marihuanaEstado,
+    cantidad: marihuanaCantidad,
+    obs: observaciones
+  };
   r.updatedAt = Date.now();
   Storage.guardar(K.registros, registros);
   auditar('marihuana_cuidado_guardada', { fecha });
 }
-
+  
 function construirBotonesMarihuanaCuidado(){
   document.querySelectorAll('#view-cuidado .marihuana-btn[data-mar]').forEach(btn => {
     btn.addEventListener('click', () => {
