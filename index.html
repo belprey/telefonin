@@ -693,6 +693,30 @@ body.feedback-mode .fb-panel{cursor:default !important}
   padding:12px 18px;border-radius:14px;font-size:14px;font-weight:600;
   z-index:500;box-shadow:0 8px 24px rgba(0,0,0,.3);
   animation:fade .3s ease;max-width:88vw;text-align:center;line-height:1.35}
+  /* ── Drogas y medicamentos (Etapa 2, alineado a planilla DBT) ── */
+.drogas-no-btn{width:100%;padding:14px;border:2px solid var(--ok);
+  background:#e3f7ed;color:#149a5a;border-radius:14px;
+  font-family:inherit;font-size:14px;font-weight:700;
+  cursor:pointer;transition:.15s;margin-bottom:14px}
+.drogas-no-btn:active{transform:scale(.98)}
+.drogas-no-btn.on{background:var(--ok);color:#fff;border-color:var(--ok)}
+
+.droga-bloque{padding:12px 0;border-bottom:1px solid var(--line)}
+.droga-bloque:last-child{border-bottom:none}
+.droga-label{font-size:13px;font-weight:700;color:var(--text);
+  margin-bottom:8px;display:block}
+.droga-inputs{display:grid;grid-template-columns:70px 1fr;gap:8px}
+.droga-inputs input{width:100%;padding:10px 12px;border:1px solid var(--line);
+  border-radius:10px;font-family:inherit;font-size:14px;
+  background:#f6f9fd;outline:none;color:var(--text)}
+.droga-inputs input:focus{border-color:var(--primary);background:#fff}
+.droga-sn{display:flex;gap:8px}
+.droga-sn-btn{flex:1;padding:11px 10px;border:2px solid var(--line);
+  background:#fff;border-radius:12px;font-family:inherit;
+  font-size:13px;font-weight:600;color:var(--text);cursor:pointer;transition:.15s}
+.droga-sn-btn:active{transform:scale(.97)}
+.droga-sn-btn.on.s{background:#e3f7ed;border-color:var(--ok);color:#149a5a}
+.droga-sn-btn.on.n{background:#fde9e9;border-color:var(--danger);color:#c92c32}
   
 </style>
 </head>
@@ -805,15 +829,61 @@ body.feedback-mode .fb-panel{cursor:default !important}
         <div class="scale-row"><span class="lbl">🗣️ Efectividad interpersonal</span><div class="scale skill" data-scale="habInterpersonal" data-max="7"></div></div>
       </div>
 
-      <div class="card">
-        <h3>Drogas</h3>
-        <p class="hint">Cómo fue hoy. Sin juicio, solo el dato.</p>
+     <!-- ── Drogas y medicamentos (Etapa 2 · planilla DBT) ─────────── -->
+<div class="card">
+  <h3>Drogas y medicamentos</h3>
+  <p class="hint">Cómo fue hoy. Sin juicio, solo el dato.</p>
 
-        <div class="marihuana-botones">
-          <button type="button" class="marihuana-btn" data-mar="no">🟢 No fumé</button>
-          <button type="button" class="marihuana-btn" data-mar="dentro">🟡 Dentro de mi meta</button>
-          <button type="button" class="marihuana-btn" data-mar="fuera">🟠 Fuera de mi meta</button>
-        </div>
+  <!-- Botón rápido: deja todo en cero -->
+  <button type="button" class="drogas-no-btn" id="drogasNoBtn">
+    🟢 Hoy no consumí nada
+  </button>
+
+  <!-- Alcohol -->
+  <div class="droga-bloque">
+    <span class="droga-label">🍷 Alcohol</span>
+    <div class="droga-inputs">
+      <input type="number" id="droga-alcohol-cant" min="0" placeholder="#">
+      <input type="text" id="droga-alcohol-que" placeholder="¿Qué? Ej: cerveza">
+    </div>
+  </div>
+
+  <!-- Drogas ilegales -->
+  <div class="droga-bloque">
+    <span class="droga-label">💊 Drogas ilegales</span>
+    <div class="droga-inputs">
+      <input type="number" id="droga-ilegales-cant" min="0" placeholder="#">
+      <input type="text" id="droga-ilegales-que" placeholder="¿Qué? Ej: cocaína">
+    </div>
+  </div>
+
+  <!-- Meds prescriptos: S/N según lo indicado -->
+  <div class="droga-bloque">
+    <span class="droga-label">💉 Medicamentos prescriptos</span>
+    <div class="droga-sn">
+      <button type="button" class="droga-sn-btn" id="droga-meds-s">
+        ✓ Según lo indicado
+      </button>
+      <button type="button" class="droga-sn-btn" id="droga-meds-n">
+        ✗ No según lo indicado
+      </button>
+    </div>
+  </div>
+
+  <!-- Meds de venta libre -->
+  <div class="droga-bloque">
+    <span class="droga-label">🩹 Medicamentos de venta libre</span>
+    <div class="droga-inputs">
+      <input type="number" id="droga-vl-cant" min="0" placeholder="#">
+      <input type="text" id="droga-vl-que" placeholder="¿Qué? Ej: ibuprofeno 400mg">
+    </div>
+  </div>
+
+  <div class="field" style="margin-top:14px;margin-bottom:0">
+    <label>Observaciones (opcional)</label>
+    <textarea id="droga-obs" placeholder="¿Qué pasó? ¿Cómo te sentiste?"></textarea>
+  </div>
+</div>
 
         <div class="marihuana-cantidad" id="marCantidad">
           <label style="font-size:12.5px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.3px;display:block;margin-bottom:8px">Cantidad</label>
@@ -921,6 +991,41 @@ body.feedback-mode .fb-panel{cursor:default !important}
         </h3>
         <div id="cuidadoChecklist"></div>
       </div>
+
+      <!-- ── Mi consumo de marihuana (tracker personal) ────────────── -->
+<div class="card">
+  <h3>Mi consumo de marihuana</h3>
+  <p class="hint">Cómo vengo con mi meta. Sin juicio, solo el dato.</p>
+
+  <div class="marihuana-botones">
+    <button type="button" class="marihuana-btn" data-mar="no">🟢 No fumé</button>
+    <button type="button" class="marihuana-btn" data-mar="dentro">🟡 Dentro de mi meta</button>
+    <button type="button" class="marihuana-btn" data-mar="fuera">🟠 Fuera de mi meta</button>
+  </div>
+
+  <div class="marihuana-cantidad" id="marCantidadCuidado">
+    <label style="font-size:12.5px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.3px;display:block;margin-bottom:8px">Cantidad</label>
+    <div class="marihuana-botones">
+      <button type="button" class="marihuana-btn" data-cant="1">1 seca</button>
+      <button type="button" class="marihuana-btn" data-cant="2">2 secas</button>
+      <button type="button" class="marihuana-btn" data-cant="3+">3 o más</button>
+    </div>
+  </div>
+
+  <div class="field" style="margin-top:14px;margin-bottom:0">
+    <label>Observaciones (opcional)</label>
+    <textarea id="mar-obs-cuidado" placeholder="¿Qué pasó? ¿Cómo te sentiste?"></textarea>
+  </div>
+
+  <div class="meta-marihuana" style="margin-top:14px;padding-top:14px;border-top:1px solid var(--line)">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">
+      <label style="font-size:12.5px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.3px">Mi meta ahora</label>
+      <span id="metaGuardadoAvisoCuidado" style="font-size:11px;color:var(--ok);opacity:0;transition:opacity .3s;font-weight:600">✓ Guardado</span>
+    </div>
+    <textarea id="mar-meta-cuidado" placeholder="Ej: no fumar por 21 días"></textarea>
+  </div>
+</div>
+      
     </section>
 
     <section class="view" id="view-habilidades">
@@ -2229,6 +2334,9 @@ function renderCuidadoChecklist(){
       toggleCuidadoItem(inp.dataset.cuidadoItem, inp.checked);
     });
   });
+  /* Nuevo: carga la marihuana del día elegido */
+  const rM = registros.find(x => x.fecha === fecha);
+  cargarMarihuanaEnFormCuidado(rM && rM.marihuana ? rM.marihuana : null);
 }
 
 function toggleCuidadoItem(itemId, checked){
@@ -2343,28 +2451,181 @@ let marihuanaEstado = null;
 let marihuanaCantidad = null;
 let metaMarihuana = Storage.cargar('telefonin.v3.metaMarihuana', { texto: '' });
 
-function construirBotonesMarihuana(){
-  document.querySelectorAll('.marihuana-btn[data-mar]').forEach(btn => {
-    btn.addEventListener('click', () => {
-      const val = btn.dataset.mar;
-      marihuanaEstado = (marihuanaEstado === val) ? null : val;
-      renderMarihuanaBotones();
-    });
-  });
-  document.querySelectorAll('.marihuana-btn[data-cant]').forEach(btn => {
-    btn.addEventListener('click', () => {
-      const val = btn.dataset.cant;
-      marihuanaCantidad = (marihuanaCantidad === val) ? null : val;
-      renderMarihuanaBotones();
-    });
-  });
-   const metaEl = document.getElementById('mar-meta');
-  if (metaEl) metaEl.addEventListener('input', programarGuardadoMeta);
 
+/* ── Drogas y medicamentos (Etapa 2) ─────────────────────────
+   Alineado a la planilla DBT. Guarda dentro del registro diario
+   en el campo `drogas`. Independiente de `marihuana`. */
+
+let drogasEstado = {
+  alcohol: { cant: '', que: '' },
+  ilegales: { cant: '', que: '' },
+  medsPrescriptos: null,   // 'S' | 'N' | null
+  ventaLibre: { cant: '', que: '' },
+  noConsumiNada: false,
+  obs: ''
+};
+
+function renderDrogasNoBtn(){
+  const btn = document.getElementById('drogasNoBtn');
+  if (!btn) return;
+  btn.classList.toggle('on', drogasEstado.noConsumiNada === true);
 }
 
-function renderMarihuanaBotones(){
-  document.querySelectorAll('.marihuana-btn[data-mar]').forEach(btn => {
+function resetDrogas(){
+  drogasEstado = {
+    alcohol: { cant: '', que: '' },
+    ilegales: { cant: '', que: '' },
+    medsPrescriptos: null,
+    ventaLibre: { cant: '', que: '' },
+    noConsumiNada: false,
+    obs: ''
+  };
+  document.getElementById('droga-alcohol-cant').value = '';
+  document.getElementById('droga-alcohol-que').value = '';
+  document.getElementById('droga-ilegales-cant').value = '';
+  document.getElementById('droga-ilegales-que').value = '';
+  document.getElementById('droga-vl-cant').value = '';
+  document.getElementById('droga-vl-que').value = '';
+  document.getElementById('droga-obs').value = '';
+  document.querySelectorAll('.droga-sn-btn').forEach(b => b.classList.remove('on', 's', 'n'));
+  renderDrogasNoBtn();
+}
+
+function cargarDrogasEnForm(drogas){
+  resetDrogas();
+  if (!drogas) return;
+  if (drogas.alcohol){
+    drogasEstado.alcohol = { ...drogas.alcohol };
+    document.getElementById('droga-alcohol-cant').value = drogas.alcohol.cant || '';
+    document.getElementById('droga-alcohol-que').value = drogas.alcohol.que || '';
+  }
+  if (drogas.ilegales){
+    drogasEstado.ilegales = { ...drogas.ilegales };
+    document.getElementById('droga-ilegales-cant').value = drogas.ilegales.cant || '';
+    document.getElementById('droga-ilegales-que').value = drogas.ilegales.que || '';
+  }
+  if (drogas.ventaLibre){
+    drogasEstado.ventaLibre = { ...drogas.ventaLibre };
+    document.getElementById('droga-vl-cant').value = drogas.ventaLibre.cant || '';
+    document.getElementById('droga-vl-que').value = drogas.ventaLibre.que || '';
+  }
+  if (drogas.medsPrescriptos){
+    drogasEstado.medsPrescriptos = drogas.medsPrescriptos;
+    const id = drogas.medsPrescriptos === 'S' ? 'droga-meds-s' : 'droga-meds-n';
+    const btn = document.getElementById(id);
+    if (btn) btn.classList.add('on', drogas.medsPrescriptos.toLowerCase());
+  }
+  if (drogas.noConsumiNada) drogasEstado.noConsumiNada = true;
+  document.getElementById('droga-obs').value = drogas.obs || '';
+  renderDrogasNoBtn();
+}
+
+function leerDrogasDelForm(){
+  const alcohol = {
+    cant: document.getElementById('droga-alcohol-cant').value.trim(),
+    que: document.getElementById('droga-alcohol-que').value.trim()
+  };
+  const ilegales = {
+    cant: document.getElementById('droga-ilegales-cant').value.trim(),
+    que: document.getElementById('droga-ilegales-que').value.trim()
+  };
+  const ventaLibre = {
+    cant: document.getElementById('droga-vl-cant').value.trim(),
+    que: document.getElementById('droga-vl-que').value.trim()
+  };
+  const obs = document.getElementById('droga-obs').value.trim();
+
+  // Si no hay nada cargado, devolvemos null para no ensuciar el registro
+  const todoVacio = !alcohol.cant && !alcohol.que && !ilegales.cant && !ilegales.que &&
+                    !ventaLibre.cant && !ventaLibre.que && !drogasEstado.medsPrescriptos &&
+                    !drogasEstado.noConsumiNada && !obs;
+  if (todoVacio) return null;
+
+  return {
+    alcohol,
+    ilegales,
+    medsPrescriptos: drogasEstado.medsPrescriptos,
+    ventaLibre,
+    noConsumiNada: drogasEstado.noConsumiNada === true,
+    obs
+  };
+}
+
+function construirDrogas(){
+  // Botón "Hoy no consumí nada"
+  const btn = document.getElementById('drogasNoBtn');
+  if (btn){
+    btn.addEventListener('click', () => {
+      const encendido = !drogasEstado.noConsumiNada;
+      drogasEstado.noConsumiNada = encendido;
+      if (encendido){
+        // Limpiar todos los campos
+        document.getElementById('droga-alcohol-cant').value = '';
+        document.getElementById('droga-alcohol-que').value = '';
+        document.getElementById('droga-ilegales-cant').value = '';
+        document.getElementById('droga-ilegales-que').value = '';
+        document.getElementById('droga-vl-cant').value = '';
+        document.getElementById('droga-vl-que').value = '';
+        document.querySelectorAll('.droga-sn-btn').forEach(b => b.classList.remove('on', 's', 'n'));
+        drogasEstado.medsPrescriptos = null;
+      }
+      renderDrogasNoBtn();
+    });
+  }
+
+  // Botones S/N de prescriptos
+  const sBtn = document.getElementById('droga-meds-s');
+  const nBtn = document.getElementById('droga-meds-n');
+  const bindSN = (btn, val) => {
+    if (!btn) return;
+    btn.addEventListener('click', () => {
+      const yaActivo = btn.classList.contains('on');
+      document.querySelectorAll('.droga-sn-btn').forEach(b => b.classList.remove('on', 's', 'n'));
+      if (!yaActivo){
+        btn.classList.add('on', val.toLowerCase());
+        drogasEstado.medsPrescriptos = val;
+        drogasEstado.noConsumiNada = false;
+      } else {
+        drogasEstado.medsPrescriptos = null;
+      }
+      renderDrogasNoBtn();
+    });
+  };
+  bindSN(sBtn, 'S');
+  bindSN(nBtn, 'N');
+
+  // Cualquier cambio en los inputs apaga el "no consumí nada"
+  ['droga-alcohol-cant','droga-alcohol-que','droga-ilegales-cant',
+   'droga-ilegales-que','droga-vl-cant','droga-vl-que'].forEach(id => {
+    const el = document.getElementById(id);
+    if (el) el.addEventListener('input', () => {
+      if (drogasEstado.noConsumiNada){
+        drogasEstado.noConsumiNada = false;
+        renderDrogasNoBtn();
+      }
+    });
+  });
+  /* ── Marihuana en Rutina de cuidado (tracker personal) ────────
+   Reutiliza los estados `marihuanaEstado` y `marihuanaCantidad`.
+   Guarda directo sobre `registros[fecha].marihuana`. */
+
+function cargarMarihuanaEnFormCuidado(mar){
+  marihuanaEstado = null;
+  marihuanaCantidad = null;
+  if (mar){
+    if (mar.estado) marihuanaEstado = mar.estado;
+    if (mar.cantidad) marihuanaCantidad = mar.cantidad;
+  }
+  const obs = document.getElementById('mar-obs-cuidado');
+  if (obs) obs.value = (mar && mar.obs) || '';
+  const meta = document.getElementById('mar-meta-cuidado');
+  if (meta) meta.value = metaMarihuana.texto || '';
+  renderMarihuanaBotonesCuidado();
+}
+
+function renderMarihuanaBotonesCuidado(){
+  // Botones de estado (data-mar) SOLO los de la card de cuidado
+  document.querySelectorAll('#view-cuidado .marihuana-btn[data-mar]').forEach(btn => {
     btn.classList.remove('on', 'verde', 'amarillo', 'naranja');
     if (btn.dataset.mar === marihuanaEstado){
       btn.classList.add('on');
@@ -2373,10 +2634,10 @@ function renderMarihuanaBotones(){
       if (btn.dataset.mar === 'fuera') btn.classList.add('naranja');
     }
   });
-  document.querySelectorAll('.marihuana-btn[data-cant]').forEach(btn => {
+  document.querySelectorAll('#view-cuidado .marihuana-btn[data-cant]').forEach(btn => {
     btn.classList.toggle('on', btn.dataset.cant === marihuanaCantidad);
   });
-  const cont = document.getElementById('marCantidad');
+  const cont = document.getElementById('marCantidadCuidado');
   if (cont){
     if (marihuanaEstado === 'dentro' || marihuanaEstado === 'fuera'){
       cont.classList.add('visible');
@@ -2387,34 +2648,67 @@ function renderMarihuanaBotones(){
   }
 }
 
-function resetMarihuana(){
-  marihuanaEstado = null;
-  marihuanaCantidad = null;
-  const obs = document.getElementById('mar-obs');
-  if (obs) obs.value = '';
-  renderMarihuanaBotones();
-}
-
-function cargarMarihuanaEnForm(mar){
-  resetMarihuana();
-  if (!mar) return;
-  if (mar.estado) marihuanaEstado = mar.estado;
-  if (mar.cantidad) marihuanaCantidad = mar.cantidad;
-  const obs = document.getElementById('mar-obs');
-  if (obs) obs.value = mar.obs || '';
-  renderMarihuanaBotones();
-}
-
-function leerMarihuanaDelForm(){
-  const obs = document.getElementById('mar-obs');
+function guardarMarihuanaCuidado(){
+  const fecha = cuidadoFechaActual || hoyISO();
+  let r = registros.find(x => x.fecha === fecha);
+  if (!r){
+    r = Dominio.registro.guardar({ fecha, rutina: {} });
+    r = registros.find(x => x.fecha === fecha);
+  }
+  const obs = document.getElementById('mar-obs-cuidado');
   const observaciones = obs ? obs.value.trim() : '';
-  if (!marihuanaEstado && !observaciones) return null;
-  return {
-    estado: marihuanaEstado,
-    cantidad: marihuanaCantidad,
-    obs: observaciones
-  };
+  if (!marihuanaEstado && !observaciones){
+    delete r.marihuana;
+  } else {
+    r.marihuana = {
+      estado: marihuanaEstado,
+      cantidad: marihuanaCantidad,
+      obs: observaciones
+    };
+  }
+  r.updatedAt = Date.now();
+  Storage.guardar(K.registros, registros);
+  auditar('marihuana_cuidado_guardada', { fecha });
 }
+
+function construirBotonesMarihuanaCuidado(){
+  document.querySelectorAll('#view-cuidado .marihuana-btn[data-mar]').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const val = btn.dataset.mar;
+      marihuanaEstado = (marihuanaEstado === val) ? null : val;
+      renderMarihuanaBotonesCuidado();
+      guardarMarihuanaCuidado();
+    });
+  });
+  document.querySelectorAll('#view-cuidado .marihuana-btn[data-cant]').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const val = btn.dataset.cant;
+      marihuanaCantidad = (marihuanaCantidad === val) ? null : val;
+      renderMarihuanaBotonesCuidado();
+      guardarMarihuanaCuidado();
+    });
+  });
+  const obs = document.getElementById('mar-obs-cuidado');
+  if (obs) obs.addEventListener('blur', guardarMarihuanaCuidado);
+
+  const meta = document.getElementById('mar-meta-cuidado');
+  if (meta){
+    meta.addEventListener('input', () => {
+      if (metaDebounceTimer) clearTimeout(metaDebounceTimer);
+      metaDebounceTimer = setTimeout(() => {
+        metaMarihuana.texto = meta.value.trim();
+        metaMarihuana.actualizada = Date.now();
+        Storage.guardar('telefonin.v3.metaMarihuana', metaMarihuana);
+        const aviso = document.getElementById('metaGuardadoAvisoCuidado');
+        if (aviso){
+          aviso.style.opacity = '1';
+          setTimeout(() => { aviso.style.opacity = '0'; }, 1500);
+        }
+      }, 800);
+    });
+  }
+}
+}  
 
 function cargarMetaEnForm(){
   const el = document.getElementById('mar-meta');
@@ -2595,6 +2889,7 @@ function limpiarFormRegistro(){
   $$('[data-scale]').forEach(c => { [...c.children].forEach(b=>b.classList.remove('on')); c.dataset.value=''; });
   rutinaSeleccionActual = {};
   resetEmociones();
+  resetDrogas();
   ctxSeleccion = { lugares:[], afectos:[], nota:'', clima:null };
   Ubicacion.limpiar();
   $('#r-minutosMind').value=''; $('#r-notas').value=''; $('#r-importante').value=''; $('#r-ctxNota').value='';
@@ -2613,7 +2908,7 @@ async function cargarRegistroEnForm(fecha){
   });
   rutinaSeleccionActual = { ...(r.rutina || {}) };
   cargarEmocionesEnForm(r.emociones || null);
-  cargarMarihuanaEnForm(r.marihuana || null);
+  cargarDrogasEnForm(r.drogas || null);
   $('#r-minutosMind').value = r.minutosMind ?? '';
   $('#r-notas').value = r.notas ?? '';
   $('#r-importante').value = r.importante ?? '';
@@ -2651,7 +2946,7 @@ if (cFechaEl){
     clima: ctxSeleccion.clima || null, lugares: ctxSeleccion.lugares || [],
         afectosClima: ctxSeleccion.afectos, ctxNota: $('#r-ctxNota').value.trim(),
     emociones: leerEmocionesDelForm(),
-    marihuana: leerMarihuanaDelForm()
+    drogas: leerDrogasDelForm()
   });
   if (nuevo.importante){ Dominio.notas.crear(nuevo.importante, 'general'); renderNotas(); }
   renderHistorial();
@@ -3615,7 +3910,8 @@ function iniciar(){
   renderPasos();
   renderHistorial();
   construirEmocionesChips();
-  construirBotonesMarihuana();
+  construirDrogas();
+  construirBotonesMarihuanaCuidado();
   renderCuidadoChecklist();
   renderPlaylists();
   renderLugaresChips();
