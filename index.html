@@ -2605,6 +2605,8 @@ function construirDrogas(){
       }
     });
   });
+    }
+  
   /* ── Marihuana en Rutina de cuidado (tracker personal) ────────
    Reutiliza los estados `marihuanaEstado` y `marihuanaCantidad`.
    Guarda directo sobre `registros[fecha].marihuana`. */
@@ -2708,7 +2710,6 @@ function construirBotonesMarihuanaCuidado(){
     });
   }
 }
-}  
 
 function cargarMetaEnForm(){
   const el = document.getElementById('mar-meta');
@@ -2807,7 +2808,6 @@ function resetEmociones(){
 
 function cargarEmocionesEnForm(emociones){
   resetEmociones();
-  resetMarihuana();
   if (!emociones) return;
   const obs = document.getElementById('emo-obs');
   if (emociones.principal && emociones.principal.id){
