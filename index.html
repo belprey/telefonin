@@ -4355,5 +4355,29 @@ fbApplySavedEdits();
   
 iniciar();
 </script>
+  <script>
+(function(){
+  const btn = document.createElement('button');
+  btn.textContent = '⬇️ Exportar datos (JSON)';
+  btn.style.cssText = 'position:fixed;bottom:16px;right:16px;z-index:99999;padding:12px 16px;background:#c9a227;color:#1A2A47;border:none;border-radius:14px;font-weight:bold;font-size:14px;box-shadow:0 4px 14px rgba(0,0,0,.35);cursor:pointer;';
+  btn.onclick = function(){
+    const data = {};
+    for (let i = 0; i < localStorage.length; i++) {
+      const k = localStorage.key(i);
+      data[k] = localStorage.getItem(k);
+    }
+    const blob = new Blob([JSON.stringify(data, null, 2)], {type:'application/json'});
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = 'telefonin-backup-' + new Date().toISOString().slice(0,10) + '.json';
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
+    URL.revokeObjectURL(url);
+  };
+  document.body.appendChild(btn);
+})();
+</script>
 </body>
 </html>
